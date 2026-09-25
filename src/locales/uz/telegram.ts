@@ -1,0 +1,66 @@
+export default {
+  parentCard: {
+    title: 'Ota-ona uchun Telegram',
+    hint: "Ota-ona bu QR kodni telefoni bilan skaner qilsa, bot ochiladi va shu o'quvchiga ulanadi. Shundan keyin to'lov haqidagi xabarlar unga avtomatik boradi.",
+    link: 'Ulanish havolasi',
+    download: 'QR yuklab olish',
+    regenerate: 'QR yangilash',
+    regenerateTitle: 'QR kodni yangilash',
+    regenerateConfirm:
+      "Eski QR kod shu zahoti ishlamay qoladi. Allaqachon ulangan ota-onalar uzilmaydi — ular xabar olishda davom etadi.",
+    regenerated: 'QR kod yangilandi',
+    parents: 'Ulangan ota-onalar',
+    noParents: "Hali hech kim ulanmagan. QR kodni ota-onaga ko'rsating.",
+    unnamed: 'Nomsiz',
+    unlink: 'Ulanishni uzish',
+    unlinked: 'Ulanish uzildi',
+    blocked: '{count} ta ota-ona botni bloklagan — ularga xabar bormaydi',
+    copied: 'Havola nusxalandi',
+    copyFailed: "Havolani nusxalab bo'lmadi",
+    botNotConfigured:
+      "O'quv markazining Telegram boti hali ulanmagan. QR kod yaratish uchun Sozlamalar → Telegram bot sahifasida bot tokenini kiriting.",
+  },
+  settings: {
+    title: 'Telegram bot',
+    botTitle: "O'quv markazi boti",
+    botHint:
+      "Telegramda {'@'}BotFather ga kiring → /newbot → bot nomi va username'ini tanlang → u bergan tokenni shu yerga qo'ying. Bot username'ini qo'lda yozish shart emas, u tokendan avtomatik aniqlanadi.",
+    tokenLabel: "Bot tokeni ({'@'}BotFather)",
+    connectBot: 'Botni ulash',
+    changeToken: 'Tokenni almashtirish',
+    disconnectBot: 'Botni uzish',
+    currentToken: 'Joriy token',
+    noBot: "Bot hali ulanmagan — ota-onalarga xabar bormaydi.",
+    tokenSetNotConnected:
+      "Token saqlangan, lekin bot ulanmadi. Token yaroqliligini tekshiring yoki qayta kiriting.",
+    botConnected: 'Bot muvaffaqiyatli ulandi',
+    botDisconnected: 'Bot uzildi',
+    connected: "Bot ulangan: {'@'}{bot}",
+    notificationsTitle: 'Xabarnomalar',
+    notificationsHint:
+      "Qaysi hodisada ota-onaga xabar ketishini shu yerda sozlaysiz. Sozlama butun tashkilot uchun amal qiladi.",
+    isEnabled: 'Bot xabarnomalari yoqilgan',
+    isEnabledHint: "O'chirilsa — quyidagilar qanday turgan bo'lsa ham hech qanday xabar yuborilmaydi.",
+    notifyPaymentReceived: "To'lov qabul qilinganda",
+    notifyPaymentReceivedHint:
+      "Xodim pulni olgan zahoti xabar ketadi. Admin chekni rad etsa, ota-onaga tuzatish xabari yuboriladi.",
+    notifyPaymentConfirmed: 'Admin chekni tasdiqlaganda',
+    notifyPaymentConfirmedHint:
+      "Yuqoridagi bilan birga yoqilsa, ota-ona bitta to'lov uchun ikkita xabar oladi.",
+    notifyAbsence: "O'quvchi darsga kelmaganda",
+    notifyAbsenceHint:
+      "Davomat jurnalida «kelmadi» yoki «kechikdi» belgilanganda. Faqat status o'zgarganda yuboriladi.",
+    notifyDebt: 'Oylik qarz eslatmasi',
+    notifyDebtHint: "Belgilangan kuni soat 09:00 da to'lanmagan qarz bo'yicha eslatma.",
+    debtReminderDay: 'Eslatma kuni (1–28)',
+    dayError: "Kun 1 dan 28 gacha bo'lishi kerak",
+    sendNow: 'Eslatmani hozir yuborish',
+    sent: "{count} ta o'quvchining ota-onasiga eslatma yuborildi",
+    saved: 'Sozlamalar saqlandi',
+    howTitle: 'Qanday ishlaydi',
+    how1: "{'@'}BotFather dan o'z botingizni oching va tokenini yuqoriga kiriting.",
+    how2: "O'quvchi sahifasidagi «Ota-ona uchun Telegram» kartasidan QR kodni ota-onaga ko'rsating yoki chop eting.",
+    how3: "Ota-ona QR ni skaner qiladi, «Start» bosadi — chat shu o'quvchiga ulanadi.",
+    how4: "Bundan keyin yuqorida yoqilgan hodisalar bo'yicha xabar avtomatik boradi.",
+  },
+}

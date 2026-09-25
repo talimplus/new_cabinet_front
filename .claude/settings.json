@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "ask": [
+      "Bash(git:*)",
+      "Bash(gh:*)"
+    ]
+  }
+}

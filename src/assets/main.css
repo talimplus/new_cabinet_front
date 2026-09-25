@@ -1,0 +1,225 @@
+@import 'tailwindcss';
+@import '@vueform/multiselect/themes/default.css';
+@import '@vuepic/vue-datepicker/dist/main.css';
+
+/* Class-based dark mode: toggle by adding `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens — semantic, theme-aware. (Refined via the ui-ux-pro-max spec.)
+ *
+ * Brand: TalimPlus teal. Raw #01C0C8 fails AA as text/fill on white (2.24:1),
+ * so it is kept as a DECORATIVE brand accent (--brand: logo, active-nav bar,
+ * charts) while all interactive fills/links/focus rings use a deepened teal
+ * (--primary #0E7C82 light / #22D3D9 dark) that passes WCAG AA.
+ *
+ * Raw values live on :root / .dark; they are mapped into Tailwind utilities via
+ * `@theme inline`, so `bg-surface`, `text-foreground`, `border-border`,
+ * `rounded-lg`, `shadow-card` follow the active theme. Never hard-code a hex.
+ */
+
+:root {
+  /* Surfaces */
+  --background: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #ffffff; /* popovers, dropdowns, modals (separated by shadow) */
+  --surface-muted: #f1f3f6; /* table headers, hover rows, insets */
+
+  /* Text */
+  --foreground: #0f172a;
+  --muted-foreground: #5b6472; /* secondary text, labels */
+  --fg-subtle: #8a94a3; /* placeholders, disabled, tertiary */
+
+  /* Lines & fields */
+  --border: #e7e9ee; /* hairline dividers */
+  --input: #d6dae1; /* control edges — stronger than dividers */
+  --ring: #0e7c82; /* focus ring = deep teal (AA visible) */
+
+  /* Brand / primary */
+  --brand: #01c0c8; /* identity accent, NON-text (nav bar, logo, charts) */
+  --primary: #0e7c82;
+  --primary-hover: #0c6b70;
+  --primary-active: #0a5c61;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e6fbfb; /* tint bg: selected, badge, focus wash */
+  --on-primary-soft: #0b7a80; /* text on the tint */
+
+  --secondary: #f1f3f6;
+  --secondary-foreground: #0f172a;
+  --accent: #0e7c82; /* single accent = primary (no second accent hue) */
+  --accent-foreground: #ffffff;
+
+  /* Status */
+  --success: #067a57;
+  --success-foreground: #ffffff;
+  --success-soft: #e7f7f0;
+
+  --warning: #9a6700;
+  --warning-foreground: #ffffff;
+  --warning-soft: #fbf3e2;
+
+  --danger: #dc2626;
+  --danger-foreground: #ffffff;
+  --danger-soft: #fdecec;
+
+  --info: #0f766e;
+  --info-foreground: #ffffff;
+  --info-soft: #e7f4f2;
+
+  /* Overlay + elevation (subtle, ink-tinted) */
+  --overlay: rgb(2 6 16 / 0.55);
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.05);
+  --shadow-card-hover: 0 4px 8px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+  --shadow-popover: 0 12px 24px -6px rgb(15 23 42 / 0.12), 0 4px 8px -4px rgb(15 23 42 / 0.08);
+}
+
+.dark {
+  --background: #0b0f14;
+  --surface: #121821;
+  --surface-2: #171f2a;
+  --surface-muted: #1b2430;
+
+  --foreground: #e6eaf0;
+  --muted-foreground: #9aa6b5;
+  --fg-subtle: #6b7686;
+
+  --border: #232b36;
+  --input: #2e3846;
+  --ring: #22d3d9;
+
+  --brand: #01c0c8;
+  --primary: #22d3d9;
+  --primary-hover: #38dde3;
+  --primary-active: #14c3cb;
+  --primary-foreground: #04252a;
+  --primary-soft: #10312f;
+  --on-primary-soft: #5ee7ec;
+
+  --secondary: #1b2430;
+  --secondary-foreground: #e6eaf0;
+  --accent: #22d3d9;
+  --accent-foreground: #04252a;
+
+  --success: #34d399;
+  --success-foreground: #06231a;
+  --success-soft: #0e2a22;
+
+  --warning: #fbbf24;
+  --warning-foreground: #2a2410;
+  --warning-soft: #2a2410;
+
+  --danger: #f87171;
+  --danger-foreground: #2a0708;
+  --danger-soft: #2a1516;
+
+  --info: #5eead4;
+  --info-foreground: #04222f;
+  --info-soft: #0f2a28;
+
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.45), 0 1px 3px rgb(0 0 0 / 0.35);
+  --shadow-card-hover: 0 4px 10px -2px rgb(0 0 0 / 0.5);
+  --shadow-popover: 0 16px 32px -8px rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-fg-subtle: var(--fg-subtle);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand: var(--brand);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary-soft: var(--on-primary-soft);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+
+  --color-overlay: var(--overlay);
+
+  /* Radius lock: 6 chips · 8 controls · 12 cards · 16 modals */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* Elevation */
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-popover: var(--shadow-popover);
+
+  /* Fonts */
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Tabular figures for money/IDs/counts when using the mono utility. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--input) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--input);
+    border-radius: 9999px;
+  }
+}

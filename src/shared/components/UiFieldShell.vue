@@ -1,0 +1,25 @@
+<template>
+  <div class="flex flex-col gap-1.5">
+    <label v-if="label" :for="forId" class="text-sm font-medium text-foreground">
+      {{ label }}
+      <span v-if="required" class="text-danger">*</span>
+    </label>
+
+    <slot />
+
+    <p v-if="error" class="text-xs text-danger">{{ error }}</p>
+    <p v-else-if="hint" class="text-xs text-muted-foreground">{{ hint }}</p>
+  </div>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  label?: string
+  hint?: string
+  error?: string
+  required?: boolean
+  forId?: string
+}
+
+defineProps<Props>()
+</script>

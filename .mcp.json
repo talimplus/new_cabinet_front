@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "talim-swagger": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@ivotoby/openapi-mcp-server"
+      ],
+      "env": {
+        "API_BASE_URL": "http://localhost:3004",
+        "OPENAPI_SPEC_PATH": "http://localhost:3004/api-json"
+      }
+    }
+  }
+}
