@@ -13,20 +13,8 @@ import type { Subject } from '../interfaces/subject.interface'
 const { t } = useI18n()
 
 const {
-  scope,
-  rows,
-  totalPages,
-  loading,
-  filters,
-  modalOpen,
-  editing,
-  init,
-  search,
-  setPage,
-  openCreate,
-  openEdit,
-  submit,
-  remove,
+  scope, rows, totalPages, loading, filters, modalOpen, editing,
+  init, search, setPage, openCreate, openEdit, submit, remove,
 } = useSubjects()
 onMounted(init)
 

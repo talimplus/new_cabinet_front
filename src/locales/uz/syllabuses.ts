@@ -48,6 +48,8 @@ export default {
     deleteTopicTitle: 'Mavzuni o\'chirish',
     deleteTopicText: '"{title}" mavzusini o\'chirmoqchimisiz?',
     reorderError: 'Tartibni saqlashda xatolik yuz berdi',
+    moveUp: "Yuqoriga ko'chirish",
+    moveDown: "Pastga ko'chirish",
   },
   difficulty: {
     easy: 'Oson',

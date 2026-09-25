@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { GenericObject } from 'vee-validate'
-import { UiButton, UiSelect, UiInput, UiPagination, UiIcon } from '@/shared/components'
+import { UiButton, UiInput, UiPagination, UiIcon } from '@/shared/components'
 import { Plus, Search } from '@/shared/icons'
 import { debounce } from '@/shared/utils/debounce'
 import { usePermissions } from '@/shared/composables/use-permissions'

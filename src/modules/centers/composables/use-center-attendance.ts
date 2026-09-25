@@ -6,19 +6,18 @@ import { resolveErrorMessage } from '@/shared/utils/error-message'
 import { captureCenterIp } from '../api/centers.api'
 import type { Center } from '../interfaces/center.interface'
 
-/** Coordinate fields are `''` while empty (UiInput clears a number to `''`). */
-type CoordInput = number | ''
-
 /** The slice of the payload this composable owns. */
 export interface CenterAttendancePayload {
   latitude: number | null
   longitude: number | null
-  checkInRadiusMeters: number | null
+  /** Omitted when blank — the radius cannot be cleared, only changed. */
+  checkInRadiusMeters?: number
   publicIp: string | null
 }
 
-/** Empty or non-finite → null, so a blank field never lands as `0`. */
-function toCoord(value: CoordInput): number | null {
+/** Empty or non-finite → null, so a blank field never lands as `0`.
+ *  Number fields are `''` while empty (UiInput clears a number to `''`). */
+function toCoord(value: number | ''): number | null {
   if (value === '') return null
   const num = Number(value)
   return Number.isFinite(num) ? num : null
@@ -37,9 +36,9 @@ export function useCenterAttendance() {
   const ipLoading = ref(false)
 
   const form = reactive({
-    latitude: '' as CoordInput,
-    longitude: '' as CoordInput,
-    checkInRadiusMeters: 150 as CoordInput,
+    latitude: '' as number | '',
+    longitude: '' as number | '',
+    checkInRadiusMeters: 150 as number | '',
     publicIp: '',
   })
 
@@ -88,12 +87,14 @@ export function useCenterAttendance() {
   }
 
   function toPayload(): CenterAttendancePayload {
-    return {
+    const payload: CenterAttendancePayload = {
       latitude: toCoord(form.latitude),
       longitude: toCoord(form.longitude),
-      checkInRadiusMeters: toCoord(form.checkInRadiusMeters),
       publicIp: form.publicIp.trim() ? form.publicIp.trim() : null,
     }
+    const radius = toCoord(form.checkInRadiusMeters)
+    if (radius !== null) payload.checkInRadiusMeters = radius
+    return payload
   }
 
   return { form, geoLoading, ipLoading, applyFrom, useCurrentPosition, captureIp, toPayload }

@@ -81,13 +81,21 @@ describe('useCenterAttendance', () => {
       const s = useCenterAttendance()
       s.form.latitude = ''
       s.form.longitude = ''
-      s.form.checkInRadiusMeters = ''
 
       const payload = s.toPayload()
 
       expect(payload.latitude).toBeNull()
       expect(payload.longitude).toBeNull()
-      expect(payload.checkInRadiusMeters).toBeNull()
+    })
+
+    // The radius has no "clear" on the backend: a null would be stored as 0 m.
+    it('omits a blank radius entirely instead of sending null', () => {
+      const s = useCenterAttendance()
+      s.form.checkInRadiusMeters = ''
+
+      const payload = s.toPayload()
+
+      expect('checkInRadiusMeters' in payload).toBe(false)
     })
 
     it('passes numeric coords through as numbers', () => {

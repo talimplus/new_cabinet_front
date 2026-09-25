@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { UiBadge, UiIcon } from '@/shared/components'
-import { GripVertical, BookOpen, FileText, ClipboardList, Pencil, Eye } from '@/shared/icons'
+import { UiBadge, UiIcon, UiIconButton } from '@/shared/components'
+import { GripVertical, BookOpen, FileText, ClipboardList, Pencil, Eye, ChevronUp, ChevronDown } from '@/shared/icons'
 import {
   TOPIC_DIFFICULTY_LABEL_KEYS,
   TOPIC_DIFFICULTY_VARIANTS,
@@ -22,8 +22,11 @@ const props = defineProps<{
   editable?: boolean
   dragging?: boolean
   dragOver?: boolean
+  /** Disable "move up" / "move down" at the ends of the list. */
+  first?: boolean
+  last?: boolean
 }>()
-const emit = defineEmits<{ open: [] }>()
+const emit = defineEmits<{ open: []; 'move-up': []; 'move-down': [] }>()
 
 const ICONS = {
   [TopicContentKey.GUIDE]: BookOpen,
@@ -51,7 +54,7 @@ const indicators = computed(() =>
       v-if="editable"
       :icon="GripVertical"
       :size="16"
-      class="shrink-0 cursor-grab text-muted-foreground"
+      class="hidden shrink-0 cursor-grab text-muted-foreground md:block"
       @click.stop
     />
     <span
@@ -77,6 +80,11 @@ const indicators = computed(() =>
           </span>
         </span>
       </div>
+    </div>
+    <!-- Drag-and-drop is mouse-only; these keep reordering usable on phones and by keyboard. -->
+    <div v-if="editable" class="flex shrink-0 flex-col" @click.stop>
+      <UiIconButton :icon="ChevronUp" :label="t('syllabuses.editor.moveUp')" :disabled="first" @click="emit('move-up')" />
+      <UiIconButton :icon="ChevronDown" :label="t('syllabuses.editor.moveDown')" :disabled="last" @click="emit('move-down')" />
     </div>
     <UiIcon :icon="editable ? Pencil : Eye" :size="16" class="shrink-0 text-muted-foreground" />
   </li>

@@ -48,6 +48,8 @@ export default {
     deleteTopicTitle: 'Удалить тему',
     deleteTopicText: 'Удалить тему «{title}»?',
     reorderError: 'Не удалось сохранить порядок тем',
+    moveUp: 'Переместить вверх',
+    moveDown: 'Переместить вниз',
   },
   difficulty: {
     easy: 'Лёгкая',

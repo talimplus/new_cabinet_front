@@ -52,4 +52,36 @@ describe('TopicList', () => {
 
     expect(wrapper.emitted('reorder')).toBeUndefined()
   })
+
+  // Touch browsers ignore HTML5 drag — the up/down buttons are the phone path.
+  describe('move up / move down buttons', () => {
+    const upSel = `button[aria-label="${t('syllabuses.editor.moveUp')}"]`
+    const downSel = `button[aria-label="${t('syllabuses.editor.moveDown')}"]`
+
+    it('emits reorder to the neighbouring index without opening the topic', async () => {
+      const wrapper = mount(TopicList, { props: { topics, editable: true } })
+      const cards = wrapper.findAll('li')
+
+      await cards[1]!.find(upSel).trigger('click')
+      await cards[1]!.find(downSel).trigger('click')
+
+      expect(wrapper.emitted('reorder')).toEqual([[1, 0], [1, 2]])
+      expect(wrapper.emitted('open')).toBeUndefined()
+    })
+
+    it('disables "up" on the first topic and "down" on the last', () => {
+      const cards = mount(TopicList, { props: { topics, editable: true } }).findAll('li')
+
+      expect(cards[0]!.find(upSel).attributes('disabled')).toBeDefined()
+      expect(cards[0]!.find(downSel).attributes('disabled')).toBeUndefined()
+      expect(cards[2]!.find(downSel).attributes('disabled')).toBeDefined()
+    })
+
+    it('hides the buttons when not editable', () => {
+      const wrapper = mount(TopicList, { props: { topics, editable: false } })
+
+      expect(wrapper.find(upSel).exists()).toBe(false)
+      expect(wrapper.find(downSel).exists()).toBe(false)
+    })
+  })
 })

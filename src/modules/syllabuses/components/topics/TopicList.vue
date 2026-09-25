@@ -42,6 +42,8 @@ function onEnd(): void {
       :topic="topic"
       :order="index + 1"
       :editable="editable"
+      :first="index === 0"
+      :last="index === topics.length - 1"
       :dragging="dragIndex === index"
       :drag-over="overIndex === index && dragIndex !== index"
       :draggable="editable"
@@ -51,6 +53,8 @@ function onEnd(): void {
       @drop.prevent="editable && onDrop(index)"
       @dragend="onEnd"
       @open="emit('open', topic)"
+      @move-up="emit('reorder', index, index - 1)"
+      @move-down="emit('reorder', index, index + 1)"
     />
   </ul>
 </template>
