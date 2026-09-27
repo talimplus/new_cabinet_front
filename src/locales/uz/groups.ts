@@ -100,6 +100,30 @@ export default {
     cancelled: 'Bekor qilindi',
     extra: "Ko'chirilgan dars",
   },
+  pauses: {
+    title: "To'xtatilgan davrlar",
+    description:
+      "Guruh vaqtincha to'xtatilgan kunlarda darslar o'tkazilmaydi: jurnalda ko'rinmaydi va o'quvchi ular uchun to'lamaydi.",
+    add: "To'xtatish",
+    addTitle: "Guruhni vaqtincha to'xtatish",
+    fromDate: 'Qaysi kundan',
+    toDate: 'Qaysi kungacha',
+    reason: 'Sabab',
+    hint: "Oylik to'lov shu kunlardagi darslar ulushiga kamayadi. To'lov qilinganlarga ortiqcha pul qaytariladigan bo'lib yoziladi.",
+    empty: "Guruh hech qachon to'xtatilmagan",
+    deleteTitle: "To'xtatishni bekor qilish",
+    deleteText: "Bu kunlardagi darslar qaytadi va to'lovlar qayta hisoblanadi. Davom etasizmi?",
+    validation: {
+      fromDate: 'Boshlanish sanasini tanlang',
+      toDate: 'Tugash sanasini tanlang',
+      range: "Tugash sanasi boshlanish sanasidan oldin bo'lishi mumkin emas",
+      reason: 'Sababni yozing',
+    },
+    messages: {
+      created: "Guruh to'xtatildi",
+      deleted: "To'xtatish bekor qilindi",
+    },
+  },
   info: {
     basicInfo: "Asosiy ma'lumotlar",
     groupName: 'Guruh nomi',
@@ -151,6 +175,12 @@ export default {
     selectAll: 'Barchasini belgilash',
   },
   form: {
+    scheduleEffectiveFrom: 'Yangi jadval qaysi kundan',
+    scheduleEffectiveFromHint:
+      "Shu kundan oldingi darslar (davomat va to'lov) eski jadvalda qoladi.",
+    teacherEffectiveFrom: "Yangi o'qituvchi qaysi kundan",
+    teacherEffectiveFromHint:
+      "Shu kundan oldingi darslar uchun komissiya eski o'qituvchida qoladi.",
     addTitle: "Guruh qo'shish",
     createTitle: 'Guruh yaratish',
     days: 'Dars kunlari',

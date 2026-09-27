@@ -34,7 +34,10 @@
         :can-transfer="canTransfer"
         @reload="load"
       />
-      <GroupInfoTab v-else :group="group" :student-count="students.length" />
+      <template v-else>
+        <GroupInfoTab :group="group" :student-count="students.length" />
+        <GroupPausesCard :group-id="groupId" :can-edit="canEditGroup" />
+      </template>
     </template>
   </div>
 </template>
@@ -42,11 +45,13 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { UiSpinner, UiIcon, UiIconButton, UiTabs } from '@/shared/components'
+import { UiSpinner, UiIconButton, UiTabs } from '@/shared/components'
 import { ArrowLeft } from '@/shared/icons'
 import GroupAttendanceTab from '../components/detail/GroupAttendanceTab.vue'
 import GroupStudentsTab from '../components/detail/GroupStudentsTab.vue'
 import GroupInfoTab from '../components/detail/GroupInfoTab.vue'
+import GroupPausesCard from '../components/detail/GroupPausesCard.vue'
+import { usePermissions } from '@/shared/composables/use-permissions'
 import GroupPlanTab from '../components/plan/GroupPlanTab.vue'
 import { useGroupDetail } from '../composables/use-group-detail'
 import { GroupTab } from '../enums/group-tab.enum'
@@ -60,6 +65,8 @@ const groupId = Number(route.params.id)
 
 const { group, students, loading, loadingStudents, activeTab, tabs, canEditPlan, canTransfer, load } =
   useGroupDetail(groupId)
+
+const { canEditGroup } = usePermissions()
 
 onMounted(load)
 </script>

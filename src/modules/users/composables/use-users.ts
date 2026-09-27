@@ -1,10 +1,11 @@
-import { reactive, ref } from 'vue'
-import { fetchUsers, createUser, updateUser, deleteUser } from '../api/users.api'
+import { computed, reactive, ref } from 'vue'
+import { fetchUsers, createUser, updateUser, deleteUser, setUserActive } from '../api/users.api'
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
 import type { User } from '../interfaces/user.interface'
 import type { UserForm } from '../interfaces/user-form.interface'
 import type { UsersParams } from '../interfaces/user-params.interface'
+import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import { t } from '@/locales'
 
 interface UsersFilters {
@@ -86,6 +87,38 @@ export function useUsers() {
   function requestDelete(user: User): void {
     deleteTarget.value = user
   }
+  /** Block / unblock — a leaver is blocked instead of deleted (history stays). */
+  const toggleTarget = ref<User | null>(null)
+  const toggling = ref(false)
+  function requestToggleActive(user: User): void {
+    toggleTarget.value = user
+  }
+  async function confirmToggleActive(): Promise<void> {
+    const user = toggleTarget.value
+    if (!user || toggling.value) return
+    toggling.value = true
+    try {
+      const isActive = user.isActive === false
+      await setUserActive(user.id, { isActive })
+      notify.success(t(isActive ? 'users.messages.unblocked' : 'users.messages.blocked'))
+      toggleTarget.value = null
+      await load()
+    } finally {
+      toggling.value = false
+    }
+  }
+
+  const columns = computed<TableColumn[]>(() => [
+    { key: 'id', label: t('users.table.id'), hideOnMobile: true },
+    { key: 'firstName', label: t('users.table.firstName'), primary: true },
+    { key: 'lastName', label: t('users.table.lastName') },
+    { key: 'phone', label: t('users.table.phone') },
+    { key: 'role', label: t('users.table.role') },
+    { key: 'salary', label: t('users.table.salary'), align: 'right' },
+    { key: 'commissionPercentage', label: t('users.table.commissionPercentage') },
+    { key: 'center', label: t('users.table.center') },
+  ])
+
   async function confirmDelete(): Promise<void> {
     if (!deleteTarget.value) return
     await deleteUser(deleteTarget.value.id)
@@ -99,5 +132,6 @@ export function useUsers() {
     modalOpen, editing, deleteTarget,
     init, load, applyFilters, search, searchPhone, setPage,
     openCreate, openEdit, submit, requestDelete, confirmDelete,
+    toggleTarget, toggling, requestToggleActive, confirmToggleActive, columns,
   }
 }

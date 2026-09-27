@@ -21,6 +21,7 @@
       <GroupFeeHint :fee-changed="feeChanged" :apply-fee-now="form.applyFeeNow" :current-fee="currentFee" :next-month-label="nextMonthLabel" @update:apply-fee-now="form.applyFeeNow = $event" />
       <GroupScheduleEditor v-model:days="days" v-model:all-time="allTime" v-model:times="times" v-model:different-time="differentTime" :day-options="dayOptions" />
       <GroupScheduleConflicts :checking="conflictChecking" :messages="conflictMessages" :free="conflictChecked && !conflicts.length" />
+      <GroupChangeDates v-model:schedule-from="form.scheduleEffectiveFrom" v-model:teacher-from="form.teacherEffectiveFrom" :schedule-changed="scheduleChanged" :teacher-changed="teacherChanged" />
     </div>
 
     <template #footer>
@@ -46,6 +47,7 @@ import { UiModal, UiInput, UiSelect, UiDatepicker, UiButton, UiConfirmDialog } f
 import GroupScheduleEditor from './GroupScheduleEditor.vue'
 import GroupFeeHint from './GroupFeeHint.vue'
 import GroupScheduleConflicts from './GroupScheduleConflicts.vue'
+import GroupChangeDates from './GroupChangeDates.vue'
 import { useGroupForm } from '../composables/use-group-form'
 import type { Group } from '../interfaces/group.interface'
 import type { GroupForm } from '../interfaces/group-form.interface'
@@ -65,7 +67,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean]; submit: [paylo
 const {
   form, errors, days, allTime, times, differentTime, dayOptions,
   subjects, rooms, teachers, feeChanged, isShortening, nextMonthLabel, currentFee,
-  conflicts, conflictChecking, conflictChecked, conflictMessages,
+  scheduleChanged, teacherChanged, conflicts, conflictChecking, conflictChecked, conflictMessages,
   reset, validate, toPayload, setBackendErrors, setFieldErrors, setSelect,
 } = useGroupForm(() => props.defaultCenterId, () => props.modelValue)
 

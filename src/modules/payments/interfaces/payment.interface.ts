@@ -36,6 +36,13 @@ export interface Payment {
   /** Manually written off by an admin, with the mandatory reason. */
   manualExcludedAmount?: number | string
   manualExcludedReason?: string | null
+  /** Discount percent applied to this month's fee. */
+  discountPercentApplied?: number
+  /**
+   * Fixed discount (so'm/month). A discount not tied to a subject is taken
+   * ONCE from the student's total — it shows on the main group's row only.
+   */
+  discountAmountApplied?: number
   createdAt: string
   hasPendingReceipt?: boolean
   pendingReceiptsCount?: number

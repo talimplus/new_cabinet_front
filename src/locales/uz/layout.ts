@@ -1,6 +1,8 @@
 export default {
   allCenters: 'Barcha filiallar',
   menu: {
+    holidays: 'Bayram kunlari',
+    absences: 'Darsga kelmaganlar',
     statistics: 'Statistika',
     users: 'Ishchilar',
     groups: 'Guruhlar',

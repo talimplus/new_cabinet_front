@@ -27,6 +27,7 @@ export default {
     unpaid: 'Не оплачено',
   },
   table: {
+    discount: 'Скидка: {value}',
     student: 'Ученик',
     group: 'Группа',
     lessons: 'Уроки',

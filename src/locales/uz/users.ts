@@ -9,6 +9,14 @@ export default {
     namePlaceholder: "Ism bo'yicha...",
     phonePlaceholder: "Telefon bo'yicha...",
   },
+  blocked: 'Bloklangan',
+  block: 'Bloklash (tizimga kira olmaydi)',
+  unblock: 'Blokdan chiqarish',
+  blockConfirm: {
+    title: 'Xodimni bloklash',
+    blockText: "{name} tizimga kira olmaydi (hozir ochiq sessiyasi ham yopiladi). Oylik va komissiya tarixi saqlanadi. Davom etasizmi?",
+    unblockText: '{name} yana tizimga kira oladi. Davom etasizmi?',
+  },
   table: {
     id: 'ID',
     firstName: 'Ism',
@@ -20,6 +28,8 @@ export default {
     center: 'Markaz',
   },
   form: {
+    payChangeHint:
+      "Oylik yoki foiz o'zgartirilsa, shu oydan boshlab kuchga kiradi. Oldingi oylar (keyin to'langan o'quvchi puli ham) eski foizda hisoblanadi.",
     createTitle: 'Foydalanuvchi yaratish',
     createEmployeeTitle: "Ishchi qo'shish",
     editTitle: 'Ishchini tahrirlash',
@@ -56,5 +66,9 @@ export default {
     manager: 'Menejer',
     other: 'Boshqa',
     student: "O'quvchi",
+  },
+  messages: {
+    blocked: 'Xodim bloklandi',
+    unblocked: 'Xodim blokdan chiqarildi',
   },
 }

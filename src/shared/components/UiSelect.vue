@@ -61,7 +61,7 @@ const { model, errorMessage, handleBlur } = useFormControl<SelectValue>(props, e
 </script>
 
 <style scoped>
-/* Bridge the multiselect package theme onto our design tokens. */
+/* Bridge the package theme onto our tokens — map EVERY state, or it keeps a light-only default. */
 .ui-multiselect {
   --ms-bg: var(--surface);
   --ms-border-color: var(--input);
@@ -76,7 +76,12 @@ const { model, errorMessage, handleBlur } = useFormControl<SelectValue>(props, e
   --ms-tag-color: var(--primary);
   --ms-dropdown-bg: var(--surface);
   --ms-dropdown-border-color: var(--border);
+  --ms-option-bg-pointed: var(--surface-muted);
   --ms-option-color-pointed: var(--foreground);
+  --ms-option-color-selected: var(--primary-foreground);
+  --ms-option-color-selected-pointed: var(--primary-foreground);
+  --ms-option-bg-disabled: var(--surface);
+  --ms-option-color-disabled: var(--fg-subtle);
   --ms-empty-color: var(--muted-foreground);
   color: var(--foreground);
   /* iOS Safari zooms a focused field under 16px — keep 16px on phones. */

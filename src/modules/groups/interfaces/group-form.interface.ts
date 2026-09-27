@@ -21,4 +21,8 @@ export interface GroupForm {
   /** Edit-only: when the price changed, whether it applies this month or next. */
   applyFeeFrom?: FeeApplyFrom
   days?: GroupFormDay[]
+  /** Edit-only, `YYYY-MM-DD`: the new schedule applies from this day (default today). */
+  scheduleEffectiveFrom?: string
+  /** Edit-only, `YYYY-MM-DD`: the new teacher takes over from this day (default today). */
+  teacherEffectiveFrom?: string
 }

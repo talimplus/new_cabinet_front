@@ -64,6 +64,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/users/email/:email', permissions: [Permission.USERS_VIEW] },
   { method: GET, path: '/users', permissions: [Permission.USERS_VIEW], acceptsCenterId: true },
   { method: POST, path: '/users', permissions: [Permission.USERS_CREATE] },
+  { method: PUT, path: '/users/:id/active', permissions: [Permission.USERS_UPDATE] },
   { method: GET, path: '/users/:id', permissions: [Permission.USERS_VIEW] },
   { method: PUT, path: '/users/:id', permissions: [Permission.USERS_UPDATE] },
   { method: DELETE, path: '/users/:id', permissions: [Permission.USERS_DELETE] },
@@ -100,8 +101,25 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/students/:id', permissions: [Permission.STUDENTS_VIEW] },
   { method: PUT, path: '/students/:id', permissions: [Permission.STUDENTS_UPDATE] },
 
+  // ---- bayram kunlari ----
+  {
+    method: GET,
+    path: '/holidays',
+    permissions: [Permission.SCHEDULE_VIEW, Permission.GROUPS_VIEW, Permission.ATTENDANCE_VIEW],
+    acceptsCenterId: true,
+  },
+  { method: POST, path: '/holidays', permissions: [Permission.SCHEDULE_MANAGE] },
+  { method: DELETE, path: '/holidays/:id', permissions: [Permission.SCHEDULE_MANAGE] },
+
+  // ---- attendance: kelmaganlar ro'yxati ----
+  { method: GET, path: '/attendance/absences', permissions: [Permission.ATTENDANCE_VIEW], acceptsCenterId: true },
+  { method: PUT, path: '/attendance/absences/:id/follow-up', permissions: [Permission.ATTENDANCE_MANAGE] },
+
   // ---- groups ----
   { method: GET, path: '/groups/all', permissions: [Permission.GROUPS_VIEW], acceptsCenterId: true },
+  { method: GET, path: '/groups/:id/pauses', permissions: [Permission.GROUPS_VIEW] },
+  { method: POST, path: '/groups/:id/pauses', permissions: [Permission.GROUPS_UPDATE] },
+  { method: DELETE, path: '/groups/:id/pauses/:pauseId', permissions: [Permission.GROUPS_UPDATE] },
   { method: GET, path: '/group/all', permissions: [Permission.GROUPS_VIEW], acceptsCenterId: true },
   { method: PUT, path: '/groups/change-status/:id', permissions: [Permission.GROUPS_CHANGE_STATUS] },
   { method: GET, path: '/groups/:groupId/attendance/lesson-dates', permissions: [Permission.ATTENDANCE_VIEW] },

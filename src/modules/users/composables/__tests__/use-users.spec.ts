@@ -7,24 +7,28 @@ import {
   createUser as createUserApi,
   updateUser as updateUserApi,
   deleteUser as deleteUserApi,
+  setUserActive as setUserActiveApi,
 } from '../../api/users.api'
 import { useNotificationStore } from '@/stores/notification.store'
 import { NotificationType } from '@/shared/enums/notification-type.enum'
 import { UserRole } from '@/shared/enums/user-role.enum'
 import type { User } from '../../interfaces/user.interface'
 import type { UserForm } from '../../interfaces/user-form.interface'
+import { t } from '@/locales'
 
 vi.mock('../../api/users.api', () => ({
   fetchUsers: vi.fn(),
   createUser: vi.fn(),
   updateUser: vi.fn(),
   deleteUser: vi.fn(),
+  setUserActive: vi.fn(),
 }))
 
 const mockedFetchUsers = vi.mocked(fetchUsersApi)
 const mockedCreateUser = vi.mocked(createUserApi)
 const mockedUpdateUser = vi.mocked(updateUserApi)
 const mockedDeleteUser = vi.mocked(deleteUserApi)
+const mockedSetUserActive = vi.mocked(setUserActiveApi)
 
 const CENTER_ID = 5
 
@@ -134,6 +138,83 @@ describe('useUsers', () => {
       const s = useUsers()
       await s.confirmDelete()
       expect(mockedDeleteUser).not.toHaveBeenCalled()
+    })
+  })
+  describe('requestToggleActive() + confirmToggleActive()', () => {
+    it('blocks an active user, notifies and reloads', async () => {
+      const s = useUsers()
+      mockedSetUserActive.mockResolvedValueOnce(makeUser({ id: 7, isActive: false }))
+
+      s.requestToggleActive(makeUser({ id: 7, isActive: true }))
+      await s.confirmToggleActive()
+      await flushPromises()
+
+      expect(mockedSetUserActive).toHaveBeenCalledWith(7, { isActive: false })
+      const notify = useNotificationStore()
+      expect(notify.items).toContainEqual(
+        expect.objectContaining({ type: NotificationType.SUCCESS, message: t('users.messages.blocked') }),
+      )
+      expect(mockedFetchUsers).toHaveBeenCalledTimes(1)
+    })
+
+    it('treats a user without isActive as active (blocks it)', async () => {
+      const s = useUsers()
+      mockedSetUserActive.mockResolvedValueOnce(makeUser({ id: 7, isActive: false }))
+
+      s.requestToggleActive(makeUser({ id: 7 }))
+      await s.confirmToggleActive()
+
+      expect(mockedSetUserActive).toHaveBeenCalledWith(7, { isActive: false })
+    })
+
+    it('unblocks a blocked user, notifies and reloads', async () => {
+      const s = useUsers()
+      mockedSetUserActive.mockResolvedValueOnce(makeUser({ id: 8, isActive: true }))
+
+      s.requestToggleActive(makeUser({ id: 8, isActive: false }))
+      await s.confirmToggleActive()
+      await flushPromises()
+
+      expect(mockedSetUserActive).toHaveBeenCalledWith(8, { isActive: true })
+      const notify = useNotificationStore()
+      expect(notify.items).toContainEqual(
+        expect.objectContaining({ type: NotificationType.SUCCESS, message: t('users.messages.unblocked') }),
+      )
+      expect(mockedFetchUsers).toHaveBeenCalledTimes(1)
+    })
+
+    it('requesting only opens the confirmation; nothing is sent yet', () => {
+      const s = useUsers()
+      const u = makeUser({ id: 9 })
+      s.requestToggleActive(u)
+      expect(s.toggleTarget.value).toEqual(u)
+      expect(mockedSetUserActive).not.toHaveBeenCalled()
+    })
+
+    it('closes the confirmation after success and ignores a double confirm', async () => {
+      const s = useUsers()
+      let resolve!: (v: unknown) => void
+      mockedSetUserActive.mockReturnValueOnce(new Promise((r) => { resolve = r }) as never)
+      s.requestToggleActive(makeUser({ id: 9 }))
+      const first = s.confirmToggleActive()
+      void s.confirmToggleActive()
+      resolve(makeUser({ id: 9, isActive: false }))
+      await first
+      expect(mockedSetUserActive).toHaveBeenCalledTimes(1)
+      expect(s.toggleTarget.value).toBeNull()
+    })
+  })
+
+  describe('columns', () => {
+    it('exposes the 8 table columns with firstName as the primary one', () => {
+      const s = useUsers()
+      const cols = s.columns.value
+
+      expect(cols.map((c) => c.key)).toEqual([
+        'id', 'firstName', 'lastName', 'phone', 'role', 'salary', 'commissionPercentage', 'center',
+      ])
+      expect(cols.filter((c) => c.primary).map((c) => c.key)).toEqual(['firstName'])
+      expect(cols.find((c) => c.key === 'firstName')?.label).toBe(t('users.table.firstName'))
     })
   })
 })

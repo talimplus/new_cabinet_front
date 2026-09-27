@@ -157,4 +157,24 @@ describe('UiTable', () => {
       expect(wrapper.text()).toContain('Bo‘sh')
     })
   })
+  describe('refetch indicator', () => {
+    it('dims the rows with a spinner overlay while reloading existing rows', () => {
+      const wrapper = mount(UiTable, { props: { columns, rows, loading: true } })
+      expect(wrapper.find('[data-test="table-refresh"]').exists()).toBe(true)
+      expect(wrapper.attributes('aria-busy')).toBe('true')
+      expect(wrapper.findAll('tbody tr')).toHaveLength(2)
+    })
+
+    it('keeps the first-load spinner and no overlay when there are no rows yet', () => {
+      const wrapper = mount(UiTable, { props: { columns, rows: [], loading: true } })
+      expect(wrapper.find('[data-test="table-refresh"]').exists()).toBe(false)
+      expect(wrapper.findComponent(UiSpinner).exists()).toBe(true)
+    })
+
+    it('shows no overlay once loading ends', () => {
+      const wrapper = mount(UiTable, { props: { columns, rows, loading: false } })
+      expect(wrapper.find('[data-test="table-refresh"]').exists()).toBe(false)
+      expect(wrapper.attributes('aria-busy')).toBeUndefined()
+    })
+  })
 })

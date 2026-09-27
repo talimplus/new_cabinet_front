@@ -44,6 +44,33 @@ export interface PaymentByMethod {
   count?: number
 }
 
+export interface MonthMoney {
+  amountDue: number
+  amountPaid: number
+  remainingAmount: number
+}
+
+export interface MonthPayments extends MonthMoney {
+  refundedAmount: number
+}
+
+export interface MonthExpenses {
+  totalAmount: number
+}
+
+/**
+ * One month of the range (`byMonth`, verified against the live API). Payroll's
+ * month is the PAY month — the salary paid in it is for the previous month's work.
+ */
+export interface DashboardMonth {
+  /** `YYYY-MM` */
+  month: string
+  payments: MonthPayments
+  expenses: MonthExpenses
+  payroll: MonthMoney
+  netCashflow: number
+}
+
 /** GET /statistics/dashboard response (verified against the live API + old app). */
 export interface DashboardResponse {
   centerId: number
@@ -55,4 +82,6 @@ export interface DashboardResponse {
   payroll: PayrollStats
   students: StudentsStats
   netCashflow: number
+  /** Every month of fromMonth..toMonth (both inclusive); the totals above are its sum. */
+  byMonth: DashboardMonth[]
 }

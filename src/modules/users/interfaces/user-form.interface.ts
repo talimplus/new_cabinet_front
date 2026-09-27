@@ -16,3 +16,8 @@ export interface UserForm {
   salary?: number
   commissionPercentage?: number
 }
+
+/** Body of PUT /users/{id}/active — block (`false`) / unblock (`true`). */
+export interface UserActiveForm {
+  isActive: boolean
+}

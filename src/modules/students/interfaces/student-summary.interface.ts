@@ -38,6 +38,8 @@ export interface StudentSummaryProfile {
   status: StudentStatus
   monthlyFee: number
   discountPercent: number
+  /** so'm per month (0 — none); the amount counterpart of discountPercent */
+  discountAmount?: number
   discountReason?: string | null
   centerId: number
   centerName?: string | null
@@ -80,6 +82,10 @@ export interface StudentSummaryMonth {
   fullAmount?: number
   perLessonAmount?: number
   isProrated?: boolean
+  /** Discount percent applied to this group's fee this month. */
+  discountPercent?: number
+  /** Fixed so'm discount — once per student, on the main group's row only. */
+  discountAmount?: number
   manualExcludedAmount?: number
   manualExcludedLessons?: number | null
   manualExcludedReason?: string | null

@@ -21,6 +21,18 @@ interface GroupFormState {
   lessonDurationMinutes: string | number
   endDate: Date | null
   applyFeeNow: boolean
+  /** Edit-only: the day the new schedule takes effect (earlier lessons keep the old one). */
+  scheduleEffectiveFrom: Date | null
+  /** Edit-only: the day the new teacher takes over (commission splits on it). */
+  teacherEffectiveFrom: Date | null
+}
+
+/** Order-independent key of a schedule: `day@HH:mm`, sorted. */
+function scheduleKey(days: GroupFormDay[]): string {
+  return days
+    .map((d) => `${d.day}@${String(d.startTime ?? '').slice(0, 5)}`)
+    .sort()
+    .join(',')
 }
 
 /**
@@ -39,6 +51,7 @@ export function useGroupForm(
   const form = reactive<GroupFormState>({
     name: '', centerId: null, subjectId: null, roomId: null, teacherId: null,
     monthlyFee: '', lessonDurationMinutes: DEFAULT_LESSON_DURATION, endDate: null, applyFeeNow: false,
+    scheduleEffectiveFrom: null, teacherEffectiveFrom: null,
   })
   const errors = reactive<Record<string, string>>({})
 
@@ -48,6 +61,9 @@ export function useGroupForm(
   const currentFee = ref<number | null>(null)
   /** The previous end date (YYYY-MM-DD) — to detect a shortening on submit. */
   const previousEndDate = ref<string | null>(null)
+  /** Baselines to detect a real schedule / teacher change on edit. */
+  const originalScheduleKey = ref('')
+  const originalTeacherId = ref<number | null>(null)
 
   /** Edit-only: the entered price differs from the group's current price. */
   const feeChanged = computed(
@@ -113,6 +129,10 @@ export function useGroupForm(
       currentFee.value = editing.monthlyFee == null ? null : Number(editing.monthlyFee)
       previousEndDate.value = editing.endDate ?? null
       const sch = editing.schedules ?? []
+      originalScheduleKey.value = scheduleKey(sch.map((x) => ({ day: x.day, startTime: x.startTime })))
+      originalTeacherId.value = editing.teacher?.id ?? null
+      form.scheduleEffectiveFrom = new Date()
+      form.teacherEffectiveFrom = new Date()
       days.value = sch.map((s) => s.day)
       if (sch.length > 1) {
         differentTime.value = true
@@ -135,12 +155,25 @@ export function useGroupForm(
       form.applyFeeNow = false
       currentFee.value = null
       previousEndDate.value = null
+      originalScheduleKey.value = ''
+      originalTeacherId.value = null
+      form.scheduleEffectiveFrom = null
+      form.teacherEffectiveFrom = null
       days.value = []
       allTime.value = ''
       times.value = []
       differentTime.value = false
     }
   }
+
+  /** Edit-only: the schedule really changed (the form always re-sends it). */
+  const scheduleChanged = computed(
+    () => isEditing.value && days.value.length > 0 && scheduleKey(buildDays()) !== originalScheduleKey.value,
+  )
+  /** Edit-only: a different teacher was picked. */
+  const teacherChanged = computed(
+    () => isEditing.value && form.teacherId !== originalTeacherId.value,
+  )
 
   function buildDays(): GroupFormDay[] {
     return days.value.map((day, i) => ({
@@ -196,6 +229,14 @@ export function useGroupForm(
 
     const built = buildDays()
     if (built.length) payload.days = built
+    // Dates matter only for a real change; the backend ignores them otherwise.
+    // A cleared date means "from today" — the same as the backend default,
+    // sent explicitly so the payload matches what the form promised.
+    const today = toDateString(new Date())
+    if (scheduleChanged.value)
+      payload.scheduleEffectiveFrom = toDateString(form.scheduleEffectiveFrom) || today
+    if (teacherChanged.value)
+      payload.teacherEffectiveFrom = toDateString(form.teacherEffectiveFrom) || today
     return payload
   }
 
@@ -215,6 +256,7 @@ export function useGroupForm(
     form, errors, days, allTime, times, differentTime, dayOptions,
     subjects, rooms, teachers,
     feeChanged, isShortening, nextMonthLabel, currentFee,
+    scheduleChanged, teacherChanged,
     conflicts: conflictCheck.conflicts,
     conflictChecking: conflictCheck.checking,
     conflictChecked: conflictCheck.checked,

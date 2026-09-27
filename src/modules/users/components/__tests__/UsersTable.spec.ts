@@ -44,7 +44,9 @@ const rowsWithDynamicRole: User[] = [
 ]
 
 const EDIT_BTN = 'button.hover\\:text-primary'
-const DELETE_BTN = 'button.hover\\:text-danger'
+const DELETE_BTN = `button[aria-label="${t('common.delete')}"]`
+const BLOCK_BTN = `button[aria-label="${t('users.block')}"]`
+const UNBLOCK_BTN = `button[aria-label="${t('users.unblock')}"]`
 
 function mountTable() {
   return mount(UsersTable, { props: { columns, rows, canEdit: true, canDelete: true } })
@@ -119,5 +121,33 @@ describe('UsersTable', () => {
       await viewButtons[0]!.trigger('click')
       expect(last(wrapper.emitted('view'))).toEqual([rows[0]])
     })
+  })
+
+  it('offers "block" for an active employee and emits toggleActive', async () => {
+    const wrapper = mountTable()
+    const btns = wrapper.find('tbody').findAll(BLOCK_BTN)
+    expect(btns).toHaveLength(2)
+    await btns[0]!.trigger('click')
+    expect(last(wrapper.emitted('toggleActive'))).toEqual([rows[0]])
+  })
+
+  it('marks a blocked employee, dims the row and offers "unblock"', () => {
+    const blocked: User[] = [{ ...rows[0]!, isActive: false }]
+    const wrapper = mount(UsersTable, { props: { columns, rows: blocked, canEdit: true } })
+    const row = wrapper.find('tbody tr')
+    expect(row.classes()).toContain('opacity-60')
+    expect(row.text()).toContain(t('users.blocked'))
+    expect(wrapper.find('tbody').findAll(UNBLOCK_BTN)).toHaveLength(1)
+  })
+
+  it('never offers blocking the admin', () => {
+    const admin: User[] = [{ ...rows[0]!, role: UserRole.ADMIN }]
+    const wrapper = mount(UsersTable, { props: { columns, rows: admin, canEdit: true } })
+    expect(wrapper.find('tbody').findAll(BLOCK_BTN)).toHaveLength(0)
+  })
+
+  it('hides blocking on the signed-in user\'s own row', () => {
+    const wrapper = mount(UsersTable, { props: { columns, rows, canEdit: true, selfId: 1 } })
+    expect(wrapper.find('tbody').findAll(BLOCK_BTN)).toHaveLength(1)
   })
 })

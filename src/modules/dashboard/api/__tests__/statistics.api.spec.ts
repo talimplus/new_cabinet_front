@@ -25,6 +25,7 @@ describe('statistics.api', () => {
       payroll: { amountDue: 0, amountPaid: 0, remainingAmount: 0, totalCount: 0, paidCount: 0, partialCount: 0, unpaidCount: 0 },
       students: { totalCount: 10, activeCount: 8, addedCount: 2, stoppedCount: 1 },
       netCashflow: 60,
+      byMonth: [],
     }
     mockedHttp.get.mockResolvedValueOnce({ data: body })
 

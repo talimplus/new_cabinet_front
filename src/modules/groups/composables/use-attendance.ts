@@ -33,6 +33,8 @@ export function useAttendance(groupId: number, students: Ref<Student[]>) {
   const lessonDates = computed(() => data.value?.lessonDates ?? [])
   const today = computed(() => data.value?.today ?? '')
   const overrides = computed(() => data.value?.overridesByDate ?? {})
+  /** Holidays in the shown month — explains the missing lesson columns. */
+  const holidays = computed(() => data.value?.holidays ?? [])
   const membership = computed<GroupStudentMembership[]>(() => data.value?.students ?? [])
 
   /** Inclusive first…last calendar day of the selected month as `YYYY-MM-DD`. */
@@ -214,6 +216,7 @@ export function useAttendance(groupId: number, students: Ref<Student[]>) {
     month,
     membership,
     lessonDates,
+    holidays,
     today,
     load,
     setMonth,

@@ -70,6 +70,10 @@ export function usePermissions() {
     canManageAttendance: computed(() => can(Permission.ATTENDANCE_MANAGE)),
     canManagePastAttendance: computed(() => can(Permission.ATTENDANCE_MANAGE_PAST)),
 
+    // ---- schedule / holidays ----
+    /** Add / remove holidays (and manage the timetable). */
+    canManageSchedule: computed(() => can(Permission.SCHEDULE_MANAGE)),
+
     // ---- staff attendance (check-in) ----
     canCheckIn: computed(() => can(Permission.STAFF_ATTENDANCE_CHECK_IN)),
     canViewStaffAttendance: computed(() => can(Permission.STAFF_ATTENDANCE_VIEW)),

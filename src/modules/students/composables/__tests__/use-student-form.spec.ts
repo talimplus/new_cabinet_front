@@ -4,6 +4,7 @@ import { useStudentForm } from '../use-student-form'
 import { StudentStatus } from '../../enums/student-status.enum'
 import { StudentPreferredTime } from '../../enums/student-preferred-time.enum'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
+import { DiscountType } from '../../enums/discount-type.enum'
 import type { Student } from '../../interfaces/student.interface'
 
 // Stub the select-options composable so the centerId watcher's loadFor()
@@ -120,36 +121,63 @@ describe('useStudentForm', () => {
       expect('jshshir' in payload).toBe(false)
     })
 
-    it('simple discount mode emits discountPercent/discountReason', async () => {
+    it('simple percent discount emits discountPercent (and zeroes the amount)', async () => {
       const f = await ready()
       f.form.usePeriods = false
-      f.form.discountPercent = '10'
+      f.form.discountType = DiscountType.PERCENT
+      f.form.discountValue = '10'
       f.form.discountReason = 'Sodiq mijoz'
 
       const payload = f.toPayload()
 
       expect(payload.discountPercent).toBe(10)
+      expect(payload.discountAmount).toBe(0)
       expect(payload.discountReason).toBe('Sodiq mijoz')
       expect('discountPeriods' in payload).toBe(false)
     })
 
-    it('period mode emits discountPeriods filtered to valid rows and omits the simple fields', async () => {
+    it('simple amount discount emits discountAmount (and zeroes the percent)', async () => {
+      const f = await ready()
+      f.form.discountType = DiscountType.AMOUNT
+      f.form.discountValue = '20000'
+
+      const payload = f.toPayload()
+
+      expect(payload.discountAmount).toBe(20000)
+      expect(payload.discountPercent).toBe(0)
+    })
+
+    it('omits the simple discount when no value is entered', async () => {
+      const f = await ready()
+      f.form.discountType = DiscountType.AMOUNT
+      f.form.discountValue = ''
+
+      const payload = f.toPayload()
+
+      expect('discountPercent' in payload).toBe(false)
+      expect('discountAmount' in payload).toBe(false)
+    })
+
+    it('period mode emits percent OR amount per row, with the group, and omits the simple fields', async () => {
       const f = await ready()
       f.form.usePeriods = true
-      f.form.discountPercent = '10'
+      f.form.discountValue = '10'
       f.form.discountReason = 'ignored'
       f.form.discountPeriods = [
-        { percent: '20', fromMonth: '2026-01', toMonth: '2026-06', reason: ' Aksiya ' },
-        { percent: '', fromMonth: '2026-02', toMonth: '', reason: '' }, // no percent
-        { percent: '30', fromMonth: '', toMonth: '', reason: '' }, // no fromMonth
+        { type: DiscountType.PERCENT, value: '10', groupId: null, fromMonth: '2026-01', toMonth: '2026-06', reason: ' Aksiya ' },
+        { type: DiscountType.AMOUNT, value: '20000', groupId: 12, fromMonth: '2026-07', toMonth: '', reason: 'Ikki fan' },
+        { type: DiscountType.PERCENT, value: '', groupId: null, fromMonth: '2026-02', toMonth: '', reason: '' }, // no value
+        { type: DiscountType.AMOUNT, value: '5000', groupId: null, fromMonth: '', toMonth: '', reason: '' }, // no fromMonth
       ]
 
       const payload = f.toPayload()
 
       expect(payload.discountPeriods).toEqual([
-        { percent: 20, fromMonth: '2026-01', toMonth: '2026-06', reason: 'Aksiya' },
+        { percent: 10, fromMonth: '2026-01', toMonth: '2026-06', reason: 'Aksiya' },
+        { amount: 20000, groupId: 12, fromMonth: '2026-07', reason: 'Ikki fan' },
       ])
       expect('discountPercent' in payload).toBe(false)
+      expect('discountAmount' in payload).toBe(false)
       expect('discountReason' in payload).toBe(false)
     })
   })
@@ -188,6 +216,38 @@ describe('useStudentForm', () => {
       expect(f.form.subjectId).toBe(3)
       expect(f.form.groupIds).toEqual([1, 2])
       expect(f.form.jshshir).toBe('12345678901234')
+    })
+
+    it('reads an amount discount back as the "amount" type', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset({
+        id: 2, firstName: 'A', lastName: 'B', phone: '1', status: StudentStatus.ACTIVE, centerId: 7,
+        discountPercent: '0', discountAmount: '20000', discountReason: 'Ikki fan',
+      })
+      await flushPromises()
+
+      expect(f.form.usePeriods).toBe(false)
+      expect(f.form.discountType).toBe(DiscountType.AMOUNT)
+      expect(f.form.discountValue).toBe(20000)
+      expect(f.form.discountReason).toBe('Ikki fan')
+    })
+
+    it('reads periods back with their type and group', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset({
+        id: 3, firstName: 'A', lastName: 'B', phone: '1', status: StudentStatus.ACTIVE, centerId: 7,
+        discountPeriods: [
+          { id: 1, percent: 0, amount: 20000, groupId: 12, fromMonth: '2026-07-01', toMonth: '2026-08-01', reason: 'x' },
+          { id: 2, percent: 10, amount: 0, groupId: null, fromMonth: '2026-06-01', toMonth: null },
+        ],
+      })
+      await flushPromises()
+
+      expect(f.form.usePeriods).toBe(true)
+      expect(f.form.discountPeriods).toEqual([
+        { type: DiscountType.AMOUNT, value: 20000, groupId: 12, fromMonth: '2026-07', toMonth: '2026-08', reason: 'x' },
+        { type: DiscountType.PERCENT, value: 10, groupId: null, fromMonth: '2026-06', toMonth: '', reason: '' },
+      ])
     })
 
     it('blanks the form on reset(null)', async () => {

@@ -209,8 +209,13 @@ own roles on top.
 | Qabulxona | `reception` | `reception` | ✅ | — | 28 |
 | O'qituvchi | `teacher` | `teacher` | ✅ | — | 12 |
 | Boshqa | `other` | `other` | ✅ | — | 3 |
+| O'quvchi | `student` | `student` | ✅ | ✅ | none |
 
-- **`isLocked`** → cannot be edited or deleted (Administrator only).
+- **`student`** (added 2026-09-27) is the role of a student's cabinet account
+  (`POST /students` creates it). It is **not returned by `GET /roles`**, cannot be
+  given to staff (`POST/PUT /users` with its `roleId` → 400), and cannot be edited
+  or deleted (403). So the roles page and the staff form never see it.
+- **`isLocked`** → cannot be edited or deleted (Administrator and O'quvchi).
 - **`isSystem`** → cannot be deleted and its `baseRole` cannot change; its
   permissions *can* be edited.
 - A role with `userCount > 0` cannot be deleted.
@@ -291,6 +296,7 @@ automatically (`01-api-integration.md` §2.6).
 | POST | `/users` | `users.create` | |
 | GET | `/users/:id` | `users.view` | |
 | PUT | `/users/:id` | `users.update` | |
+| PUT | `/users/:id/active` | `users.update` | |
 | DELETE | `/users/:id` | `users.delete` | |
 | GET | `/users/email/:email` | `users.view` | |
 | GET | `/users/employees` | `users.view` \| `groups.create` \| `groups.update` | ⊕ |
@@ -324,6 +330,12 @@ automatically (`01-api-integration.md` §2.6).
 | PUT | `/groups/:id` | `groups.update` | |
 | DELETE | `/groups/:id` | `groups.delete` | |
 | PUT | `/groups/change-status/:id` | `groups.changeStatus` | |
+| GET | `/groups/:id/pauses` | `groups.view` | |
+| POST/DELETE | `/groups/:id/pauses[/:pauseId]` | `groups.update` | |
+| GET | `/attendance/absences` | `attendance.view` | ⊕ |
+| GET | `/holidays` | `schedule.view` \| `groups.view` \| `attendance.view` | ⊕ |
+| POST/DELETE | `/holidays[/:id]` | `schedule.manage` | |
+| PUT | `/attendance/absences/:id/follow-up` | `attendance.manage` | |
 | GET | `/groups/:groupId/attendance` | `attendance.view` | |
 | GET | `/groups/:groupId/attendance/lesson-dates` | `attendance.view` | |
 | POST | `/groups/:groupId/attendance/submit` | `attendance.manage` | |
@@ -422,6 +434,8 @@ the page is open to any authenticated user.
 | `/users/:id` (staff card) | `staffPerformance.view` |
 | `/my-performance` | `staffAttendance.viewOwn` |
 | `/staff-attendance` | `staffAttendance.view` |
+| `/absences` (kelmaganlar) | `attendance.view` |
+| `/holidays` (bayram kunlari) | `schedule.view` |
 | `/roles` | `roles.view` |
 | `/subjects` | `subjects.view` |
 | `/rooms` | `rooms.view` |
@@ -467,8 +481,8 @@ then three collapsible groups. A group disappears when all its items are hidden.
 |---|---|
 | Standalone | Statistika (`statistics.view`) · Bugungi darslar (`teacher.today`) · Xodimlar (`users.view`) · Rollar (`roles.view`) · Guruhlar (`groups.view`) · Dars jadvali (`schedule.view`) · Kurs rejalari (`syllabus.view`) · Mening faoliyatim (`staffAttendance.viewOwn`) · Xodimlar davomati (`staffAttendance.view`) |
 | **To'lovlar** | To'lovlar (`payments.view`) · Ish haqi (`payroll.view`) · Chiqimlar (`expenses.view`) · Tasdiqlash uchun to'lovlar (`receipts.view`) |
-| **O'quvchilar** | Qabul (`students.view`) · Leads (`leads.view`) · O'quvchilar · To'xtatganlar · Rad etilganlar · Tamomlaganlar (all `students.view`) |
-| **Sozlamalar** | Markazlar (`centers.view`) · Fanlar (`subjects.view`) · Xonalar (`rooms.view`) · Tashkilot (`organization.settings`) · Telegram (`telegram.settings`) |
+| **O'quvchilar** | Qabul (`students.view`) · Darsga kelmaganlar (`attendance.view`) · Leads (`leads.view`) · O'quvchilar · To'xtatganlar · Rad etilganlar · Tamomlaganlar (all `students.view`) |
+| **Sozlamalar** | Bayram kunlari (`schedule.view`) · Markazlar (`centers.view`) · Fanlar (`subjects.view`) · Xonalar (`rooms.view`) · Tashkilot (`organization.settings`) · Telegram (`telegram.settings`) |
 
 ---
 

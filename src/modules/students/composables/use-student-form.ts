@@ -5,18 +5,17 @@ import { StudentPreferredTime } from '../enums/student-preferred-time.enum'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString, parseDate } from '@/shared/utils/format-date'
 import type { Student } from '../interfaces/student.interface'
-import type { StudentForm, DiscountPeriodForm } from '../interfaces/student-form.interface'
+import type { StudentForm } from '../interfaces/student-form.interface'
+import {
+  applyDiscount,
+  blankDiscount,
+  discountFromStudent,
+  type DiscountState,
+} from '../utils/student-discount'
 import { t } from '@/locales'
 
-/** A discount period row while editing (months are "YYYY-MM", percent may be blank). */
-export interface DiscountRow {
-  percent: string | number
-  fromMonth: string
-  toMonth: string
-  reason: string
-}
 
-interface StudentFormState {
+interface StudentFormState extends DiscountState {
   firstName: string
   lastName: string
   phone: string
@@ -34,10 +33,6 @@ interface StudentFormState {
   passportNumber: string
   jshshir: string
   comment: string
-  usePeriods: boolean
-  discountPercent: string | number
-  discountReason: string
-  discountPeriods: DiscountRow[]
 }
 
 function blankState(centerId: number | null): StudentFormState {
@@ -46,18 +41,15 @@ function blankState(centerId: number | null): StudentFormState {
     referrerId: null, monthlyFee: '', heardAboutUs: '', preferredTime: null,
     preferredDays: [], centerId, groupIds: [], subjectId: null,
     passportSeries: '', passportNumber: '', jshshir: '', comment: '',
-    usePeriods: false, discountPercent: '', discountReason: '', discountPeriods: [],
+    ...blankDiscount(),
   }
-}
-
-export function emptyPeriod(): DiscountRow {
-  return { percent: '', fromMonth: '', toMonth: '', reason: '' }
 }
 
 /**
  * Student create/edit state. Owns the reactive form, the scoped select options
  * (reloaded when the center changes), validation and payload building. The
- * discount block toggles between a single percent and a list of periods.
+ * discount block toggles between a single discount (percent OR amount) and a
+ * list of periods (each optionally limited to one group).
  */
 export function useStudentForm(defaultCenterId: () => number | null) {
   const { subjects, groups, referrers, loadFor, clear } = useStudentOptions()
@@ -109,20 +101,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     form.passportNumber = editing.passportNumber ?? ''
     form.jshshir = editing.jshshir ?? ''
     form.comment = editing.comment ?? ''
-
-    const periods = editing.discountPeriods ?? []
-    if (periods.length) {
-      form.usePeriods = true
-      form.discountPeriods = periods.map((p) => ({
-        percent: p.percent ?? '',
-        fromMonth: (p.fromMonth ?? '').slice(0, 7),
-        toMonth: (p.toMonth ?? '').slice(0, 7),
-        reason: p.reason ?? '',
-      }))
-    } else {
-      form.discountPercent = editing.discountPercent ?? ''
-      form.discountReason = editing.discountReason ?? ''
-    }
+    Object.assign(form, discountFromStudent(editing))
   }
 
   function validate(): boolean {
@@ -137,24 +116,6 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     if (value === '' || value === null) return undefined
     const n = Number(value)
     return Number.isNaN(n) ? undefined : n
-  }
-
-  function buildDiscount(payload: StudentForm): void {
-    if (form.usePeriods) {
-      const periods: DiscountPeriodForm[] = form.discountPeriods
-        .filter((p) => p.percent !== '' && p.fromMonth)
-        .map((p) => ({
-          percent: Number(p.percent),
-          fromMonth: p.fromMonth,
-          toMonth: p.toMonth || undefined,
-          reason: p.reason.trim() || undefined,
-        }))
-      if (periods.length) payload.discountPeriods = periods
-      return
-    }
-    const percent = num(form.discountPercent)
-    if (percent !== undefined) payload.discountPercent = percent
-    if (form.discountReason.trim()) payload.discountReason = form.discountReason.trim()
   }
 
   function toPayload(): StudentForm {
@@ -185,7 +146,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
       if (form.passportNumber.trim()) payload.passportNumber = form.passportNumber.trim()
     }
 
-    buildDiscount(payload)
+    applyDiscount(form, payload)
     return payload
   }
 

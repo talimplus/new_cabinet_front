@@ -23,7 +23,7 @@ function pct(value = 0, total = 0): number {
 const paymentRows = computed(() => {
   const p = props.data?.payments
   return [
-    { label: t('statistics.details.totalDebt'), value: formatSom(p?.amountDue) },
+    { label: t('statistics.details.charged'), value: formatSom(p?.amountDue) },
     { label: t('statistics.details.paid'), value: formatSom(p?.amountPaid), tone: 'success' as const, percent: pct(p?.amountPaid, p?.amountDue) },
     { label: t('statistics.details.remaining'), value: formatSom(p?.remainingAmount), tone: 'danger' as const, percent: pct(p?.remainingAmount, p?.amountDue) },
   ]
@@ -40,7 +40,7 @@ const expenseRows = computed(() => {
 const payrollRows = computed(() => {
   const p = props.data?.payroll
   return [
-    { label: t('statistics.details.totalDebt'), value: formatSom(p?.amountDue) },
+    { label: t('statistics.details.charged'), value: formatSom(p?.amountDue) },
     { label: t('statistics.details.paid'), value: formatSom(p?.amountPaid), tone: 'success' as const, percent: pct(p?.amountPaid, p?.amountDue) },
     { label: t('statistics.details.remaining'), value: formatSom(p?.remainingAmount), tone: 'danger' as const, percent: pct(p?.remainingAmount, p?.amountDue) },
   ]

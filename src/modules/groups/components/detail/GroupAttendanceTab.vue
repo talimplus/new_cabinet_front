@@ -1,12 +1,7 @@
 <template>
   <div class="space-y-4">
-    <AttendancePicker
-      :month="a.month.value"
-      :year="a.year.value"
-      @update:month="a.setMonth"
-      @update:year="a.setYear"
-      @current="a.goToCurrentMonth"
-    />
+    <AttendancePicker :month="a.month.value" :year="a.year.value" @update:month="a.setMonth" @update:year="a.setYear" @current="a.goToCurrentMonth" />
+    <AttendanceHolidaysNote :holidays="a.holidays.value" />
 
     <div v-if="a.loading.value" class="p-8 text-center"><UiSpinner :size="22" class="mx-auto text-muted-foreground" /></div>
     <p v-else-if="!students.length" class="p-8 text-center text-sm text-muted-foreground">{{ t('groups.attendance.noStudents') }}</p>
@@ -79,6 +74,7 @@ import { onMounted, toRef } from 'vue'
 import { UiSpinner, UiIcon } from '@/shared/components'
 import { RefreshCw } from '@/shared/icons'
 import AttendancePicker from './AttendancePicker.vue'
+import AttendanceHolidaysNote from './AttendanceHolidaysNote.vue'
 import AttendanceCell from './AttendanceCell.vue'
 import AttendanceStatusPicker from './AttendanceStatusPicker.vue'
 import AttendanceRescheduleDialog from './AttendanceRescheduleDialog.vue'

@@ -29,6 +29,7 @@ const data: DashboardResponse = {
   },
   students: { totalCount: 128, activeCount: 90, addedCount: 12, stoppedCount: 5 },
   netCashflow: 500,
+  byMonth: [],
 }
 
 describe('DashboardStats', () => {

@@ -1,6 +1,8 @@
 export default {
   allCenters: 'Все центры',
   menu: {
+    holidays: 'Праздничные дни',
+    absences: 'Пропуски занятий',
     statistics: 'Статистика',
     users: 'Сотрудники',
     groups: 'Группы',

@@ -301,7 +301,8 @@ old app: logo ≤ 300 KB, favicon ≤ 100 KB.
 | POST | `/users` | `CreateUserDto` | user `{…}` |
 | GET | `/users/{id}` | — | user |
 | PUT | `/users/{id}` | `UpdateUserDto` | user |
-| DELETE | `/users/{id}` | — | — |
+| DELETE | `/users/{id}` | — | — ⚠️ **400** if the employee has history (salary, commission, receipts, taught a group) or is the admin — block instead |
+| PUT | `/users/{id}/active` | `{ isActive* }` | user — **block / unblock** (2026-09-27). Blocked = can't log in, live token dies within 15 s, history kept |
 | GET | `/users/email/{email}` | — | user |
 | GET | `/users/employees` | `centerId, name, phone, page, perPage` | `{ data, meta }` |
 | GET | `/users/teachers` | `centerId?, name?` | **bare array** |
@@ -317,7 +318,7 @@ string is only a fallback when `roleId` is absent. The new app currently sends
 
 Employee row (verified):
 ```jsonc
-{ "id", "firstName", "lastName", "login", "phone", "role", "salary",
+{ "id", "firstName", "lastName", "login", "phone", "role", "isActive", "salary",
   "commissionPercentage", "createdAt",
   "center": {…}, "userRole": { "id","key","name","baseRole","permissions",
                                "isSystem","isLocked","createdAt","updatedAt" } }
@@ -383,8 +384,8 @@ to clear coordinates.
 | POST | `/students/transfer/preview` | `{ studentIds*[], fromGroupId* }` | per-student debt/credit |
 | POST | `/students/transfer` | `{ studentIds*[], fromGroupId*, toGroupId*, transferDate?, reason?, closeSourceGroup? }` | `{ …, sourceGroupClosed }` |
 | GET | `/students/{id}/discount-periods` | — | **bare array** |
-| POST | `/students/{id}/discount-periods` | `{ percent*, fromMonth*, toMonth?, reason? }` | period |
-| PUT | `/students/{id}/discount-periods/{periodId}` | same, all optional | period |
+| POST | `/students/{id}/discount-periods` | `{ percent? \| amount?, groupId?, fromMonth*, toMonth?, reason? }` | period |
+| PUT | `/students/{id}/discount-periods/{periodId}` | same, all optional; sending `percent` or `amount` switches the type | period |
 | DELETE | `/students/{id}/discount-periods/{periodId}` | — | — |
 | GET | `/student` | alias of `/students` | — |
 
@@ -395,7 +396,24 @@ preferredDays[] (repeated param), page, perPage`
 `CreateStudentDto`: `firstName*, lastName*, phone*, secondPhone?, birthDate?,
 comment?, heardAboutUs?, preferredTime?, preferredDays?[], passportSeries?,
 passportNumber?, jshshir?, referrerId?, monthlyFee?, discountPercent?,
-discountReason?, discountPeriods?[], status?, centerId?, groupIds?[], subjectId?`
+discountAmount?, discountReason?, discountPeriods?[], status?, centerId?, groupIds?[], subjectId?`
+
+**Discounts (2026-09-26, verified live):** a discount is a percent (0..100) **or**
+an amount in so'm per month — exactly one of them > 0, otherwise 422
+(`errors.percent` / `errors.amount`). A period may carry `groupId` to apply only
+to that group's payments (a two-subject student usually gets it on the cheaper
+subject); `groupId: null` — all groups; a foreign group → 422 `errors.groupId`.
+The amount applies to **full months only** (a mid-month join gets it from the
+next month). Periods come back as `{ id, percent, amount, groupId, fromMonth,
+toMonth, reason, createdAt }`; students carry `discountAmount` next to
+`discountPercent` (numeric strings). UI: `DiscountType` enum + `formatDiscount()`.
+
+**Changing the permanent discount (2026-09-27, verified live):** `PUT /students/{id}`
+with a new `discountPercent` / `discountAmount` takes effect from the **current
+month** if no money was taken for it yet (no `amountPaid`, no pending receipt), else
+from the **next month**; past months are never repriced. The response shape is
+unchanged — `discountPercent/Amount` echo the value the admin last entered, not
+necessarily the one billed this month. Form hint: `students.form.discountChangeHint`.
 
 ⚠️ `UpdateStudentDto` is **narrower** than create — it has no `secondPhone`,
 `comment`, `heardAboutUs`, `preferredTime`, `preferredDays`, passport fields,
@@ -442,12 +460,27 @@ its `groups[]` carry no `schedule` — the student card should read those from
 | GET | `/groups/{id}` | — | Group |
 | POST | `/groups` | `CreateGroupDto` | Group |
 | PUT | `/groups/{id}` | `UpdateGroupDto` | Group |
-| DELETE | `/groups/{id}` | — | — |
+| DELETE | `/groups/{id}` | — | — ⚠️ **400** when the group has payments or attendance — finish it instead |
 | PUT | `/groups/change-status/{id}` | `{ status* }` (`new|started|finished`) | Group |
+| GET | `/groups/{id}/pauses` | — | `[{ id, groupId, fromDate, toDate, reason, createdAt }]` (newest first) |
+| POST | `/groups/{id}/pauses` | `{ fromDate*, toDate*, reason* }` (`YYYY-MM-DD`, inclusive) | pause · **422** on overlap (`fromDate`) or when attendance exists inside the range |
+| DELETE | `/groups/{id}/pauses/{pauseId}` | — | `{ success: true }` |
 | GET | `/group/all` | alias | — |
 
 `CreateGroupDto`: `name*, subjectId*, teacherId*, roomId*, monthlyFee*, days*[{day,startTime}],
 timezone?, startDate?, endDate?, lessonDurationMinutes?(90), status?, centerId?`
+
+`UpdateGroupDto` also takes **`scheduleEffectiveFrom`** and **`teacherEffectiveFrom`**
+(`YYYY-MM-DD`, default today, read only when `days` / `teacherId` really
+changed): lessons before that day keep the old schedule (journal, billing,
+lateness) and the old teacher keeps the commission for them. The form sends
+them only on a real change (2026-09-27). A teacher must be a `teacher`-type
+user (422 `teacherId` otherwise).
+
+**Paused periods** (`/groups/{id}/pauses`): lessons on those days are not held —
+hidden from the journal, no attendance, not billed (`lessonsPlanned` unchanged,
+`lessonsBillable` drops, so the fee shrinks by that share). Adding/removing a
+pause recalculates the group's payments, fully paid months included.
 
 `UpdateGroupDto` adds **`applyFeeFrom: 'next_month' | 'current_month'`** — a fee
 change defaults to taking effect **next month**; `current_month` is only for
@@ -536,6 +569,43 @@ Rules that the UI must honour:
 ```
 Attaching a different syllabus **clears the previous topic assignments**.
 `distribute` replaces the whole plan (hand edits afterwards are fine).
+
+### 5.7.2 Holidays (2026-09-27)
+
+| Method | Path | Params / Body | Response |
+|---|---|---|---|
+| GET | `/holidays` | `centerId?` ⊕, `year?` | `[{ id, centerId, fromDate, toDate, name, createdAt }]` — center's + org-wide (`centerId: null`) |
+| POST | `/holidays` | `{ fromDate*, toDate*, name*, centerId? }` (`null` = whole org; non-admin pinned to own center) | holiday · **422** when attendance exists on those days |
+| DELETE | `/holidays/{id}` | — | `{ success: true }` |
+
+No lessons on holidays in any group; the monthly fee does **not** change (holiday
+lessons leave both planned and billable counts). The journal response
+(`lesson-dates`) carries `holidays: [{ fromDate, toDate, name }]` for the range.
+
+Payments list rows: `discountAmountApplied` — a fixed discount not tied to a
+subject is taken **once** per student per month, on the main group's row only
+(0 on the others). Student summary months carry `discountPercent` / `discountAmount`.
+`PUT /users/{id}`: a changed `salary` / `commissionPercentage` applies from the
+current month; earlier months keep the old values.
+
+### 5.7.1 Absences — reception call list (2026-09-27)
+
+| Method | Path | Params / Body | Response |
+|---|---|---|---|
+| GET | `/attendance/absences` | `centerId?` ⊕, `from?, to?` (`YYYY-MM-DD`), `groupId?, teacherId?, status?` (`absent`\|`excused`), `followedUp?` (bool), `search?` (name/phone), `page, perPage` (≤100) | `{ data, meta, summary }` |
+| PUT | `/attendance/absences/{id}/follow-up` | `{ note* }` — empty string clears the mark | `{ id, followUpNote, followedUpAt }` |
+
+Row (verified live):
+```jsonc
+{ "id": 58, "lessonDate": "2026-09-06", "status": "absent",
+  "comment": "…teacher's journal note…",
+  "followUpNote": null, "followedUpAt": null, "followedUpBy": null | { id, firstName, lastName },
+  "student": { "id", "firstName", "lastName", "phone", "secondPhone" },
+  "group": { "id", "name" }, "teacher": { "id", "firstName", "lastName" } | null,
+  "absencesInRange": 3 }        // misses of this student in this group in the range
+// summary: { absent, excused, notFollowedUp } — ignores status/followedUp filters
+```
+A teacher sees only their own groups.
 
 ### 5.8 Payments (18) — the largest surface
 
@@ -687,6 +757,12 @@ reception/manager payments create a **pending** receipt for an admin to confirm.
 The list **ensures** rows exist for the requested month (never empty when staff
 exist). **Future months are rejected.**
 
+`forMonth` is the **work month** (backend migration `…053`, 2026-09): the June
+salary sits under June even though it is paid in July. The current month is open
+and grows as students pay; a month marked `paid` is frozen — money that arrives
+later for it goes to the next unpaid month as `earningCarryOverCommission`.
+`earningForMonth` now always equals `forMonth` (kept for older clients).
+
 `deduction`: `{ amount*, reason*, type?: 'late'|'unsettled_payment'|'other' }`.
 Send `amount: 0` to record **only** a deduction with no payout.
 
@@ -784,12 +860,21 @@ Both return `{ id, name, center: {…}, createdAt }` on create/update.
   "payroll":{ "statusEnum":{…},"amountDue","amountPaid","remainingAmount",
               "totalCount","paidCount","partialCount","unpaidCount" },
   "students":{"totalCount","activeCount","addedCount","stoppedCount"},
-  "netCashflow":0 }
+  "netCashflow":0,
+  "byMonth":[ { "month":"2026-08",
+                "payments":{"amountDue","amountPaid","remainingAmount","refundedAmount"},
+                "expenses":{"totalAmount"},
+                "payroll":{"amountDue","amountPaid","remainingAmount"},
+                "netCashflow" } ] }
 ```
-⚠️ **There is no monthly time series.** The response is a single aggregate for
-the whole range — the old app's charts split one number across months, which is
-not real data. Charts stay deferred until the backend provides a series.
-`paymentsByMethod` is the one breakdown available (payments grouped by method).
+- **Both `fromMonth` and `toMonth` are inclusive.** `09 → 10` is two months, so
+  the dashboard defaults to a single month (`current → current`).
+- `payments.amountDue` is what was **charged** for the period, not debt — the debt
+  is `remainingAmount`. The UI labels it "Hisoblangan / Начислено".
+- `byMonth` (added 2026-09-26) is the real monthly series: one row per month of the
+  range, zero-filled, built from the same scoped queries — the totals above are its
+  sum. Payroll's month is the **pay** month (salary for the previous month's work).
+  `paymentsByMethod` is still range-level only.
 
 ### 5.15 Leads (6)
 | Method | Path | Params / Body |

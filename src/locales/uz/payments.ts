@@ -27,6 +27,7 @@ export default {
     unpaid: "To'lanmagan",
   },
   table: {
+    discount: 'Chegirma: {value}',
     student: "O'quvchi",
     group: 'Guruh',
     lessons: 'Darslar',

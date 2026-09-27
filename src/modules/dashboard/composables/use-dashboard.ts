@@ -7,10 +7,13 @@ function ym(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
-/** Default range: current month → next month (matches the old app). */
+/**
+ * Default range: the current month only. Both ends are inclusive on the
+ * backend, so the old "current → next month" default summed two months.
+ */
 function defaultRange(): { fromMonth: string; toMonth: string } {
-  const now = new Date()
-  return { fromMonth: ym(now), toMonth: ym(new Date(now.getFullYear(), now.getMonth() + 1, 1)) }
+  const now = ym(new Date())
+  return { fromMonth: now, toMonth: now }
 }
 
 export function useDashboard() {
@@ -31,19 +34,28 @@ export function useDashboard() {
     }
   }
 
-  /** Load centers (pick default), then fetch stats. Call on mount. */
+  /** Fetch stats for the default period. Call on mount. */
   async function init(): Promise<void> {
     await load()
   }
 
-
+  /**
+   * While a single month is shown, picking a start month moves the whole view
+   * to that month; a start after the end pulls the end along (the API rejects it).
+   */
   async function setFromMonth(value: string): Promise<void> {
+    if (!value) return
+    const singleMonth = range.fromMonth === range.toMonth
     range.fromMonth = value
+    if (singleMonth || range.toMonth < value) range.toMonth = value
     await load()
   }
 
+  /** An end before the start pulls the start back to it. */
   async function setToMonth(value: string): Promise<void> {
+    if (!value) return
     range.toMonth = value
+    if (range.fromMonth > value) range.fromMonth = value
     await load()
   }
 

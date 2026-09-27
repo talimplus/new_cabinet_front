@@ -24,7 +24,7 @@ export {
   Users, User, UserPlus, GraduationCap, BookOpen, FileText, CalendarDays, Calendar,
   Clock, CreditCard, DollarSign, ReceiptText, Wallet, BadgeDollarSign, DoorOpen,
   Layers, ClipboardList, LayoutDashboard, Bell, Phone, Mail, Building2, MapPin,
-  LocateFixed, Wifi,
+  LocateFixed, Wifi, PhoneCall, UserX, CalendarOff,
   TrendingUp, TrendingDown, Flag, Coins, Settings2, Pause, Ban, CheckCheck,
   Printer, History, FileSpreadsheet, CalendarRange, Scissors, FilterX, CheckSquare,
   QrCode, Link2Off, UserCheck, ArrowLeftRight, HandCoins, Palette, ImageOff,

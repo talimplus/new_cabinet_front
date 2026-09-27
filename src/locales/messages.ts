@@ -1,10 +1,12 @@
 import { AppLocale } from '@/shared/enums/app-locale.enum'
 
+import uzAbsences from './uz/absences'
 import uzAuth from './uz/auth'
 import uzCenters from './uz/centers'
 import uzCommon from './uz/common'
 import uzExpenses from './uz/expenses'
 import uzGroups from './uz/groups'
+import uzHolidays from './uz/holidays'
 import uzLayout from './uz/layout'
 import uzLeads from './uz/leads'
 import uzOrganization from './uz/organization'
@@ -24,11 +26,13 @@ import uzSyllabuses from './uz/syllabuses'
 import uzTelegram from './uz/telegram'
 import uzUsers from './uz/users'
 
+import ruAbsences from './ru/absences'
 import ruAuth from './ru/auth'
 import ruCenters from './ru/centers'
 import ruCommon from './ru/common'
 import ruExpenses from './ru/expenses'
 import ruGroups from './ru/groups'
+import ruHolidays from './ru/holidays'
 import ruLayout from './ru/layout'
 import ruLeads from './ru/leads'
 import ruOrganization from './ru/organization'
@@ -54,11 +58,13 @@ import ruUsers from './ru/users'
  */
 export const messages = {
   [AppLocale.UZ]: {
+    absences: uzAbsences,
     auth: uzAuth,
     centers: uzCenters,
     common: uzCommon,
     expenses: uzExpenses,
     groups: uzGroups,
+    holidays: uzHolidays,
     layout: uzLayout,
     leads: uzLeads,
     organization: uzOrganization,
@@ -79,11 +85,13 @@ export const messages = {
     users: uzUsers,
   },
   [AppLocale.RU]: {
+    absences: ruAbsences,
     auth: ruAuth,
     centers: ruCenters,
     common: ruCommon,
     expenses: ruExpenses,
     groups: ruGroups,
+    holidays: ruHolidays,
     layout: ruLayout,
     leads: ruLeads,
     organization: ruOrganization,

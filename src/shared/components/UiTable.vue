@@ -1,63 +1,60 @@
 <template>
-  <!-- Desktop: a real table. -->
-  <div
-    class="hidden overflow-hidden rounded-lg border border-border bg-surface shadow-card md:block"
-  >
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="bg-surface-muted">
-          <tr>
-            <th v-for="col in columns" :key="col.key" :class="headClass(col)">
-              {{ col.label }}
-            </th>
-            <th v-if="$slots.actions" class="w-0 px-3"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading && !rows.length">
-            <td :colspan="colspan" class="p-8 text-center">
-              <UiSpinner :size="22" class="mx-auto text-muted-foreground" />
-            </td>
-          </tr>
-          <tr v-else-if="!rows.length">
-            <td :colspan="colspan" class="p-8 text-center text-sm text-muted-foreground">
-              {{ emptyLabel }}
-            </td>
-          </tr>
-          <tr
-            v-for="(row, i) in rows"
-            :key="String(row[rowKey] ?? i)"
-            :class="
-              cn('border-t border-border transition-colors hover:bg-surface-muted', rowClass?.(row))
-            "
-          >
-            <td v-for="col in columns" :key="col.key" :class="cellClass(col)">
-              <slot :name="`cell-${col.key}`" :row="row as unknown" :value="row[col.key]">{{
-                row[col.key]
-              }}</slot>
-            </td>
-            <td v-if="$slots.actions" class="px-3 py-2.5 text-right">
-              <slot name="actions" :row="row as unknown" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="relative" :aria-busy="loading || undefined">
+    <!-- Desktop: a real table. -->
+    <div
+      class="hidden overflow-hidden rounded-lg border border-border bg-surface shadow-card md:block"
+    >
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-muted">
+            <tr>
+              <th v-for="col in columns" :key="col.key" :class="headClass(col)">
+                {{ col.label }}
+              </th>
+              <th v-if="$slots.actions" class="w-0 px-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading && !rows.length">
+              <td :colspan="colspan" class="p-8 text-center">
+                <UiSpinner :size="22" class="mx-auto text-muted-foreground" />
+              </td>
+            </tr>
+            <tr v-else-if="!rows.length">
+              <td :colspan="colspan" class="p-8 text-center text-sm text-muted-foreground">
+                {{ emptyLabel }}
+              </td>
+            </tr>
+            <tr v-for="(row, i) in rows" :key="String(row[rowKey] ?? i)" :class="trClass(row)">
+              <td v-for="col in columns" :key="col.key" :class="cellClass(col)">
+                <slot :name="`cell-${col.key}`" :row="row as unknown" :value="row[col.key]">{{
+                  row[col.key]
+                }}</slot>
+              </td>
+              <td v-if="$slots.actions" class="px-3 py-2.5 text-right">
+                <slot name="actions" :row="row as unknown" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- Below `md` the same rows render as cards; every slot is forwarded. -->
-  <UiTableCards
-    :columns="columns"
-    :rows="rows"
-    :row-key="rowKey"
-    :empty-label="emptyLabel"
-    :loading="loading"
-    :row-class="rowClass"
-  >
-    <template v-for="(_, name) in $slots" #[name]="scope">
-      <slot :name="name" v-bind="scope ?? {}" />
-    </template>
-  </UiTableCards>
+    <!-- Below `md` the same rows render as cards; every slot is forwarded. -->
+    <UiTableCards
+      :columns="columns"
+      :rows="rows"
+      :row-key="rowKey"
+      :empty-label="emptyLabel"
+      :loading="loading"
+      :row-class="rowClass"
+    >
+      <template v-for="(_, name) in $slots" #[name]="scope">
+        <slot :name="name" v-bind="scope ?? {}" />
+      </template>
+    </UiTableCards>
+    <UiTableRefresh :active="Boolean(loading && rows.length)" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -66,6 +63,7 @@ import { useI18n } from 'vue-i18n'
 import { cn } from '@/shared/utils/cn'
 import UiSpinner from './UiSpinner.vue'
 import UiTableCards from './UiTableCards.vue'
+import UiTableRefresh from './UiTableRefresh.vue'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 
 interface Props {
@@ -91,6 +89,8 @@ const headClass = (col: TableColumn) =>
     'whitespace-nowrap px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground',
     alignEnd(col),
   )
+const trClass = (row: Record<string, unknown>) =>
+  cn('border-t border-border transition-colors hover:bg-surface-muted', props.rowClass?.(row))
 const cellClass = (col: TableColumn) =>
   cn('px-3 py-2.5 align-middle text-foreground', alignEnd(col))
 </script>

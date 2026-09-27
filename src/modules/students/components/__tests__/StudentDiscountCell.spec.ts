@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import StudentDiscountCell from '../StudentDiscountCell.vue'
+import { formatSom } from '@/shared/utils/format-money'
 import type { Student } from '../../interfaces/student.interface'
 import { StudentStatus } from '../../enums/student-status.enum'
 
@@ -43,6 +44,26 @@ describe('StudentDiscountCell', () => {
     expect(rows).toHaveLength(2)
     expect(rows[0]!.text()).toContain('10%')
     expect(rows[1]!.text()).toContain('20%')
+  })
+
+  it('renders an amount period as money, not as a percent', () => {
+    const wrapper = mount(StudentDiscountCell, {
+      props: {
+        student: buildStudent({
+          discountPeriods: [{ id: 1, fromMonth: '2026-07-01', percent: 0, amount: 20000, groupId: 12 }],
+        }),
+      },
+    })
+    const text = wrapper.text().replace(/\s/g, ' ')
+    expect(text).toContain(formatSom(20000).replace(/\s/g, ' '))
+    expect(text).not.toContain('0%')
+  })
+
+  it('renders the permanent amount discount when there are no periods', () => {
+    const wrapper = mount(StudentDiscountCell, {
+      props: { student: buildStudent({ discountPercent: '0', discountAmount: '20000' }) },
+    })
+    expect(wrapper.text().replace(/\s/g, ' ')).toContain(formatSom(20000).replace(/\s/g, ' '))
   })
 
   it('shows a short period reason in full with no title attribute', () => {

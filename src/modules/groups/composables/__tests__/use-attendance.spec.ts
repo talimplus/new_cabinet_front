@@ -147,6 +147,23 @@ describe('useAttendance', () => {
     })
   })
 
+  describe('holidays', () => {
+    it('is empty before load and when the response has no holidays', async () => {
+      const a = setup()
+      expect(a.holidays.value).toEqual([])
+      await a.load()
+      expect(a.holidays.value).toEqual([])
+    })
+
+    it('exposes data.holidays after load', async () => {
+      const holidays = [{ fromDate: '2026-09-01', toDate: '2026-09-01', name: 'Mustaqillik' }]
+      mockedFetch.mockResolvedValueOnce(makeData({ holidays }))
+      const a = setup()
+      await a.load()
+      expect(a.holidays.value).toEqual(holidays)
+    })
+  })
+
   describe('month/year navigation', () => {
     beforeEach(() => {
       vi.useFakeTimers()

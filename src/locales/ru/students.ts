@@ -127,6 +127,18 @@ export default {
     toMonth: 'Месяц окончания',
     reason: 'Причина',
     addPeriod: 'Добавить период',
+    removePeriod: 'Удалить период',
+    discountType: 'Тип скидки',
+    discountTypes: {
+      percent: 'Процент (%)',
+      amount: 'Сумма (сум)',
+    },
+    discountGroup: 'На какой предмет',
+    allGroups: 'Все группы',
+    discountHint:
+      'Скидка суммой вычитается каждый месяц; ученику, пришедшему в середине месяца, — со следующего месяца. При двух предметах обычно даётся на более дешёвый.',
+    discountChangeHint:
+      'Изменённая скидка действует с текущего месяца, если за него ещё не платили, иначе — со следующего.',
   },
   view: {
     title: 'Платежи ученика',
@@ -168,6 +180,7 @@ export default {
       status: 'Статус',
       empty: 'Платежи не найдены',
       lessonsShort: '{billable}/{planned} зан.',
+      discount: 'скидка: {value}',
       excused: 'уваж.: {count} зан.',
       excluded: 'исключено: {amount}',
     },

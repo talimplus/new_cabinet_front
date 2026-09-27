@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchEmployees, fetchUsers, createUser, updateUser, deleteUser } from '../users.api'
+import {
+  fetchEmployees,
+  fetchUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  setUserActive,
+} from '../users.api'
 import { http } from '@/shared/api/http'
 import { UserRole } from '@/shared/enums/user-role.enum'
 import type { User } from '../../interfaces/user.interface'
@@ -79,5 +86,15 @@ describe('users.api', () => {
     await deleteUser(7)
 
     expect(mockedHttp.delete).toHaveBeenCalledWith('/users/7')
+  })
+
+  it('setUserActive PUTs { isActive } to /users/{id}/active and returns the user', async () => {
+    const updated = { id: 5, firstName: 'Ali', isActive: false } as User
+    mockedHttp.put.mockResolvedValueOnce({ data: updated })
+
+    const result = await setUserActive(5, { isActive: false })
+
+    expect(mockedHttp.put).toHaveBeenCalledWith('/users/5/active', { isActive: false })
+    expect(result).toEqual(updated)
   })
 })

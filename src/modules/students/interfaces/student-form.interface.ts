@@ -4,7 +4,12 @@ import type { StudentPreferredTime } from '../enums/student-preferred-time.enum'
 
 /** One discount period in the create/update body. Months are "YYYY-MM". */
 export interface DiscountPeriodForm {
-  percent: number
+  /** Exactly one of `percent` / `amount` is sent (> 0). */
+  percent?: number
+  /** so'm per month */
+  amount?: number
+  /** Limit to one group; omitted — all of the student's groups. */
+  groupId?: number
   fromMonth: string
   toMonth?: string
   reason?: string
@@ -27,6 +32,8 @@ export interface StudentForm {
   referrerId?: number
   monthlyFee?: number
   discountPercent?: number
+  /** so'm per month; sent instead of `discountPercent` when the type is "amount" */
+  discountAmount?: number
   discountReason?: string
   discountPeriods?: DiscountPeriodForm[]
   status?: StudentStatus

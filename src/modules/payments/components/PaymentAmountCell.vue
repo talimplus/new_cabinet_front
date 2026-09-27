@@ -5,6 +5,7 @@
     <div v-if="refunded > 0" class="text-xs text-success">
       {{ t('payments.table.refunded', { amount: formatSom(refunded) }) }}
     </div>
+    <div v-if="discountLabel" class="text-xs text-info">{{ discountLabel }}</div>
     <!-- Written off by an admin; the reason is part of the record. -->
     <div v-if="excluded > 0" class="text-xs text-warning">
       {{ t('payments.table.excluded', { amount: formatSom(excluded) }) }}
@@ -26,4 +27,13 @@ const props = defineProps<{ payment: Payment }>()
 
 const refunded = computed(() => toAmount(props.payment.refundedAmount))
 const excluded = computed(() => toAmount(props.payment.manualExcludedAmount))
+/** "Chegirma: 10% · 50 000 so'm" — only the parts that apply to this row. */
+const discountLabel = computed(() => {
+  const parts: string[] = []
+  const pct = toAmount(props.payment.discountPercentApplied)
+  const amt = toAmount(props.payment.discountAmountApplied)
+  if (pct > 0) parts.push(`${pct}%`)
+  if (amt > 0) parts.push(formatSom(amt))
+  return parts.length ? t('payments.table.discount', { value: parts.join(' · ') }) : ''
+})
 </script>

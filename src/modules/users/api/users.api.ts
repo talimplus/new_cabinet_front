@@ -1,7 +1,7 @@
 import { http } from '@/shared/api/http'
 import type { Employee, EmployeesParams, TeachersParams } from '../interfaces/employee.interface'
 import type { User } from '../interfaces/user.interface'
-import type { UserForm } from '../interfaces/user-form.interface'
+import type { UserForm, UserActiveForm } from '../interfaces/user-form.interface'
 import type { UsersParams } from '../interfaces/user-params.interface'
 import type { PaginatedResponse } from '@/shared/interfaces/paginated.interface'
 
@@ -35,4 +35,13 @@ export async function updateUser(id: number, form: UserForm): Promise<User> {
 
 export async function deleteUser(id: number): Promise<void> {
   await http.delete(`/users/${id}`)
+}
+
+/**
+ * PUT /users/{id}/active — block / unblock an employee. A leaver is blocked,
+ * not deleted: deleting would erase their salary and commission history.
+ */
+export async function setUserActive(id: number, form: UserActiveForm): Promise<User> {
+  const { data } = await http.put<User>(`/users/${id}/active`, form)
+  return data
 }

@@ -46,6 +46,15 @@ export interface LessonDatesResponse {
   lessonDates: string[]
   attendanceByDate: Record<string, AttendanceByDate>
   overridesByDate?: Record<string, LessonDateOverride>
+  /** Holidays inside the shown range — those days have no lesson at all. */
+  holidays?: LessonDatesHoliday[]
+}
+
+/** A holiday returned with the journal (`YYYY-MM-DD`, inclusive). */
+export interface LessonDatesHoliday {
+  fromDate: string
+  toDate: string
+  name: string
 }
 
 /** Query params for the lesson-dates endpoint. */

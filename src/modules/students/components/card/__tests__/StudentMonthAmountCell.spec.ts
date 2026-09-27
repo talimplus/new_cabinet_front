@@ -76,4 +76,29 @@ describe('StudentMonthAmountCell', () => {
     const zero = mountCell({ manualExcludedAmount: 0 })
     expect(zero.text()).not.toContain(t('students.view.table.excluded', { amount: formatSom(0) }))
   })
+
+  describe('discount line', () => {
+    it('shows the discount percent', () => {
+      expect(mountCell({ discountPercent: 10 }).text()).toContain(
+        t('students.view.table.discount', { value: '10%' }),
+      )
+    })
+
+    it('shows the fixed discount amount', () => {
+      expect(mountCell({ discountAmount: 50000 }).text()).toContain(
+        t('students.view.table.discount', { value: formatSom(50000) }),
+      )
+    })
+
+    it('joins percent and amount when both apply', () => {
+      expect(mountCell({ discountPercent: 10, discountAmount: 50000 }).text()).toContain(
+        t('students.view.table.discount', { value: `10% · ${formatSom(50000)}` }),
+      )
+    })
+
+    it('is hidden when both are 0 or undefined', () => {
+      expect(mountCell().find('p.text-info').exists()).toBe(false)
+      expect(mountCell({ discountPercent: 0, discountAmount: 0 }).find('p.text-info').exists()).toBe(false)
+    })
+  })
 })

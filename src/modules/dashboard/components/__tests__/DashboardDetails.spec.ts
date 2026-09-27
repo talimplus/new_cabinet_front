@@ -33,6 +33,7 @@ const data: DashboardResponse = {
   },
   students: { totalCount: 128, activeCount: 90, addedCount: 12, stoppedCount: 5 },
   netCashflow: 500,
+  byMonth: [],
 }
 
 describe('DashboardDetails', () => {
@@ -44,6 +45,13 @@ describe('DashboardDetails', () => {
     expect(text).toContain(t('statistics.details.payments'))
     expect(text).toContain(t('statistics.details.expenses'))
     expect(text).toContain(t('statistics.details.payroll'))
+  })
+
+  it('labels amountDue as "charged", not as debt (the debt is the remaining row)', () => {
+    const wrapper = mount(DashboardDetails, { props: { data } })
+    const text = wrapper.text()
+    expect(text).toContain(t('statistics.details.charged'))
+    expect(text).toContain(t('statistics.details.remaining'))
   })
 
   it('shows the formatted payment amounts', () => {

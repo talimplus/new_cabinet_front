@@ -18,6 +18,7 @@
 
     <DashboardStats :data="data" />
     <DashboardDetails :data="data" />
+    <DashboardMonthly :data="data" />
   </div>
 </template>
 
@@ -31,6 +32,7 @@ import { TrendingUp, TrendingDown } from '@/shared/icons'
 import DashboardFilters from '../components/DashboardFilters.vue'
 import DashboardStats from '../components/DashboardStats.vue'
 import DashboardDetails from '../components/DashboardDetails.vue'
+import DashboardMonthly from '../components/DashboardMonthly.vue'
 import { useDashboard } from '../composables/use-dashboard'
 
 const { t } = useI18n()

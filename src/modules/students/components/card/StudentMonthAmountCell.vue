@@ -18,6 +18,7 @@
     <p v-if="(month.lessonsExcused ?? 0) > 0" class="mt-0.5 border-s-2 border-info ps-2 text-xs text-info">
       {{ t('students.view.table.excused', { count: month.lessonsExcused }) }}
     </p>
+    <p v-if="discountLabel" class="mt-0.5 text-xs text-info">{{ discountLabel }}</p>
     <p v-if="(month.manualExcludedAmount ?? 0) > 0" class="mt-0.5 text-xs text-warning">
       {{ t('students.view.table.excluded', { amount: formatSom(month.manualExcludedAmount) }) }}
       <span v-if="month.manualExcludedReason">({{ month.manualExcludedReason }})</span>
@@ -35,5 +36,11 @@ const { t } = useI18n()
 
 const props = defineProps<{ month: StudentSummaryMonth }>()
 
+const discountLabel = computed(() => {
+  const parts: string[] = []
+  if ((props.month.discountPercent ?? 0) > 0) parts.push(`${props.month.discountPercent}%`)
+  if ((props.month.discountAmount ?? 0) > 0) parts.push(formatSom(props.month.discountAmount))
+  return parts.length ? t('students.view.table.discount', { value: parts.join(' · ') }) : ''
+})
 const prorated = computed(() => props.month.isProrated === true && !!props.month.fullAmount)
 </script>

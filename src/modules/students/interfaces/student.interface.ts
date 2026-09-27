@@ -10,7 +10,12 @@ export interface DiscountPeriod {
   studentId?: number
   fromMonth: string // ISO date, e.g. "2026-01-01"
   toMonth?: string | null
+  /** Either `percent` or `amount` is > 0 (verified against the live API). */
   percent: number
+  /** so'm per month; applied to full months only */
+  amount?: number
+  /** Limited to one group (e.g. the cheaper subject); null — all groups. */
+  groupId?: number | null
   reason?: string | null
   createdAt?: string
 }
@@ -36,6 +41,8 @@ export interface Student {
   jshshir?: string | null
   monthlyFee?: string | null
   discountPercent?: string | null
+  /** so'm per month, the amount counterpart of `discountPercent` (string numeric) */
+  discountAmount?: string | null
   discountReason?: string | null
   status: StudentStatus
   returnLikelihood?: ReturnLikelihood | null

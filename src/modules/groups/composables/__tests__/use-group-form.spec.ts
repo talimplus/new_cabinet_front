@@ -378,6 +378,124 @@ describe('useGroupForm', () => {
     })
   })
 
+  describe('scheduleChanged / teacherChanged + effective-from dates', () => {
+    // Local noon — so "today" is the same calendar day in every timezone.
+    const NOW = new Date(2026, 8, 27, 12, 0, 0)
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(NOW)
+    })
+    afterEach(() => vi.useRealTimers())
+
+    const twoDays = (): Group['schedules'] => [
+      { day: WeekDay.MONDAY, startTime: '09:00' },
+      { day: WeekDay.FRIDAY, startTime: '16:00' },
+    ]
+
+    it('on create both flags are false and no effective-from dates are sent', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.days.value = [WeekDay.MONDAY]
+      f.allTime.value = '10:00'
+      f.form.teacherId = 4
+
+      expect(f.scheduleChanged.value).toBe(false)
+      expect(f.teacherChanged.value).toBe(false)
+      const payload = f.toPayload()
+      expect('scheduleEffectiveFrom' in payload).toBe(false)
+      expect('teacherEffectiveFrom' in payload).toBe(false)
+    })
+
+    it('on edit with unchanged schedule and teacher the payload has no effective-from dates', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+
+      expect(f.scheduleChanged.value).toBe(false)
+      expect(f.teacherChanged.value).toBe(false)
+      const payload = f.toPayload()
+      expect('scheduleEffectiveFrom' in payload).toBe(false)
+      expect('teacherEffectiveFrom' in payload).toBe(false)
+    })
+
+    it('ignores seconds in the stored startTime (HH:mm:ss vs HH:mm)', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup([{ day: WeekDay.MONDAY, startTime: '10:00:00' }]))
+      await flushPromises()
+      f.allTime.value = '10:00'
+
+      expect(f.scheduleChanged.value).toBe(false)
+    })
+
+    it('changing the days flags scheduleChanged and sends today as scheduleEffectiveFrom', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+      f.days.value = [WeekDay.MONDAY, WeekDay.THURSDAY]
+
+      expect(f.scheduleChanged.value).toBe(true)
+      expect(f.teacherChanged.value).toBe(false)
+      const payload = f.toPayload()
+      expect(payload.scheduleEffectiveFrom).toBe('2026-09-27')
+      expect('teacherEffectiveFrom' in payload).toBe(false)
+    })
+
+    it('changing a start time also counts as a schedule change', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+      f.times.value = ['09:00', '17:00']
+
+      expect(f.scheduleChanged.value).toBe(true)
+    })
+
+    it('sends the picked scheduleEffectiveFrom date instead of today when changed', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+      f.days.value = [WeekDay.TUESDAY, WeekDay.FRIDAY]
+      f.form.scheduleEffectiveFrom = new Date(2026, 9, 5)
+
+      expect(f.toPayload().scheduleEffectiveFrom).toBe('2026-10-05')
+    })
+
+    it('reordering the same days/times is NOT a change', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+      f.days.value = [WeekDay.FRIDAY, WeekDay.MONDAY]
+      f.times.value = ['16:00', '09:00']
+
+      expect(f.scheduleChanged.value).toBe(false)
+      expect('scheduleEffectiveFrom' in f.toPayload()).toBe(false)
+    })
+
+    it('changing teacherId flags teacherChanged and sends teacherEffectiveFrom', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+      f.form.teacherId = 15
+
+      expect(f.teacherChanged.value).toBe(true)
+      expect(f.scheduleChanged.value).toBe(false)
+      const payload = f.toPayload()
+      expect(payload.teacherEffectiveFrom).toBe('2026-09-27')
+      expect('scheduleEffectiveFrom' in payload).toBe(false)
+    })
+
+    it('picking the original teacher again clears teacherChanged', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup(twoDays()))
+      await flushPromises()
+      f.form.teacherId = 15
+      f.form.teacherId = 9
+
+      expect(f.teacherChanged.value).toBe(false)
+    })
+  })
+
   describe('live schedule-conflict check', () => {
     beforeEach(() => vi.useFakeTimers())
     afterEach(() => vi.useRealTimers())

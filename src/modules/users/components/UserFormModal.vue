@@ -14,6 +14,7 @@
       <UiSelect name="roleId" :label="t('users.form.role')" :options="roleOptions" :searchable="false" :placeholder="t('users.form.selectRole')" />
       <UiInput name="salary" type="number" :label="t('users.form.salary')" />
       <UiInput name="commissionPercentage" type="number" :label="t('users.form.commissionPercentage')" />
+      <p v-if="editing" class="rounded-md bg-info-soft px-3 py-2 text-xs text-info sm:col-span-2">{{ t('users.form.payChangeHint') }}</p>
     </UiForm>
 
     <template #footer>

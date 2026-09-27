@@ -9,26 +9,19 @@ import { useUsers } from '../composables/use-users'
 import UsersTable from '../components/UsersTable.vue'
 import UserFormModal from '../components/UserFormModal.vue'
 import UserDeleteDialog from '../components/UserDeleteDialog.vue'
+import UserBlockDialog from '../components/UserBlockDialog.vue'
+import { useUserStore } from '@/stores/user.store'
 import type { UserForm } from '../interfaces/user-form.interface'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const router = useRouter()
+const userStore = useUserStore()
 
 const { canCreateUser, canEditUser, canDeleteUser, canViewStaffPerformance } = usePermissions()
 const u = useUsers()
 onMounted(u.init)
 
-const columns = computed(() => [
-  { key: 'id', label: t('users.table.id'), hideOnMobile: true },
-  { key: 'firstName', label: t('users.table.firstName'), primary: true },
-  { key: 'lastName', label: t('users.table.lastName') },
-  { key: 'phone', label: t('users.table.phone') },
-  { key: 'role', label: t('users.table.role') },
-  { key: 'salary', label: t('users.table.salary'), align: 'right' as const },
-  { key: 'commissionPercentage', label: t('users.table.commissionPercentage') },
-  { key: 'center', label: t('users.table.center') },
-])
 const deleteOpen = computed({ get: () => u.deleteTarget.value !== null, set: (v: boolean) => { if (!v) u.deleteTarget.value = null } })
 
 const modalRef = ref<{ setBackendErrors: (e: unknown) => void } | null>(null)
@@ -74,7 +67,7 @@ async function onConfirmDelete() {
     </div>
 
     <UsersTable
-      :columns="columns"
+      :columns="u.columns.value"
       :rows="u.rows.value"
       :loading="u.loading.value"
       :can-view="canViewStaffPerformance"
@@ -83,6 +76,8 @@ async function onConfirmDelete() {
       @view="(user) => router.push(`/users/${user.id}`)"
       @edit="u.openEdit"
       @delete="u.requestDelete"
+      :self-id="userStore.user?.id ?? null"
+      @toggle-active="u.requestToggleActive"
     />
 
     <UiPagination :page="u.filters.page" :total-pages="u.totalPages.value" @update:page="u.setPage" />
@@ -95,6 +90,7 @@ async function onConfirmDelete() {
       :loading="saving"
       @submit="onSubmit"
     />
+    <UserBlockDialog :user="u.toggleTarget.value" :loading="u.toggling.value" @confirm="u.confirmToggleActive" @cancel="u.toggleTarget.value = null" />
     <UserDeleteDialog v-model="deleteOpen" :user="u.deleteTarget.value" :loading="deleting" @confirm="onConfirmDelete" />
   </div>
 </template>

@@ -22,7 +22,7 @@
       </div>
       <UiTextarea v-model="form.comment" :label="t('students.form.comment')" :rows="2" />
       <StudentIdentityFields v-model:passport-series="form.passportSeries" v-model:passport-number="form.passportNumber" v-model:jshshir="form.jshshir" />
-      <StudentDiscountSection v-model:use-periods="form.usePeriods" v-model:percent="form.discountPercent" v-model:reason="form.discountReason" v-model:periods="form.discountPeriods" />
+      <StudentDiscountSection v-model:use-periods="form.usePeriods" v-model:type="form.discountType" v-model:value="form.discountValue" v-model:reason="form.discountReason" v-model:periods="form.discountPeriods" :group-options="selectedGroups" />
     </div>
 
     <template #footer>
@@ -66,6 +66,8 @@ const dayOptions = computed(() =>
 )
 
 const toNum = (v: unknown): number | null => (typeof v === 'number' ? v : null)
+// A discount period can be limited to one of the groups picked above (e.g. the cheaper subject).
+const selectedGroups = computed(() => groups.value.filter((g) => form.groupIds.includes(g.value as number)))
 
 watch(() => props.modelValue, (open) => { if (open) reset(props.editing) })
 

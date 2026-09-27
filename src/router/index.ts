@@ -99,6 +99,18 @@ const appChildren: RouteRecordRaw[] = [
     meta: { titleKey: 'layout.menu.schedule', permission: [Permission.SCHEDULE_VIEW] },
   },
   {
+    path: 'holidays',
+    name: 'holidays',
+    component: () => import('@/modules/holidays/views/HolidaysView.vue'),
+    meta: { titleKey: 'layout.menu.holidays', permission: [Permission.SCHEDULE_VIEW] },
+  },
+  {
+    path: 'absences',
+    name: 'absences',
+    component: () => import('@/modules/absences/views/AbsencesView.vue'),
+    meta: { titleKey: 'layout.menu.absences', permission: [Permission.ATTENDANCE_VIEW] },
+  },
+  {
     path: 'staff-attendance',
     name: 'staff-attendance',
     component: () => import('@/modules/staff-attendance/views/StaffAttendanceView.vue'),

@@ -30,5 +30,7 @@ export interface User {
   center?: UserCenter
   /** The assigned dynamic role; `name` is what the table shows. */
   userRole?: UserRoleRef
+  /** `false` — blocked: cannot log in, history (salary, commission) is kept. */
+  isActive?: boolean
   createdAt?: string
 }

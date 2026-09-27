@@ -42,6 +42,7 @@ import { formatDate } from '@/shared/utils/format-date'
 import { WEEK_DAY_LABEL_KEYS } from '@/modules/groups/enums/week-day.enum'
 import { PREFERRED_TIME_LABEL_KEYS } from '../../enums/student-preferred-time.enum'
 import StudentGroupRow from './StudentGroupRow.vue'
+import { formatDiscount } from '../../utils/format-discount'
 import type {
   StudentSummaryGroup,
   StudentSummaryProfile,
@@ -55,13 +56,13 @@ const emit = defineEmits<{ transfer: [group: StudentSummaryGroup] }>()
 const fields = computed(() => {
   const s = props.student
   const time = s?.preferredTime
-  const discount = Number(s?.discountPercent ?? 0)
+  const discount = formatDiscount(s?.discountPercent, s?.discountAmount)
   return [
     { label: t('students.view.info.subject'), value: s?.subject?.name || '—' },
     { label: t('students.view.info.center'), value: s?.centerName || '—' },
     { label: t('students.view.info.birthDate'), value: formatDate(s?.birthDate) },
     { label: t('students.view.info.preferredTime'), value: time ? t(PREFERRED_TIME_LABEL_KEYS[time]) : '—' },
-    { label: t('students.view.info.discount'), value: discount > 0 ? `${discount}%` : '—' },
+    { label: t('students.view.info.discount'), value: discount ?? '—' },
   ]
 })
 </script>

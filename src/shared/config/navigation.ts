@@ -2,7 +2,7 @@ import {
   CalendarDays, LayoutDashboard, Users, Flag, BookOpen, CreditCard, Wallet,
   DollarSign, ReceiptText, ClipboardList, UserPlus, GraduationCap, Pause, Ban,
   CheckCheck, Coins, Building2, DoorOpen, Settings2, ShieldCheck, CalendarRange, UserCheck,
-  TrendingUp, Palette, Send,
+  TrendingUp, Palette, Send, PhoneCall, CalendarOff,
 } from '@/shared/icons'
 import { Permission } from '@/shared/enums/permission.enum'
 import { UserRole } from '@/shared/enums/user-role.enum'
@@ -55,6 +55,7 @@ export const navigation: NavGroup[] = [
     icon: GraduationCap,
     items: [
       { labelKey: 'layout.menu.reception', to: '/reception', icon: ClipboardList, permission: [Permission.STUDENTS_VIEW] },
+      { labelKey: 'layout.menu.absences', to: '/absences', icon: PhoneCall, permission: [Permission.ATTENDANCE_VIEW] },
       { labelKey: 'layout.menu.leads', to: '/leads', icon: UserPlus, permission: [Permission.LEADS_VIEW] },
       { labelKey: 'layout.menu.students', to: '/students', icon: GraduationCap, permission: [Permission.STUDENTS_VIEW] },
       { labelKey: 'layout.menu.stopped', to: '/stopped', icon: Pause, permission: [Permission.STUDENTS_VIEW] },
@@ -66,6 +67,7 @@ export const navigation: NavGroup[] = [
     labelKey: 'layout.sections.settings',
     icon: Settings2,
     items: [
+      { labelKey: 'layout.menu.holidays', to: '/holidays', icon: CalendarOff, permission: [Permission.SCHEDULE_VIEW] },
       { labelKey: 'layout.menu.centers', to: '/centers', icon: Building2, permission: [Permission.CENTERS_VIEW] },
       { labelKey: 'layout.menu.subjects', to: '/subjects', icon: BookOpen, permission: [Permission.SUBJECTS_VIEW] },
       { labelKey: 'layout.menu.rooms', to: '/rooms', icon: DoorOpen, permission: [Permission.ROOMS_VIEW] },

@@ -224,6 +224,7 @@ Eski: `views/pending-receipts.vue` (923 qator).
 > tekshirildi: NEW→rad etish oqimi (sabab dialogi), guruhlar dropdowni, dark tema.
 > ⚠️ "O'quvchiga o'tkazish"ning to'liq jonli sinovi §2.5 dagi kabi backend seed
 > kamchiligi bilan bloklanadi (student yaratishda `student` tizim roli yo'q → 400).
+> ✅ **2026-09-27:** `student` tizim roli qo'shildi (migratsiya `...055`), `POST /students` 201 qaytaradi.
 
 ### 2.7 `/users` — Ishchilar  ✅ **BAJARILDI (2026-09-24)**
 
@@ -548,6 +549,33 @@ Eski: `views/teacher/today.vue` (337). Yangi: `modules/today/` (view + `TodayLes
 > test markazida GPS/IP sozlanmagan (`centerConfigured: false`) va check-in real yozuv yaratadi.
 > Kontrakt jonli tasdiqlangan, mantiq unit-testlarda. `StaffAttendance` entity/enum'lar
 > `shared/` da (§3.3 staff-attendance ular ustiga quriladi).
+
+### 3.10 `/absences` — Darsga kelmaganlar (YANGI, eskisida yo'q)  ✅ **BAJARILDI (2026-09-27)**
+
+Eskisida bunday sahifa yo'q edi (kelmaganlar faqat bitta guruh jurnalida ko'rinardi).
+Qabulxona uchun: kelmagan o'quvchilarga qo'ng'iroq qilib sababini yozish. Yangi:
+`modules/absences/` (view + `AbsencesSummary` / `AbsencesFilters` / `AbsencesTable` /
+`AbsenceFollowUpModal`, `use-absences`). Backend: `GET /attendance/absences`,
+`PUT /attendance/absences/:id/follow-up` (`attendance` jadvaliga `followUpNote/followedUpAt/followedUpById`).
+
+- [x] Filtrlar: sana oralig'i (default — oxirgi 7 kun), o'qituvchi → guruh (bog'langan), tur (`absent` sababsiz / `excused` sababli), qo'ng'iroq (qilinmagan — default / qilingan / hammasi), ism yoki telefon qidiruvi (debounce)
+- [x] Kartochkalar: sababsiz, sababli, qo'ng'iroq qilinmagan (status/qo'ng'iroq filtrlarisiz)
+- [x] Jadval: o'quvchi + "N marta" (shu oraliqda shu guruhda), `tel:` havolalar (telefon + ikkinchi telefon), guruh + o'qituvchi, sana, tur, o'qituvchi izohi, qo'ng'iroq natijasi (kim, qachon)
+- [x] "Natijani yozish" modali (`attendance.manage`); bo'sh izoh — belgini olib tashlaydi
+- [x] Menyu: O'quvchilar bo'limi, `attendance.view`; o'qituvchi faqat o'z guruhlarini ko'radi
+
+### 3.11 Guruh pauzasi, jadval/o'qituvchi tarixi, xodimni bloklash (YANGI)  ✅ **BAJARILDI (2026-09-27)**
+
+- [x] Guruh kartasi → "Ma'lumot" tabida **To'xtatilgan davrlar** (`GroupPausesCard`): qo'shish (sana oralig'i + sabab), o'chirish. `groups.update`
+- [x] Guruh formasi (tahrirlash): jadval yoki o'qituvchi haqiqatan o'zgarganda "qaysi kundan" sanasi (`GroupChangeDates`) → `scheduleEffectiveFrom` / `teacherEffectiveFrom`
+- [x] `/users`: xodimni **bloklash / blokdan chiqarish** (`PUT /users/:id/active`), bloklangan qator xira + "Bloklangan" belgisi; admin bloklanmaydi. Tarixi bor xodimni o'chirish backendda 400
+
+### 3.12 `/holidays` — Bayram kunlari (YANGI)  ✅ **BAJARILDI (2026-09-27)**
+
+- [x] Ro'yxat (yil tanlash), qo'shish (nomi, sana oralig'i, admin faol filial tanlagan bo'lsa "faqat shu filial uchun"), o'chirish. `schedule.manage`
+- [x] Davomat jurnalida oyga tushgan bayramlar eslatmasi (`AttendanceHolidaysNote`)
+- [x] To'lovlar jadvali va talaba kartasida qo'llangan chegirma (`10% · 50 000 so'm`); summadagi chegirma bitta (asosiy) guruh qatorida
+- [x] Xodim formasida "oylik/foiz shu oydan kuchga kiradi" izohi
 
 ---
 

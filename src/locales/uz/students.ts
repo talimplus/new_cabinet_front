@@ -127,6 +127,18 @@ export default {
     toMonth: 'Tugash oyi',
     reason: 'Sabab',
     addPeriod: "Period qo'shish",
+    removePeriod: "Periodni o'chirish",
+    discountType: 'Chegirma turi',
+    discountTypes: {
+      percent: 'Foiz (%)',
+      amount: "Summa (so'm)",
+    },
+    discountGroup: 'Qaysi fanga',
+    allGroups: 'Barcha guruhlar',
+    discountHint:
+      "Summadagi chegirma har oy ayiriladi; oy o'rtasida qo'shilgan o'quvchiga keyingi oydan boshlanadi. Ikki fanda o'qisa — odatda arzonroq fanga beriladi.",
+    discountChangeHint:
+      "Chegirma o'zgartirilsa: shu oy uchun hali to'lov qilinmagan bo'lsa — shu oydan, qilingan bo'lsa — keyingi oydan kuchga kiradi.",
   },
   view: {
     title: "O'quvchi to'lovlari",
@@ -168,6 +180,7 @@ export default {
       status: 'Holati',
       empty: "To'lovlar topilmadi",
       lessonsShort: '{billable}/{planned} dars',
+      discount: 'chegirma: {value}',
       excused: 'sababli: {count} dars',
       excluded: 'chiqarib tashlangan: {amount}',
     },
