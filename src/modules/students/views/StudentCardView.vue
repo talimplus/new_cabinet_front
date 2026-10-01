@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { UiButton, UiIcon, UiSpinner } from '@/shared/components'
 import { HandCoins } from '@/shared/icons'
 import { usePermissions } from '@/shared/composables/use-permissions'
-import { useScopeStore } from '@/stores/scope.store'
 import { useStudentCard } from '../composables/use-student-card'
 import { usePayDebt } from '../composables/use-pay-debt'
+import { useStudentDelete } from '../composables/use-student-delete'
 import { useStudentTransfer } from '@/shared/composables/use-student-transfer'
 import { fetchAllGroups } from '@/modules/groups/api/groups.api'
 import StudentCardHeader from '../components/card/StudentCardHeader.vue'
@@ -20,7 +20,7 @@ import type { StudentSummaryGroup } from '../interfaces/student-summary.interfac
 
 const { t } = useI18n()
 const route = useRoute()
-const scope = useScopeStore()
+const router = useRouter()
 const { canEditStudent, canTakePayment, canTransferStudents, canViewStudents } = usePermissions()
 
 const studentId = computed(() => {
@@ -32,11 +32,11 @@ const studentId = computed(() => {
 const card = useStudentCard(() => studentId.value)
 const pay = usePayDebt(() => studentId.value, () => card.months.value, () => card.payableNow.value)
 const transfer = useStudentTransfer(
-  () => (studentId.value ? [studentId.value] : []),
-  () => card.load(),
-  () => fetchAllGroups(),
+  () => (studentId.value ? [studentId.value] : []), () => card.load(), () => fetchAllGroups(),
 )
 
+// A deleted student has no card left — back to the reception list (NEW students live there).
+const del = useStudentDelete(() => router.push({ name: 'reception' }))
 onMounted(card.load)
 
 /** The pay-debt response already carries the refreshed summary. */
@@ -64,7 +64,9 @@ const payable = computed(() => card.payableNow.value > 0)
         :student="card.student.value"
         :can-edit="canEditStudent"
         :edit-loading="card.editLoading.value"
+        :can-delete="del.canDelete(card.student.value)"
         @edit="card.openEdit"
+        @delete="card.student.value && del.request(card.student.value)"
       />
 
       <StudentInfoCard :student="card.student.value" :can-transfer="canTransferStudents" @transfer="openTransfer" />
@@ -89,9 +91,8 @@ const payable = computed(() => card.payableNow.value > 0)
     </template>
 
     <StudentCardModals
-      :card="card" :pay="pay" :transfer="transfer"
+      :card="card" :pay="pay" :transfer="transfer" :del="del"
       :payable-now="card.payableNow.value"
-      :default-center-id="scope.centerIdForCreate"
       @pay="onPay"
     />
   </div>

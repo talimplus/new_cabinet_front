@@ -178,6 +178,11 @@ Eski: `views/pending-receipts.vue` (923 qator).
       **Qaror:** yangida buzuq "o'chirish" tugmasi umuman qo'shilmaydi; reception'da
       leadni "olib tashlash" = status dropdown'idan `NEW→IGNORED` (allaqachon mavjud).
       `deleteStudent` API yozilmadi
+- [x] **O'quvchini o'chirish** — 2026-10-01 backendga `DELETE /students/{id}` qo'shildi
+      (`students.delete`, faqat `new` va to'lov/davomat tarixisiz). `deleteStudent` +
+      `useStudentDelete` + `StudentDeleteDialog`: ro'yxat qatorida (qizil savat) va kartada
+      tugma faqat ruxsat + `new` statusda; tasdiqdan keyin ro'yxat qayta yuklanadi,
+      kartadan `reception` ga qaytariladi; tarix borligi faqat backend xatosi (toast) orqali.
 - [x] **"Guruhsiz ACTIVE qilib bo'lmaydi"** tekshiruvi — `use-students` `requestStatus`
       da: `ACTIVE` ga o'tishda `groupIds` bo'sh bo'lsa `students.messages.groupRequired`
       toast'i, so'rov yuborilmaydi (jonli tasdiq: `/students` javobida `groupIds` bor)
@@ -745,7 +750,7 @@ Eski `services/pages/*.ts` dagi **har bir eksport** yangi `*.api.ts` da bo'lishi
 | ~~users~~ | ~~`fetchAllTeachers`~~ ✅ `fetchTeachers` (`users.api.ts`, `/users/teachers`) | §2.3, §2.1, §3.3 |
 | ~~users~~ | ~~`getUserMe`, `updateUserMe`~~ ✅ `fetchMyProfile` / `updateMyProfile` (`profile.api.ts`) | §3.8 |
 | ~~students~~ | ~~`fetchStudentById`~~ ✅ §3.1 (o'quvchi kartasi) | §3.1 |
-| ~~students~~ | ~~`deleteStudent`~~ ❌ backendda `DELETE /students/{id}` yo'q — yozilmadi (status o'zgartirish ishlatiladi) | §2.5 |
+| ~~students~~ | ~~`deleteStudent`~~ ✅ 2026-10-01 backendga qo'shildi — faqat `new` o'quvchi uchun | §2.5 |
 | ~~students~~ shared | ~~`previewTransfer`, `transferStudents`~~ ✅ `shared/api/transfer.api.ts` (§2.4/§3.1 ikkalasi ishlatadi) | §2.4, §3.1 |
 | ~~payments~~ | ~~`exportPayments`, `previewExclusion`, `applyExclusion`, `fetchPaymentReceipts`, `fetchReceiptCheck`~~ ✅ §2.1 | §2.1 |
 | ~~payments~~ | ~~`fetchReceiptsStats`, `confirmReceipts` (bulk)~~ ✅ §2.2 | §2.2 |

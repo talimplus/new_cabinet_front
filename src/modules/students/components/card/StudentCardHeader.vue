@@ -28,6 +28,10 @@
         <UiIcon :icon="Pencil" :size="16" />
         {{ t('common.edit') }}
       </UiButton>
+      <UiButton v-if="canDelete" variant="danger" @click="emit('delete')">
+        <UiIcon :icon="Trash2" :size="16" />
+        {{ t('common.delete') }}
+      </UiButton>
     </div>
   </div>
 </template>
@@ -36,7 +40,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiBadge, UiButton, UiIcon } from '@/shared/components'
-import { Pencil } from '@/shared/icons'
+import { Pencil, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import {
   STUDENT_STATUS_LABEL_KEYS,
@@ -50,8 +54,10 @@ const props = defineProps<{
   student: StudentSummaryProfile | null
   canEdit?: boolean
   editLoading?: boolean
+  /** Permission + NEW status — decided by `useStudentDelete().canDelete`. */
+  canDelete?: boolean
 }>()
-const emit = defineEmits<{ edit: [] }>()
+const emit = defineEmits<{ edit: []; delete: [] }>()
 
 const fullName = computed(() =>
   props.student ? `${props.student.firstName} ${props.student.lastName}`.trim() : '',

@@ -2,6 +2,7 @@ import { http } from '@/shared/api/http'
 import type { Student, StudentDetail } from '../interfaces/student.interface'
 import type { StudentForm } from '../interfaces/student-form.interface'
 import type { StudentsParams } from '../interfaces/student-params.interface'
+import type { DeleteStudentResponse } from '../interfaces/student-delete.interface'
 import type { PaginatedResponse } from '@/shared/interfaces/paginated.interface'
 import type { StudentStatus } from '../enums/student-status.enum'
 import type { ReturnLikelihood } from '../enums/return-likelihood.enum'
@@ -34,6 +35,16 @@ export async function createStudent(form: StudentForm): Promise<Student> {
 
 export async function updateStudent(id: number, form: StudentForm): Promise<Student> {
   const { data } = await http.put<Student>(`/students/${id}`, form)
+  return data
+}
+
+/**
+ * DELETE /students/:id — irreversible. The backend only allows it for a NEW
+ * student with no payment/attendance history; otherwise it answers 400 with a
+ * message the http interceptor toasts.
+ */
+export async function deleteStudent(id: number): Promise<DeleteStudentResponse> {
+  const { data } = await http.delete<DeleteStudentResponse>(`/students/${id}`)
   return data
 }
 

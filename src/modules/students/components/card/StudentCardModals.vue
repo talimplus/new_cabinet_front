@@ -28,9 +28,14 @@
   <StudentFormModal
     v-model="card.editOpen.value"
     :editing="card.editing.value"
-    :default-center-id="defaultCenterId"
+    :default-center-id="scope.centerIdForCreate"
     :loading="card.saving.value"
     @submit="card.saveEdit"
+  />
+
+  <StudentDeleteDialog
+    :open="!!del.target.value" :name="del.name.value" :loading="del.deleting.value"
+    @confirm="del.confirm" @cancel="del.cancel"
   />
 
   <!-- One receipt per month the payment covered — opens right after paying. -->
@@ -38,20 +43,25 @@
 </template>
 
 <script setup lang="ts">
+import { useScopeStore } from '@/stores/scope.store'
 import CheckModal from '@/shared/components/receipt/CheckModal.vue'
 import PayDebtModal from './PayDebtModal.vue'
 import StudentTransferModal from '@/shared/components/transfer/StudentTransferModal.vue'
 import StudentFormModal from '../StudentFormModal.vue'
+import StudentDeleteDialog from '../StudentDeleteDialog.vue'
 import type { useStudentCard } from '../../composables/use-student-card'
 import type { usePayDebt } from '../../composables/use-pay-debt'
+import type { useStudentDelete } from '../../composables/use-student-delete'
 import type { useStudentTransfer } from '@/shared/composables/use-student-transfer'
 
 defineProps<{
   card: ReturnType<typeof useStudentCard>
   pay: ReturnType<typeof usePayDebt>
   transfer: ReturnType<typeof useStudentTransfer>
+  del: ReturnType<typeof useStudentDelete>
   payableNow: number
-  defaultCenterId: number | null
 }>()
 const emit = defineEmits<{ pay: [] }>()
+// Edit form's center fallback — the header's active center.
+const scope = useScopeStore()
 </script>

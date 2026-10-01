@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { UiButton, UiSelect, UiInput, UiPagination, UiIcon } from '@/shared/components'
+import { UiButton, UiInput, UiPagination, UiIcon } from '@/shared/components'
 import { Plus, Search } from '@/shared/icons'
 import { debounce } from '@/shared/utils/debounce'
 import { usePermissions } from '@/shared/composables/use-permissions'
@@ -12,6 +12,8 @@ import StudentsTable from '../components/StudentsTable.vue'
 import StudentFilters from '../components/StudentFilters.vue'
 import StudentFormModal from '../components/StudentFormModal.vue'
 import StudentReturnDialog from '../components/StudentReturnDialog.vue'
+import StudentDeleteDialog from '../components/StudentDeleteDialog.vue'
+import { useStudentDelete } from '../composables/use-student-delete'
 import type { StudentForm } from '../interfaces/student-form.interface'
 
 const { t } = useI18n()
@@ -33,19 +35,11 @@ const columns = computed(() => config.value.columns.map((c) => ({ ...c, label: t
 const hasFilters = computed(() => Object.values(config.value.filters).some(Boolean))
 
 const modalRef = ref<{ setBackendErrors: (e: unknown) => void } | null>(null)
-const saving = ref(false)
 const onSearch = debounce((e: Event) => s.search((e.target as HTMLInputElement).value))
-
-async function onSubmit(payload: StudentForm) {
-  saving.value = true
-  try {
-    await s.submit(payload)
-  } catch (error) {
-    modalRef.value?.setBackendErrors(error)
-  } finally {
-    saving.value = false
-  }
-}
+const onSubmit = (payload: StudentForm) =>
+  s.submit(payload).catch((error) => modalRef.value?.setBackendErrors(error))
+// Deleting a NEW student — the list (and its pagination) is reloaded afterwards.
+const del = useStudentDelete(() => s.load())
 </script>
 
 <template>
@@ -80,8 +74,10 @@ async function onSubmit(payload: StudentForm) {
       :rows="s.rows.value"
       :loading="s.loading.value"
       :can-edit="canEdit"
+      :deletable="del.canDelete"
       @open="router.push({ name: 'student-card', params: { id: $event.id } })"
       @edit="s.openEdit"
+      @delete="del.request"
       @status-change="s.requestStatus"
     />
 
@@ -92,9 +88,13 @@ async function onSubmit(payload: StudentForm) {
       v-model="s.modalOpen.value"
       :editing="s.editing.value"
       :default-center-id="s.scope.centerIdForCreate"
-      :loading="saving"
+      :loading="s.saving.value"
       @submit="onSubmit"
     />
     <StudentReturnDialog v-model="s.returnDialog.open" @confirm="s.confirmReturn" />
+    <StudentDeleteDialog
+      :open="!!del.target.value" :name="del.name.value" :loading="del.deleting.value"
+      @confirm="del.confirm" @cancel="del.cancel"
+    />
   </div>
 </template>

@@ -6,6 +6,7 @@ import {
   createStudent,
   updateStudent,
   changeStudentStatus,
+  deleteStudent,
 } from '../students.api'
 import { http } from '@/shared/api/http'
 import { StudentStatus } from '../../enums/student-status.enum'
@@ -14,7 +15,7 @@ import type { Student, StudentDetail } from '../../interfaces/student.interface'
 import type { StudentForm } from '../../interfaces/student-form.interface'
 
 vi.mock('@/shared/api/http', () => ({
-  http: { get: vi.fn(), post: vi.fn(), put: vi.fn() },
+  http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() },
 }))
 
 const mockedHttp = vi.mocked(http, true)
@@ -128,5 +129,14 @@ describe('students.api', () => {
       {},
       { params: { status: StudentStatus.ACTIVE } },
     )
+  })
+
+  it('deleteStudent DELETEs /students/{id} and returns the body', async () => {
+    mockedHttp.delete.mockResolvedValueOnce({ data: { success: true } })
+
+    const result = await deleteStudent(5)
+
+    expect(mockedHttp.delete).toHaveBeenCalledWith('/students/5')
+    expect(result).toEqual({ success: true })
   })
 })

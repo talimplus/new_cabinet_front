@@ -96,4 +96,15 @@ describe('StudentsTable', () => {
     wrapper.findAllComponents(StudentStatusCell)[0]!.vm.$emit('change', StudentStatus.STOPPED)
     expect(last(wrapper.emitted('status-change'))).toEqual([rows[0], StudentStatus.STOPPED])
   })
+
+  it('shows the delete action only on rows the deletable predicate accepts', async () => {
+    const deleteLabel = `tbody button[aria-label="${t('common.delete')}"]`
+    expect(mountTable().findAll(deleteLabel)).toHaveLength(0)
+
+    const wrapper = mountTable({ deletable: (s: Student) => s.status === StudentStatus.NEW })
+    const buttons = wrapper.findAll(deleteLabel)
+    expect(buttons).toHaveLength(1)
+    await buttons[0]!.trigger('click')
+    expect(last(wrapper.emitted('delete'))).toEqual([rows[1]])
+  })
 })

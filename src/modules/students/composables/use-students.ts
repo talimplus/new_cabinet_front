@@ -47,6 +47,7 @@ export function useStudents(getStatus: () => StudentStatus) {
 
   const modalOpen = ref(false)
   const editing = ref<Student | null>(null)
+  const saving = ref(false)
   const returnDialog = reactive<ReturnDialogState>({ open: false, student: null, status: null })
 
   async function load(): Promise<void> {
@@ -114,16 +115,22 @@ export function useStudents(getStatus: () => StudentStatus) {
     modalOpen.value = true
   }
 
+  /** Rethrows on failure so the view can map field errors onto the form. */
   async function submit(form: StudentForm): Promise<void> {
-    if (editing.value) {
-      const { status: _omit, ...body } = form // status changes go through change-status
-      await updateStudent(editing.value.id, body)
-    } else {
-      await createStudent(form)
+    saving.value = true
+    try {
+      if (editing.value) {
+        const { status: _omit, ...body } = form // status changes go through change-status
+        await updateStudent(editing.value.id, body)
+      } else {
+        await createStudent(form)
+      }
+      notify.success(t('common.saved'))
+      modalOpen.value = false
+      await load()
+    } finally {
+      saving.value = false
     }
-    notify.success(t('common.saved'))
-    modalOpen.value = false
-    await load()
   }
 
   async function applyStatus(student: Student, next: StudentStatus, extra?: { returnLikelihood?: ReturnLikelihood; comment?: string }): Promise<void> {
@@ -160,8 +167,8 @@ export function useStudents(getStatus: () => StudentStatus) {
 
   return {
     scope, rows, totalPages, loading, filters, subjectOptions,
-    modalOpen, editing, returnDialog,
-    init, search, applyFilters, setPage,
+    modalOpen, editing, saving, returnDialog,
+    load, init, search, applyFilters, setPage,
     openCreate, openEdit, submit, requestStatus, confirmReturn,
   }
 }

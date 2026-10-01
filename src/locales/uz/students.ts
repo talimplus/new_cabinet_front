@@ -88,6 +88,7 @@ export default {
   },
   messages: {
     groupRequired: 'Guruh tanlanishi kerak',
+    deleted: "O'quvchi o'chirildi",
   },
   form: {
     createTitle: "O'quvchi qo'shish",
@@ -139,6 +140,10 @@ export default {
       "Summadagi chegirma har oy ayiriladi; oy o'rtasida qo'shilgan o'quvchiga keyingi oydan boshlanadi. Ikki fanda o'qisa — odatda arzonroq fanga beriladi.",
     discountChangeHint:
       "Chegirma o'zgartirilsa: shu oy uchun hali to'lov qilinmagan bo'lsa — shu oydan, qilingan bo'lsa — keyingi oydan kuchga kiradi.",
+  },
+  delete: {
+    title: "O'quvchini o'chirish",
+    message: "«{name}» o'chirilsinmi? Bu amalni qaytarib bo'lmaydi.",
   },
   view: {
     title: "O'quvchi to'lovlari",

@@ -380,6 +380,7 @@ to clear coordinates.
 | GET | `/students/{id}` | — | Student detail |
 | POST | `/students` | `CreateStudentDto` | Student |
 | PUT | `/students/{id}` | `UpdateStudentDto` | Student |
+| DELETE | `/students/{id}` | — | `{ success: true }` (only `new`, no history — see below) |
 | PUT | `/students/change-status/{id}?status=` | `{ status*, comment?, returnLikelihood? }` | Student |
 | POST | `/students/transfer/preview` | `{ studentIds*[], fromGroupId* }` | per-student debt/credit |
 | POST | `/students/transfer` | `{ studentIds*[], fromGroupId*, toGroupId*, transferDate?, reason?, closeSourceGroup? }` | `{ …, sourceGroupClosed }` |
@@ -420,8 +421,15 @@ necessarily the one billed this month. Form hint: `students.form.discountChangeH
 `jshshir`, or `discountPeriods`; it adds `login` and `password`. Discount
 periods are edited through their own endpoints after creation.
 
-⚠️ **`DELETE /students/{id}` does not exist.** Removal is a status change
-(`stopped` / `ignored`). The old app called it and got a 404.
+⚠️ **`DELETE /students/{id}`** (added 2026-10-01, key `students.delete`, admin-only
+by default) is **irreversible** and deletes the login account, discounts, group
+links, referrals and Telegram links with the student. Allowed only for status
+`new` **and** no payment/attendance history; otherwise `400` with a message
+(`"Faqat qabuldagi (NEW) o'quvchini o'chirish mumkin…"` / `"…to'lov yoki davomat
+tarixi bor…"`), unknown id → `404 "O'quvchi topilmadi"`. The front shows the
+action only for `new` rows (`useStudentDelete`); the history refusal arrives
+only as the toasted backend message. Any other removal is a status change
+(`stopped` / `ignored`).
 
 ⚠️ `POST /students` fails with `400 "Rol tanlanmagan"` when the organization has
 no `student` base role seeded — a backend seeding concern, not a client bug.
@@ -1046,7 +1054,7 @@ Receipt→confirm   Payroll           Dashboard
 | 10 | Login failure is a 401 | ✅ Interceptor must not redirect from `/login`; screen opts out of the toast |
 | 11 | `GET /rooms` meta lacks paging fields | ✅ Documented §4.1 — treat as unpaginated |
 | 12 | Numeric columns arrive as strings | ✅ Documented §4.6 with the exact field list |
-| 13 | `DELETE /students/{id}` assumed to exist | ✅ **It does not** — use a status change |
+| 13 | `DELETE /students/{id}` assumed to exist | ✅ Added 2026-10-01 — only `new` students without history (§ students) |
 | 14 | `POST /users` needs `roleId`, not `role` | ✅ Documented §5.3 |
 | 15 | `/teacher-earnings` in the old permission table | ⚠️ **Not in the current spec** — treat as removed |
 

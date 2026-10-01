@@ -46,6 +46,13 @@
           :label="t('common.edit')"
           @click="emit('edit', row as Student)"
         />
+        <UiIconButton
+          v-if="deletable?.(row as Student)"
+          :icon="Trash2"
+          tone="danger"
+          :label="t('common.delete')"
+          @click="emit('delete', row as Student)"
+        />
       </div>
     </template>
   </UiTable>
@@ -53,7 +60,7 @@
 
 <script setup lang="ts">
 import { UiTable, UiIconButton } from '@/shared/components'
-import { Pencil, Eye } from '@/shared/icons'
+import { Pencil, Eye, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import { PREFERRED_TIME_LABEL_KEYS } from '../enums/student-preferred-time.enum'
@@ -68,10 +75,18 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-defineProps<{ columns: TableColumn[]; rows: Student[]; loading?: boolean; canEdit?: boolean }>()
+defineProps<{
+  columns: TableColumn[]
+  rows: Student[]
+  loading?: boolean
+  canEdit?: boolean
+  /** Permission + NEW-status check for the delete action (`useStudentDelete().canDelete`). */
+  deletable?: (student: Student) => boolean
+}>()
 const emit = defineEmits<{
   open: [student: Student]
   edit: [student: Student]
+  delete: [student: Student]
   'status-change': [student: Student, status: StudentStatus]
 }>()
 

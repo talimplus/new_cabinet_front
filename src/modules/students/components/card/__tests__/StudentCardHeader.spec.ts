@@ -65,4 +65,16 @@ describe('StudentCardHeader', () => {
     await button.trigger('click')
     expect(wrapper.emitted('edit')).toHaveLength(1)
   })
+
+  it('shows the delete button only when canDelete is set and emits delete', async () => {
+    const byText = (w: ReturnType<typeof mountHeader>) =>
+      w.findAll('button').filter((b) => b.text().includes(t('common.delete')))
+    expect(byText(mountHeader())).toHaveLength(0)
+
+    const wrapper = mountHeader({ canDelete: true })
+    const [button] = byText(wrapper)
+    expect(button).toBeDefined()
+    await button!.trigger('click')
+    expect(wrapper.emitted('delete')).toHaveLength(1)
+  })
 })

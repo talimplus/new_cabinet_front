@@ -100,6 +100,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: POST, path: '/students', permissions: [Permission.STUDENTS_CREATE] },
   { method: GET, path: '/students/:id', permissions: [Permission.STUDENTS_VIEW] },
   { method: PUT, path: '/students/:id', permissions: [Permission.STUDENTS_UPDATE] },
+  { method: DELETE, path: '/students/:id', permissions: [Permission.STUDENTS_DELETE] },
 
   // ---- bayram kunlari ----
   {
