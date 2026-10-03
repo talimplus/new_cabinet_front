@@ -1,0 +1,47 @@
+/* UiSelect theme — bridges the package's CSS vars onto our tokens.
+   Map EVERY state, or it keeps a light-only default. Loaded as a scoped style. */
+.ui-multiselect {
+  --ms-bg: var(--surface);
+  --ms-border-color: var(--input);
+  --ms-border-color-active: var(--primary);
+  --ms-radius: var(--radius-md);
+  --ms-ring-color: var(--primary);
+  --ms-ring-width: 2px;
+  --ms-py: 0.4rem;
+  --ms-option-bg-selected: var(--primary);
+  --ms-option-bg-selected-pointed: var(--primary-hover);
+  --ms-tag-bg: var(--primary-soft);
+  --ms-tag-color: var(--primary);
+  --ms-dropdown-bg: var(--surface);
+  --ms-dropdown-border-color: var(--border);
+  --ms-option-bg-pointed: var(--surface-muted);
+  --ms-option-color-pointed: var(--foreground);
+  --ms-option-color-selected: var(--primary-foreground);
+  --ms-option-color-selected-pointed: var(--primary-foreground);
+  --ms-option-bg-disabled: var(--surface);
+  --ms-option-color-disabled: var(--fg-subtle);
+  --ms-empty-color: var(--muted-foreground);
+  color: var(--foreground);
+  /* iOS Safari zooms a focused field under 16px — keep 16px on phones. */
+  --ms-font-size: 1rem;
+}
+@media (min-width: 768px) {
+  .ui-multiselect {
+    --ms-font-size: 0.875rem;
+  }
+}
+.ui-multiselect--invalid {
+  --ms-border-color: var(--danger);
+  --ms-border-color-active: var(--danger);
+  --ms-ring-color: var(--danger);
+}
+/* The picked labels are one comma-joined line — cut it with an ellipsis
+   instead of letting it run under the caret. */
+.ui-multiselect :deep(.multiselect-multiple-label) {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-top: var(--ms-py);
+  padding-bottom: var(--ms-py);
+}
