@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import UiInput from '../UiInput.vue'
+import { t } from '@/locales'
 
 describe('UiInput', () => {
   it('renders the label and reflects modelValue', () => {
@@ -40,5 +41,29 @@ describe('UiInput', () => {
     expect(mount(UiInput, { props: { readonly: true } }).get('input').attributes('readonly'))
       .toBeDefined()
     expect(mount(UiInput).get('input').attributes('readonly')).toBeUndefined()
+  })
+
+  it('toggles a password field between hidden and visible', async () => {
+    const wrapper = mount(UiInput, { props: { type: 'password', modelValue: 'secret' } })
+    const toggle = wrapper.get('button')
+    expect(wrapper.get('input').attributes('type')).toBe('password')
+    expect(toggle.attributes('aria-label')).toBe(t('common.showPassword'))
+
+    await toggle.trigger('click')
+    expect(wrapper.get('input').attributes('type')).toBe('text')
+    expect(toggle.attributes('aria-label')).toBe(t('common.hidePassword'))
+    expect(wrapper.get('input').element.value).toBe('secret')
+
+    await toggle.trigger('click')
+    expect(wrapper.get('input').attributes('type')).toBe('password')
+  })
+
+  it('renders no eye toggle for non-password fields', () => {
+    expect(mount(UiInput, { props: { type: 'text' } }).find('button').exists()).toBe(false)
+  })
+
+  it('disables the eye toggle with the field', () => {
+    const wrapper = mount(UiInput, { props: { type: 'password', disabled: true } })
+    expect(wrapper.get('button').attributes('disabled')).toBeDefined()
   })
 })

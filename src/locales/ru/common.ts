@@ -8,6 +8,8 @@ export default {
   add: 'Добавить',
   search: 'Поиск',
   close: 'Закрыть',
+  showPassword: 'Показать пароль',
+  hidePassword: 'Скрыть пароль',
   confirm: 'Подтвердить',
   yes: 'Да',
   no: 'Нет',

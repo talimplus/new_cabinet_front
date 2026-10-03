@@ -8,6 +8,8 @@ export default {
   add: "Qo'shish",
   search: 'Qidirish',
   close: 'Yopish',
+  showPassword: "Parolni ko'rsatish",
+  hidePassword: 'Parolni yashirish',
   confirm: 'Tasdiqlash',
   yes: 'Ha',
   no: "Yo'q",
