@@ -12,6 +12,8 @@
       :placeholder="placeholder"
       :can-clear="clearable"
       :close-on-select="mode === 'single'"
+      :hide-selected="false"
+      :multiple-label="(picked: unknown) => selectedLabels(picked, options, optionLabel, optionValue)"
       :disabled="disabled"
       :no-options-text="t('common.noData')"
       :no-results-text="t('common.noData')"
@@ -26,6 +28,7 @@ import { useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Multiselect from '@vueform/multiselect'
 import { cn } from '@/shared/utils/cn'
+import { selectedLabels } from '@/shared/utils/selected-labels'
 import { useFormControl, type FormControlProps } from '@/shared/composables/use-form-control'
 import UiFieldShell from './UiFieldShell.vue'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
@@ -60,41 +63,4 @@ const id = useId()
 const { model, errorMessage, handleBlur } = useFormControl<SelectValue>(props, emit)
 </script>
 
-<style scoped>
-/* Bridge the package theme onto our tokens — map EVERY state, or it keeps a light-only default. */
-.ui-multiselect {
-  --ms-bg: var(--surface);
-  --ms-border-color: var(--input);
-  --ms-border-color-active: var(--primary);
-  --ms-radius: var(--radius-md);
-  --ms-ring-color: var(--primary);
-  --ms-ring-width: 2px;
-  --ms-py: 0.4rem;
-  --ms-option-bg-selected: var(--primary);
-  --ms-option-bg-selected-pointed: var(--primary-hover);
-  --ms-tag-bg: var(--primary-soft);
-  --ms-tag-color: var(--primary);
-  --ms-dropdown-bg: var(--surface);
-  --ms-dropdown-border-color: var(--border);
-  --ms-option-bg-pointed: var(--surface-muted);
-  --ms-option-color-pointed: var(--foreground);
-  --ms-option-color-selected: var(--primary-foreground);
-  --ms-option-color-selected-pointed: var(--primary-foreground);
-  --ms-option-bg-disabled: var(--surface);
-  --ms-option-color-disabled: var(--fg-subtle);
-  --ms-empty-color: var(--muted-foreground);
-  color: var(--foreground);
-  /* iOS Safari zooms a focused field under 16px — keep 16px on phones. */
-  --ms-font-size: 1rem;
-}
-@media (min-width: 768px) {
-  .ui-multiselect {
-    --ms-font-size: 0.875rem;
-  }
-}
-.ui-multiselect--invalid {
-  --ms-border-color: var(--danger);
-  --ms-border-color-active: var(--danger);
-  --ms-ring-color: var(--danger);
-}
-</style>
+<style scoped src="./ui-select.css"></style>

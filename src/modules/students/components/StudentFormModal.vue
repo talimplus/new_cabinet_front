@@ -7,8 +7,8 @@
   >
     <div class="space-y-4">
       <div class="grid gap-3 sm:grid-cols-2">
-        <UiInput v-model="form.firstName" :label="t('students.form.firstName')" :error="errors.firstName" required />
         <UiInput v-model="form.lastName" :label="t('students.form.lastName')" :error="errors.lastName" required />
+        <UiInput v-model="form.firstName" :label="t('students.form.firstName')" :error="errors.firstName" required />
         <UiInput v-model="form.phone" type="tel" :label="t('students.form.phone')" :error="errors.phone" required />
         <UiInput v-model="form.secondPhone" type="tel" :label="t('students.form.secondPhone')" :error="errors.secondPhone" />
         <UiDatepicker v-model="form.birthDate" :label="t('students.form.birthDate')" :error="errors.birthDate" />
@@ -43,7 +43,6 @@ import { StudentPreferredTime, PREFERRED_TIME_LABEL_KEYS } from '../enums/studen
 import { WeekDay, WEEK_DAY_LABEL_KEYS } from '@/modules/groups/enums/week-day.enum'
 import type { Student } from '../interfaces/student.interface'
 import type { StudentForm } from '../interfaces/student-form.interface'
-import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 
 const { t } = useI18n()
 

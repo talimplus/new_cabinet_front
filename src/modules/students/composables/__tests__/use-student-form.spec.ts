@@ -7,8 +7,9 @@ import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { DiscountType } from '../../enums/discount-type.enum'
 import type { Student } from '../../interfaces/student.interface'
 
-// Stub the select-options composable so the centerId watcher's loadFor()
-// resolves without touching the network.
+// Stub the select-options composable so reset()'s loadFor() resolves without
+// touching the network.
+const options = vi.hoisted(() => ({ loadFor: vi.fn(), clear: vi.fn() }))
 vi.mock('../use-student-options', async () => {
   const { ref } = await import('vue')
   return {
@@ -16,14 +17,17 @@ vi.mock('../use-student-options', async () => {
       subjects: ref([]),
       groups: ref([]),
       referrers: ref([]),
-      loadFor: vi.fn().mockResolvedValue(undefined),
-      clear: vi.fn(),
+      loadFor: options.loadFor,
+      clear: options.clear,
     }),
   }
 })
 
 describe('useStudentForm', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    options.loadFor.mockResolvedValue(undefined)
+  })
 
   describe('validate()', () => {
     it('records errors and returns false when required fields are blank', async () => {
@@ -183,9 +187,34 @@ describe('useStudentForm', () => {
   })
 
   describe('reset()', () => {
+    it('loads the selects on every open, even when the center is unchanged', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(null)
+      f.reset(null)
+      await flushPromises()
+
+      expect(options.loadFor).toHaveBeenCalledTimes(2)
+      expect(options.loadFor).toHaveBeenCalledWith(7)
+    })
+
+    it('loads the selects for the edited student\'s center', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset({ id: 1, firstName: 'A', lastName: 'B', phone: '1', status: StudentStatus.ACTIVE, centerId: 9 })
+      await flushPromises()
+
+      expect(options.loadFor).toHaveBeenCalledWith(9)
+    })
+
+    it('clears the selects when there is no center to load for', async () => {
+      const f = useStudentForm(() => null)
+      f.reset(null)
+      await flushPromises()
+
+      expect(options.loadFor).not.toHaveBeenCalled()
+      expect(options.clear).toHaveBeenCalled()
+    })
+
     it('populates the form from a Student', async () => {
-      // Default center matches the student's so the centerId watcher does not
-      // fire and wipe the scoped selects (subjectId/groupIds).
       const f = useStudentForm(() => 7)
       const student: Student = {
         id: 5,

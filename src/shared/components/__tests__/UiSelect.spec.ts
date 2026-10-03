@@ -16,4 +16,20 @@ describe('UiSelect', () => {
     expect(wrapper.text()).toContain('Pick one')
     expect(wrapper.find('.ui-multiselect').exists()).toBe(true)
   })
+
+  it('shows the picked labels in multiple mode, not a count', () => {
+    const wrapper = mount(UiSelect, {
+      props: { options, mode: 'multiple', modelValue: [2, 1] },
+    })
+    expect(wrapper.get('.multiselect-multiple-label').text()).toBe('One, Two')
+  })
+
+  it('keeps picked options in the dropdown, marked as selected', () => {
+    const wrapper = mount(UiSelect, {
+      props: { options, mode: 'multiple', modelValue: [2] },
+    })
+    const rendered = wrapper.findAll('.multiselect-option')
+    expect(rendered).toHaveLength(2)
+    expect(rendered[1]!.classes()).toContain('is-selected')
+  })
 })

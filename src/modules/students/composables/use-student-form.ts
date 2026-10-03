@@ -1,4 +1,4 @@
-import { reactive, ref, watch } from 'vue'
+import { reactive } from 'vue'
 import { useStudentOptions } from './use-student-options'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { StudentPreferredTime } from '../enums/student-preferred-time.enum'
@@ -47,7 +47,7 @@ function blankState(centerId: number | null): StudentFormState {
 
 /**
  * Student create/edit state. Owns the reactive form, the scoped select options
- * (reloaded when the center changes), validation and payload building. The
+ * (reloaded on every open), validation and payload building. The
  * discount block toggles between a single discount (percent OR amount) and a
  * list of periods (each optionally limited to one group).
  */
@@ -57,24 +57,6 @@ export function useStudentForm(defaultCenterId: () => number | null) {
   const form = reactive<StudentFormState>(blankState(defaultCenterId()))
   const errors = reactive<Record<string, string>>({})
 
-  // Center drives the scoped selects; changing it (after init) clears them.
-  watch(
-    () => form.centerId,
-    async (id, old) => {
-      if (id === old) return
-      if (typeof id === 'number') {
-        if (old != null) {
-          form.subjectId = null
-          form.groupIds = []
-          form.referrerId = null
-        }
-        await loadFor(id)
-      } else {
-        clear()
-      }
-    },
-  )
-
   function clearErrors(): void {
     Object.keys(errors).forEach((k) => delete errors[k])
   }
@@ -82,7 +64,21 @@ export function useStudentForm(defaultCenterId: () => number | null) {
   function reset(editing: Student | null): void {
     clearErrors()
     Object.assign(form, blankState(defaultCenterId()))
-    if (!editing) return
+    if (editing) fillFrom(editing)
+    loadOptions()
+  }
+
+  /**
+   * Reloaded on every open, not on a centerId change: the center rarely differs
+   * between opens (a watcher then never fires and the selects stay empty), and
+   * a group or subject added since the last open must show up.
+   */
+  function loadOptions(): void {
+    if (typeof form.centerId === 'number') void loadFor(form.centerId)
+    else clear()
+  }
+
+  function fillFrom(editing: Student): void {
 
     form.firstName = editing.firstName ?? ''
     form.lastName = editing.lastName ?? ''
