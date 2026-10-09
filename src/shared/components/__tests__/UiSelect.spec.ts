@@ -9,6 +9,18 @@ const options: SelectOption[] = [
 ]
 
 describe('UiSelect', () => {
+  it('turns browser autocomplete off on the search box', () => {
+    const wrapper = mount(UiSelect, { props: { options } })
+    expect(wrapper.get('input.multiselect-search').attributes('autocomplete')).toBe('off')
+  })
+
+  it('passes `max` through (unlimited when omitted)', () => {
+    const capped = mount(UiSelect, { props: { options, mode: 'multiple', max: 2 } })
+    expect(capped.findComponent({ name: 'Multiselect' }).props('max')).toBe(2)
+    const open = mount(UiSelect, { props: { options, mode: 'multiple' } })
+    expect(open.findComponent({ name: 'Multiselect' }).props('max')).toBe(-1)
+  })
+
   it('mounts with options and renders the label', () => {
     const wrapper = mount(UiSelect, {
       props: { options, label: 'Pick one' },

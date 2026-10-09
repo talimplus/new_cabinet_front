@@ -27,6 +27,24 @@ describe('useLeadForm', () => {
     vi.clearAllMocks()
   })
 
+  describe('phone validation', () => {
+    it('rejects an incomplete phone and second phone', () => {
+      const { form, errors, validate } = useLeadForm(() => null)
+      form.phone = '900 0000'
+      form.secondPhone = '12'
+      expect(validate()).toBe(false)
+      expect(errors.phone).toBe(t('common.phoneInvalid'))
+      expect(errors.secondPhone).toBe(t('common.phoneInvalid'))
+    })
+
+    it('accepts any spelling of a full number and stores it as +998…', () => {
+      const { form, validate, toPayload } = useLeadForm(() => null)
+      form.phone = '97-752-20-14'
+      expect(validate()).toBe(true)
+      expect(toPayload().phone).toBe('+998977522014')
+    })
+  })
+
   describe('toPayload()', () => {
     it('only includes phone (trimmed) when nothing else is set', async () => {
       const { form, toPayload } = useLeadForm(() => null)
@@ -62,7 +80,8 @@ describe('useLeadForm', () => {
 
       expect(payload.firstName).toBe('Ali')
       expect(payload.lastName).toBe('Valiyev')
-      expect(payload.secondPhone).toBe('998907778899')
+      // Any spelling is stored in the one +998 form.
+      expect(payload.secondPhone).toBe('+998907778899')
       expect(payload.monthlyFee).toBe(500000)
       expect(payload.discountPercent).toBe(10)
       expect(payload.discountReason).toBe('Chegirma sababi')
@@ -146,7 +165,7 @@ describe('useLeadForm', () => {
 
       expect(payload.firstName).toBe('Ali')
       expect(payload.lastName).toBe('Valiyev')
-      expect(payload.phone).toBe('998901112233')
+      expect(payload.phone).toBe('+998901112233')
     })
   })
 

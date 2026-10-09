@@ -39,6 +39,7 @@ export default {
   },
   table: {
     id: 'ID',
+    index: '№',
     firstName: 'Ism',
     lastName: 'Familiya',
     phone: 'Telefon',
@@ -102,6 +103,7 @@ export default {
     preferredDays: 'Qulay kunlar',
     center: 'Markaz',
     subject: 'Fan',
+    subjectHint: 'Ikkitagacha fan tanlash mumkin',
     comment: 'Izoh',
     jshshirPlaceholder: '14 xonali raqam',
     discountTitle: 'Chegirma',

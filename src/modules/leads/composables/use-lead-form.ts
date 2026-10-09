@@ -10,6 +10,7 @@ import type { Lead } from '../interfaces/lead.interface'
 import type { LeadForm } from '../interfaces/lead-form.interface'
 import type { LeadTransferForm } from '../interfaces/lead-transfer-form.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
+import { isValidUzPhone, normalizePhone } from '@/shared/utils/format-phone'
 import { t } from '@/locales'
 
 /** Reactive edit state for a lead (dates stay as `Date`, numbers may be blank). */
@@ -103,6 +104,10 @@ export function useLeadForm(defaultCenterId: () => number | null) {
   function validate(): boolean {
     clearErrors()
     if (!form.phone.trim()) errors.phone = t('leads.validation.phone')
+    else if (!isValidUzPhone(form.phone)) errors.phone = t('common.phoneInvalid')
+    if (form.secondPhone.trim() && !isValidUzPhone(form.secondPhone)) {
+      errors.secondPhone = t('common.phoneInvalid')
+    }
     return Object.keys(errors).length === 0
   }
 
@@ -113,10 +118,10 @@ export function useLeadForm(defaultCenterId: () => number | null) {
   }
 
   function toPayload(): LeadForm {
-    const payload: LeadForm = { phone: form.phone.trim() }
+    const payload: LeadForm = { phone: normalizePhone(form.phone) }
     if (form.firstName.trim()) payload.firstName = form.firstName.trim()
     if (form.lastName.trim()) payload.lastName = form.lastName.trim()
-    if (form.secondPhone.trim()) payload.secondPhone = form.secondPhone.trim()
+    if (form.secondPhone.trim()) payload.secondPhone = normalizePhone(form.secondPhone)
     const birth = toDateString(form.birthDate)
     if (birth) payload.birthDate = birth
     if (form.comment.trim()) payload.comment = form.comment.trim()
@@ -150,7 +155,7 @@ export function useLeadForm(defaultCenterId: () => number | null) {
       ...base,
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
-      phone: form.phone.trim(),
+      phone: normalizePhone(form.phone),
       status: LeadStatus.NEW,
       groupIds: form.groupIds.length ? [...form.groupIds] : [],
       // The lead form only carries a flat discount, so no periods are created

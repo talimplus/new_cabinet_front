@@ -6,6 +6,7 @@ import { StudentPreferredTime } from '../../enums/student-preferred-time.enum'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { DiscountType } from '../../enums/discount-type.enum'
 import type { Student } from '../../interfaces/student.interface'
+import { t } from '@/locales'
 
 // Stub the select-options composable so reset()'s loadFor() resolves without
 // touching the network.
@@ -54,6 +55,70 @@ describe('useStudentForm', () => {
     })
   })
 
+  describe('phone', () => {
+    it('rejects an incomplete number and an invalid second phone', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      Object.assign(f.form, { firstName: 'A', lastName: 'B', phone: '90 123', secondPhone: '12' })
+
+      expect(f.validate()).toBe(false)
+      expect(f.errors.phone).toBe(t('common.phoneInvalid'))
+      expect(f.errors.secondPhone).toBe(t('common.phoneInvalid'))
+    })
+
+    it('stores an old spelling in the +998 form', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      Object.assign(f.form, { firstName: 'A', lastName: 'B', phone: '97-752-20-14', secondPhone: '911111111' })
+
+      expect(f.validate()).toBe(true)
+      expect(f.toPayload()).toMatchObject({ phone: '+998977522014', secondPhone: '+998911111111' })
+    })
+  })
+
+  describe('subjects (reception only)', () => {
+    const student = (status: StudentStatus): Student => ({
+      id: 9, firstName: 'A', lastName: 'B', phone: '+998901112233', status,
+      subjectId: 3, secondSubjectId: 4,
+    })
+
+    it('sends up to two subjects on create, none when nothing is picked', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      expect(f.showSubjects.value).toBe(true)
+      expect(f.toPayload()).not.toHaveProperty('subjectId')
+
+      f.form.subjectIds = [3, 4]
+      expect(f.toPayload()).toMatchObject({ subjectId: 3, secondSubjectId: 4 })
+    })
+
+    it('loads both subjects of a NEW student and sends null for a removed one', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(student(StudentStatus.NEW))
+      await flushPromises()
+      expect(f.form.subjectIds).toEqual([3, 4])
+
+      f.form.subjectIds = [4]
+      expect(f.toPayload()).toMatchObject({ subjectId: 4, secondSubjectId: null })
+      f.form.subjectIds = []
+      expect(f.toPayload()).toMatchObject({ subjectId: null, secondSubjectId: null })
+    })
+
+    it('hides the select past reception and leaves the stored subjects alone', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(student(StudentStatus.ACTIVE))
+      await flushPromises()
+
+      expect(f.showSubjects.value).toBe(false)
+      const payload = f.toPayload()
+      expect(payload).not.toHaveProperty('subjectId')
+      expect(payload).not.toHaveProperty('secondSubjectId')
+    })
+  })
+
   describe('toPayload()', () => {
     async function ready() {
       const f = useStudentForm(() => 1)
@@ -71,7 +136,8 @@ describe('useStudentForm', () => {
 
       expect(payload.firstName).toBe('Ali')
       expect(payload.lastName).toBe('Valiyev')
-      expect(payload.phone).toBe('998901112233')
+      // Any spelling is stored in the one +998 form.
+      expect(payload.phone).toBe('+998901112233')
       expect('secondPhone' in payload).toBe(false)
       expect('comment' in payload).toBe(false)
       expect('birthDate' in payload).toBe(false)
@@ -242,7 +308,7 @@ describe('useStudentForm', () => {
       expect(f.form.birthDate?.getDate()).toBe(7)
       expect(f.form.monthlyFee).toBe('500000')
       expect(f.form.centerId).toBe(7)
-      expect(f.form.subjectId).toBe(3)
+      expect(f.form.subjectIds).toEqual([3])
       expect(f.form.groupIds).toEqual([1, 2])
       expect(f.form.jshshir).toBe('12345678901234')
     })

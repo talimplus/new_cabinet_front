@@ -26,9 +26,8 @@
           @update:model-value="() => tx.toggle((row as Student).id)"
         />
       </template>
-      <template #cell-id="{ row }"><span class="font-mono text-xs text-muted-foreground">#{{ (row as Student).id }}</span></template>
-      <template #cell-fullName="{ row }">{{ (row as Student).firstName }} {{ (row as Student).lastName }}</template>
-      <template #cell-phone="{ row }"><span class="font-mono">{{ (row as Student).phone || '—' }}</span></template>
+      <template #cell-fullName="{ row }">{{ (row as Student).lastName }} {{ (row as Student).firstName }}</template>
+      <template #cell-phone="{ row }"><span class="whitespace-nowrap font-mono">{{ formatPhone((row as Student).phone) || '—' }}</span></template>
       <template #cell-status="{ row }">
         <UiBadge :variant="variants[(row as Student).status]">{{ t(labelKeys[(row as Student).status]) }}</UiBadge>
       </template>
@@ -51,6 +50,7 @@ import { computed } from 'vue'
 import { UiTable, UiBadge, UiButton, UiIcon, UiCheckbox } from '@/shared/components'
 import StudentTransferModal from '@/shared/components/transfer/StudentTransferModal.vue'
 import { ArrowLeftRight } from '@/shared/icons'
+import { formatPhone } from '@/shared/utils/format-phone'
 import { useGroupStudentsTransfer } from '../../composables/use-group-students-transfer'
 import {
   STUDENT_STATUS_LABEL_KEYS,
@@ -84,7 +84,7 @@ const tx = useGroupStudentsTransfer(
 const rows = computed(() => props.students as unknown as Array<Record<string, unknown>>)
 const columns = computed<TableColumn[]>(() => [
   ...(props.canTransfer ? [{ key: 'select', label: '' }] : []),
-  { key: 'id', label: t('groups.studentTable.id'), hideOnMobile: true },
+  { key: 'index', label: t('groups.studentTable.index'), rowNumber: true },
   { key: 'fullName', label: t('groups.studentTable.fullName'), primary: true },
   { key: 'phone', label: t('groups.studentTable.phone') },
   { key: 'status', label: t('groups.studentTable.status') },

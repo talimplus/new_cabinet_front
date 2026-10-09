@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { fetchStudents, createStudent, updateStudent, changeStudentStatus } from '../api/students.api'
 import { fetchSubjects } from '@/modules/subjects/api/subjects.api'
 import { optionalRequest, emptyPage } from '@/shared/permissions/optional-request'
@@ -165,8 +165,11 @@ export function useStudents(getStatus: () => StudentStatus) {
     returnDialog.open = false
   }
 
+  /** Rows on earlier pages — the table's № column continues from here. */
+  const rowOffset = computed(() => (filters.page - 1) * filters.perPage)
+
   return {
-    scope, rows, totalPages, loading, filters, subjectOptions,
+    scope, rows, rowOffset, totalPages, loading, filters, subjectOptions,
     modalOpen, editing, saving, returnDialog,
     load, init, search, applyFilters, setPage,
     openCreate, openEdit, submit, requestStatus, confirmReturn,

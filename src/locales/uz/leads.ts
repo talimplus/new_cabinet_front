@@ -19,6 +19,7 @@ export default {
   },
   table: {
     id: 'ID',
+    index: '№',
     fullName: 'Ism familiya',
     phone: 'Telefon',
     status: 'Holati',

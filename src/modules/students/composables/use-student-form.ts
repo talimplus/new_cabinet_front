@@ -1,7 +1,9 @@
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useStudentOptions } from './use-student-options'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { StudentPreferredTime } from '../enums/student-preferred-time.enum'
+import { StudentStatus } from '../enums/student-status.enum'
+import { isValidUzPhone, normalizePhone } from '@/shared/utils/format-phone'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString, parseDate } from '@/shared/utils/format-date'
 import type { Student } from '../interfaces/student.interface'
@@ -28,7 +30,8 @@ interface StudentFormState extends DiscountState {
   preferredDays: WeekDay[]
   centerId: number | null
   groupIds: number[]
-  subjectId: number | null
+  /** Up to two subjects → `subjectId` + `secondSubjectId`. */
+  subjectIds: number[]
   passportSeries: string
   passportNumber: string
   jshshir: string
@@ -39,7 +42,7 @@ function blankState(centerId: number | null): StudentFormState {
   return {
     firstName: '', lastName: '', phone: '', secondPhone: '', birthDate: null,
     referrerId: null, monthlyFee: '', heardAboutUs: '', preferredTime: null,
-    preferredDays: [], centerId, groupIds: [], subjectId: null,
+    preferredDays: [], centerId, groupIds: [], subjectIds: [],
     passportSeries: '', passportNumber: '', jshshir: '', comment: '',
     ...blankDiscount(),
   }
@@ -56,6 +59,12 @@ export function useStudentForm(defaultCenterId: () => number | null) {
 
   const form = reactive<StudentFormState>(blankState(defaultCenterId()))
   const errors = reactive<Record<string, string>>({})
+  /**
+   * The subject only matters at reception: once the student is active (or
+   * further) the select is hidden and the stored subjects are left untouched.
+   */
+  const showSubjects = ref(true)
+  let isEditing = false
 
   function clearErrors(): void {
     Object.keys(errors).forEach((k) => delete errors[k])
@@ -64,6 +73,8 @@ export function useStudentForm(defaultCenterId: () => number | null) {
   function reset(editing: Student | null): void {
     clearErrors()
     Object.assign(form, blankState(defaultCenterId()))
+    isEditing = !!editing
+    showSubjects.value = !editing || editing.status === StudentStatus.NEW
     if (editing) fillFrom(editing)
     loadOptions()
   }
@@ -92,7 +103,9 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     form.preferredDays = [...(editing.preferredDays ?? [])]
     form.centerId = editing.centerId ?? defaultCenterId()
     form.groupIds = [...(editing.groupIds ?? [])]
-    form.subjectId = editing.subjectId ?? null
+    form.subjectIds = [editing.subjectId, editing.secondSubjectId].filter(
+      (id): id is number => typeof id === 'number',
+    )
     form.passportSeries = editing.passportSeries ?? ''
     form.passportNumber = editing.passportNumber ?? ''
     form.jshshir = editing.jshshir ?? ''
@@ -105,6 +118,10 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     if (!form.firstName.trim()) errors.firstName = t('students.validation.firstName')
     if (!form.lastName.trim()) errors.lastName = t('students.validation.lastName')
     if (!form.phone.trim()) errors.phone = t('students.validation.phone')
+    else if (!isValidUzPhone(form.phone)) errors.phone = t('common.phoneInvalid')
+    if (form.secondPhone.trim() && !isValidUzPhone(form.secondPhone)) {
+      errors.secondPhone = t('common.phoneInvalid')
+    }
     return Object.keys(errors).length === 0
   }
 
@@ -118,9 +135,9 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     const payload: StudentForm = {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
-      phone: form.phone.trim(),
+      phone: normalizePhone(form.phone),
     }
-    if (form.secondPhone.trim()) payload.secondPhone = form.secondPhone.trim()
+    if (form.secondPhone.trim()) payload.secondPhone = normalizePhone(form.secondPhone)
     const birth = toDateString(form.birthDate)
     if (birth) payload.birthDate = birth
     if (form.comment.trim()) payload.comment = form.comment.trim()
@@ -129,7 +146,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     if (form.preferredDays.length) payload.preferredDays = [...form.preferredDays]
     if (form.referrerId != null) payload.referrerId = form.referrerId
     if (form.centerId != null) payload.centerId = form.centerId
-    if (form.subjectId != null) payload.subjectId = form.subjectId
+    applySubjects(payload)
     if (form.groupIds.length) payload.groupIds = [...form.groupIds]
     const fee = num(form.monthlyFee)
     if (fee !== undefined) payload.monthlyFee = fee
@@ -146,12 +163,24 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     return payload
   }
 
+  /**
+   * Hidden select → nothing sent, the stored subjects stay. Shown on edit →
+   * both keys always go, so removing a subject (null) is saved too.
+   */
+  function applySubjects(payload: StudentForm): void {
+    if (!showSubjects.value) return
+    const [first, second] = form.subjectIds
+    if (first === undefined && !isEditing) return
+    payload.subjectId = first ?? null
+    payload.secondSubjectId = second ?? null
+  }
+
   function setBackendErrors(error: unknown): void {
     Object.assign(errors, mapBackendErrors(error))
   }
 
   return {
-    form, errors, subjects, groups, referrers,
+    form, errors, subjects, groups, referrers, showSubjects,
     reset, validate, toPayload, setBackendErrors,
   }
 }

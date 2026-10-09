@@ -48,12 +48,17 @@ export function useAttendance(groupId: number, students: Ref<Student[]>) {
     return { mode: 'range', ...monthRange() }
   }
 
-  async function load(): Promise<void> {
-    loading.value = true
+  /**
+   * `silent` refreshes without the spinner. The spinner replaces the matrix,
+   * so after every saved cell the table was rebuilt and its horizontal scroll
+   * jumped back — marking ten students meant scrolling ten times.
+   */
+  async function load(silent = false): Promise<void> {
+    if (!silent) loading.value = true
     try {
       data.value = await fetchLessonDates(groupId, buildParams())
     } finally {
-      loading.value = false
+      if (!silent) loading.value = false
     }
   }
 
@@ -144,6 +149,14 @@ export function useAttendance(groupId: number, students: Ref<Student[]>) {
     picker.open = true
   }
 
+  /** Writes the saved mark into the matrix right away, before the refresh lands. */
+  function patchCell(date: string, item: AttendanceItem): void {
+    const byDate = data.value?.attendanceByDate
+    if (!byDate) return
+    const others = rowsFor(date).filter((r) => r.studentId !== item.studentId)
+    byDate[date] = { ...byDate[date], exists: true, rows: [...others, item], items: undefined }
+  }
+
   async function saveCell(): Promise<void> {
     // Backend requires a reason for an excused absence — guard before the call.
     if (picker.status === AttendanceStatus.EXCUSED && !picker.comment.trim()) {
@@ -159,7 +172,8 @@ export function useAttendance(groupId: number, students: Ref<Student[]>) {
       await submitAttendance(groupId, { lessonDate: picker.date, items })
       notify.success(t('common.saved'))
       picker.open = false
-      await load()
+      patchCell(picker.date, items[0]!)
+      await load(true)
     } finally {
       picker.saving = false
     }
@@ -202,7 +216,7 @@ export function useAttendance(groupId: number, students: Ref<Student[]>) {
       await rescheduleAttendance(groupId, payload)
       notify.success(t('groups.reschedule.submit'))
       reschedule.open = false
-      await load()
+      await load(true)
     } finally {
       reschedule.saving = false
     }

@@ -397,7 +397,18 @@ preferredDays[] (repeated param), page, perPage`
 `CreateStudentDto`: `firstName*, lastName*, phone*, secondPhone?, birthDate?,
 comment?, heardAboutUs?, preferredTime?, preferredDays?[], passportSeries?,
 passportNumber?, jshshir?, referrerId?, monthlyFee?, discountPercent?,
-discountAmount?, discountReason?, discountPeriods?[], status?, centerId?, groupIds?[], subjectId?`
+discountAmount?, discountReason?, discountPeriods?[], status?, centerId?, groupIds?[], subjectId?,
+secondSubjectId?`
+
+**Two subjects (2026-10-09, verified live):** a reception student may pick a
+second subject — `secondSubjectId` (same center as the first; equal to
+`subjectId` → ignored; `null` on update clears it). Responses carry
+`secondSubjectId` + `secondSubject: { id, name } | null`; the `subjectId` list
+filter matches either subject. The form shows the subject select (multiple,
+`max: 2`) only while the student is `new`; past reception neither key is sent.
+**Phones:** the form stores `+998XXXXXXXXX` (`UiPhoneInput`); old rows keep any
+spelling and are shown through `formatPhone()`. The student `search` and the
+lead `phone` filter also compare digits only, so `97 752` finds `97-752-…`.
 
 **Discounts (2026-09-26, verified live):** a discount is a percent (0..100) **or**
 an amount in so'm per month — exactly one of them > 0, otherwise 422

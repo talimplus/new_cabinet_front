@@ -13,6 +13,8 @@ describe('StudentStatusCell', () => {
   it('renders the allowed transitions and emits change with the chosen status', async () => {
     const wrapper = mount(StudentStatusCell, {
       props: { status: StudentStatus.NEW, canEdit: true },
+      // UiDropdown teleports its panel to <body>; render it in place here.
+      global: { stubs: { teleport: true } },
     })
 
     // Editable → shows a dropdown trigger, not a plain badge.

@@ -18,6 +18,8 @@ export default {
   name: 'Название',
   fullName: 'Ф.И.О',
   phone: 'Телефон',
+  phonePlaceholder: '90 123 45 67',
+  phoneInvalid: 'Номер телефона неполный (9 цифр)',
   status: 'Статус',
   date: 'Дата',
   active: 'Активный',

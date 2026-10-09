@@ -39,5 +39,7 @@ export interface StudentForm {
   status?: StudentStatus
   centerId?: number
   groupIds?: number[]
-  subjectId?: number
+  /** null on update clears the subject. */
+  subjectId?: number | null
+  secondSubjectId?: number | null
 }

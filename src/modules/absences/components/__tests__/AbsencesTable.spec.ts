@@ -39,8 +39,8 @@ describe('AbsencesTable', () => {
       }),
     ])
     const links = wrapper.get('tbody').findAll('a[href^="tel:"]')
-    expect(links.map((a) => a.attributes('href'))).toEqual(['tel:998901234567', 'tel:998907654321'])
-    expect(links[0]!.text()).toBe('998901234567')
+    expect(links.map((a) => a.attributes('href'))).toEqual(['tel:+998901234567', 'tel:+998907654321'])
+    expect(links[0]!.text()).toBe('+998 90 123 45 67')
   })
 
   it('renders no tel: links when the student has no phones', () => {

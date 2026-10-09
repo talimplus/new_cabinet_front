@@ -39,6 +39,7 @@ export default {
   },
   table: {
     id: 'ID',
+    index: '№',
     firstName: 'Имя',
     lastName: 'Фамилия',
     phone: 'Телефон',
@@ -102,6 +103,7 @@ export default {
     preferredDays: 'Удобные дни',
     center: 'Центр',
     subject: 'Предмет',
+    subjectHint: 'Можно выбрать до двух предметов',
     comment: 'Комментарий',
     jshshirPlaceholder: '14-значный номер',
     discountTitle: 'Скидка',

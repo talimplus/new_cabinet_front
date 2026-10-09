@@ -168,6 +168,7 @@ export default {
   },
   studentTable: {
     id: 'ID',
+    index: '№',
     fullName: 'F.I.Sh.',
     phone: 'Telefon',
     status: 'Holati',

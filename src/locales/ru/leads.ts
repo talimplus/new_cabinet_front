@@ -19,6 +19,7 @@ export default {
   },
   table: {
     id: 'ID',
+    index: '№',
     fullName: 'Имя и фамилия',
     phone: 'Телефон',
     status: 'Статус',

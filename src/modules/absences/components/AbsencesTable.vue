@@ -11,9 +11,9 @@
         <a
           v-for="phone in phones(row as Absence)"
           :key="phone"
-          :href="`tel:${phone}`"
-          class="inline-flex min-h-11 items-center font-mono text-sm text-primary hover:underline md:min-h-0"
-        >{{ phone }}</a>
+          :href="phoneHref(phone)"
+          class="inline-flex min-h-11 items-center whitespace-nowrap font-mono text-sm text-primary hover:underline md:min-h-0"
+        >{{ formatPhone(phone) }}</a>
       </div>
     </template>
     <template #cell-group="{ row }">
@@ -48,6 +48,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge, UiButton } from '@/shared/components'
 import { formatDate, formatDateTime } from '@/shared/utils/format-date'
+import { formatPhone, phoneHref } from '@/shared/utils/format-phone'
 import { ATTENDANCE_STATUS_LABEL_KEYS, ATTENDANCE_STATUS_VARIANTS } from '@/modules/groups/enums/attendance-status.enum'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import type { Absence, AbsencePerson } from '../interfaces/absence.interface'

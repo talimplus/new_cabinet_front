@@ -5,7 +5,8 @@ import { i18n, setLocale, LOCALE_STORAGE_KEY } from '@/locales'
 import { AppLocale } from '@/shared/enums/app-locale.enum'
 
 async function openMenu() {
-  const wrapper = mount(UiLocaleToggle)
+  // UiDropdown teleports its panel to <body>; render it in place here.
+  const wrapper = mount(UiLocaleToggle, { global: { stubs: { teleport: true } } })
   await wrapper.get('button').trigger('click')
   return wrapper
 }

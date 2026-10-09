@@ -51,6 +51,9 @@ export interface Student {
   centerId?: number
   subjectId?: number | null
   subject?: Subject | null
+  /** A reception student may want a second subject (`secondSubjectId`). */
+  secondSubjectId?: number | null
+  secondSubject?: Subject | null
   groupIds?: number[]
   referrerId?: number | null
   discountPeriods?: DiscountPeriod[]

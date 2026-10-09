@@ -18,6 +18,8 @@ export default {
   name: 'Nomi',
   fullName: 'F.I.O',
   phone: 'Telefon',
+  phonePlaceholder: '90 123 45 67',
+  phoneInvalid: "Telefon raqam to'liq emas (9 ta raqam)",
   status: 'Holati',
   date: 'Sana',
   active: 'Faol',

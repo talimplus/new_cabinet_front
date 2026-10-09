@@ -30,7 +30,7 @@ describe('StudentCardHeader', () => {
   it('renders the full name, phone and formatted monthly fee', () => {
     const text = mountHeader().text()
     expect(text).toContain('Ali Valiyev')
-    expect(text).toContain(`${t('students.view.card.phone')}: +998901234567`)
+    expect(text).toContain(`${t('students.view.card.phone')}: +998 90 123 45 67`)
     expect(text).toContain(formatSom(500000))
   })
 

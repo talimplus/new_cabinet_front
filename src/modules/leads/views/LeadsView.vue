@@ -62,6 +62,7 @@ async function onTransfer(payload: LeadTransferForm) {
     <LeadsTable
       :rows="l.rows.value"
       :loading="l.loading.value"
+      :row-offset="l.rowOffset.value"
       :can-edit="canEditLead"
       :can-delete="canDeleteLead"
       @edit="l.openEdit"

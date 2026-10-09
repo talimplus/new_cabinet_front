@@ -4,28 +4,27 @@
       <slot name="trigger" :open="open" />
     </div>
 
-    <Transition name="ui-dropdown">
-      <div
-        v-if="open"
-        ref="panel"
-        :class="
-          cn(
-            'absolute z-40 mt-1 min-w-44 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface-2 p-1 shadow-popover',
-            flipped ? 'right-0' : alignClass,
-          )
-        "
-        role="menu"
-        @click="closeOnSelect && close()"
-      >
-        <slot :close="close" />
-      </div>
-    </Transition>
+    <!-- In <body>: inside a table the panel was clipped by its overflow box. -->
+    <Teleport to="body">
+      <Transition name="ui-dropdown">
+        <div
+          v-if="open"
+          ref="panel"
+          class="fixed z-[55] min-w-44 max-w-[calc(100vw-1rem)] rounded-lg border border-border bg-surface-2 p-1 shadow-popover"
+          :style="{ top: `${position.top}px`, left: `${position.left}px`, visibility: placed ? undefined : 'hidden' }"
+          role="menu"
+          @click="closeOnSelect && close()"
+        >
+          <slot :close="close" />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
 import { nextTick, ref, onMounted, onUnmounted } from 'vue'
-import { cn } from '@/shared/utils/cn'
+import { useFloatingPanel } from '@/shared/composables/use-floating-panel'
 
 interface Props {
   align?: 'left' | 'right'
@@ -37,24 +36,25 @@ const props = withDefaults(defineProps<Props>(), { align: 'left', closeOnSelect:
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
-/** Set when a left-aligned panel would run past the viewport (narrow screens). */
-const flipped = ref(false)
-const alignClass = props.align === 'right' ? 'right-0' : 'left-0'
+// Placed under the trigger, flipped above / inward when the viewport has no room.
+const floating = useFloatingPanel(root, panel, () => props.align)
+const { position, placed } = floating
 
 async function toggle() {
-  open.value = !open.value
-  if (!open.value) return
-  flipped.value = false
+  if (open.value) return close()
+  open.value = true
   await nextTick()
-  const rect = panel.value?.getBoundingClientRect()
-  if (rect && rect.right > window.innerWidth - 8) flipped.value = true
+  floating.update()
+  floating.start()
 }
 function close() {
   open.value = false
-  flipped.value = false
+  floating.stop()
 }
 function onDocClick(e: MouseEvent) {
-  if (open.value && root.value && !root.value.contains(e.target as Node)) close()
+  const target = e.target as Node
+  if (!open.value || root.value?.contains(target) || panel.value?.contains(target)) return
+  close()
 }
 function onEsc(e: KeyboardEvent) {
   if (e.key === 'Escape') close()

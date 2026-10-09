@@ -75,7 +75,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const mobileColumns = computed(() => props.columns.filter((c) => !c.hideOnMobile))
+const mobileColumns = computed(() => props.columns.filter((c) => !c.hideOnMobile && !c.rowNumber))
 const headColumn = computed(
   () => mobileColumns.value.find((c) => c.primary) ?? mobileColumns.value[0],
 )

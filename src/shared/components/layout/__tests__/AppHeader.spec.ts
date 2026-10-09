@@ -36,7 +36,8 @@ async function mountHeader() {
   const wrapper = mount(AppHeader, {
     global: {
       plugins: [router],
-      stubs: { AppCenterSwitcher: AppCenterSwitcherStub },
+      // UiDropdown teleports its panel to <body>; render it in place here.
+      stubs: { AppCenterSwitcher: AppCenterSwitcherStub, teleport: true },
     },
   })
   await router.isReady()

@@ -114,6 +114,27 @@ describe('useAttendance', () => {
       expect(a.picker.open).toBe(false)
     })
 
+    it('keeps the matrix mounted: no spinner during the refresh, the mark shows at once', async () => {
+      const a = setup()
+      await a.load()
+      a.openCell(7, TODAY)
+      a.picker.status = AttendanceStatus.ABSENT
+
+      // The refresh never resolves — the saved mark must already be there.
+      mockedFetch.mockReturnValueOnce(new Promise(() => {}))
+      const loadingSeen: boolean[] = []
+      mockedSubmit.mockImplementationOnce(async () => {
+        loadingSeen.push(a.loading.value)
+      })
+      void a.saveCell()
+      await flushPromises()
+
+      expect(a.loading.value).toBe(false)
+      expect(loadingSeen).toEqual([false])
+      expect(a.statusOf(7, TODAY)).toBe(AttendanceStatus.ABSENT)
+      expect(a.picker.open).toBe(false)
+    })
+
     it('refuses to submit an excused status without a comment', async () => {
       const a = setup()
       await a.load()

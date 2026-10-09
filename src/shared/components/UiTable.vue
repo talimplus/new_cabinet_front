@@ -28,7 +28,7 @@
             <tr v-for="(row, i) in rows" :key="String(row[rowKey] ?? i)" :class="trClass(row)">
               <td v-for="col in columns" :key="col.key" :class="cellClass(col)">
                 <slot :name="`cell-${col.key}`" :row="row as unknown" :value="row[col.key]">{{
-                  row[col.key]
+                  col.rowNumber ? rowOffset + i + 1 : row[col.key]
                 }}</slot>
               </td>
               <td v-if="$slots.actions" class="px-3 py-2.5 text-right">
@@ -75,9 +75,11 @@ interface Props {
   emptyText?: string
   /** Extra classes per row — applied to both the `<tr>` and the mobile card. */
   rowClass?: (row: Record<string, unknown>) => string | undefined
+  /** Rows before this page (`(page - 1) * perPage`) — continues the № column. */
+  rowOffset?: number
 }
 
-const props = withDefaults(defineProps<Props>(), { rowKey: 'id' })
+const props = withDefaults(defineProps<Props>(), { rowKey: 'id', rowOffset: 0 })
 
 const { t } = useI18n()
 const emptyLabel = computed(() => props.emptyText ?? t('common.noData'))
@@ -92,5 +94,6 @@ const headClass = (col: TableColumn) =>
 const trClass = (row: Record<string, unknown>) =>
   cn('border-t border-border transition-colors hover:bg-surface-muted', props.rowClass?.(row))
 const cellClass = (col: TableColumn) =>
-  cn('px-3 py-2.5 align-middle text-foreground', alignEnd(col))
+  cn('px-3 py-2.5 align-middle text-foreground', alignEnd(col),
+    col.rowNumber && 'w-0 font-mono text-xs text-muted-foreground')
 </script>

@@ -3,11 +3,12 @@
     :columns="columns"
     :rows="rows as unknown as Record<string, unknown>[]"
     :loading="loading"
+    :row-offset="rowOffset"
     :empty-text="t('leads.empty')"
   >
     <template #cell-fullName="{ row }">{{ fullName(row as Lead) }}</template>
     <template #cell-phone="{ row }"
-      ><span class="font-mono">{{ (row as Lead).phone }}</span></template
+      ><span class="whitespace-nowrap font-mono">{{ formatPhone((row as Lead).phone) || '—' }}</span></template
     >
     <template #cell-followUpDate="{ row }">
       <span class="font-mono">{{ formatDate((row as Lead).followUpDate) }}</span>
@@ -43,9 +44,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { UiTable, UiIcon, UiIconButton } from '@/shared/components'
+import { UiTable, UiIconButton } from '@/shared/components'
 import { Pencil, Trash2 } from '@/shared/icons'
 import { formatDate } from '@/shared/utils/format-date'
+import { formatPhone } from '@/shared/utils/format-phone'
 import LeadStatusCell from './LeadStatusCell.vue'
 import type { LeadStatus } from '../enums/lead-status.enum'
 import type { Lead } from '../interfaces/lead.interface'
@@ -54,7 +56,9 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-defineProps<{ rows: Lead[]; loading?: boolean; canEdit?: boolean; canDelete?: boolean }>()
+defineProps<{
+  rows: Lead[]; loading?: boolean; rowOffset?: number; canEdit?: boolean; canDelete?: boolean
+}>()
 const emit = defineEmits<{
   edit: [lead: Lead]
   delete: [lead: Lead]
@@ -62,12 +66,13 @@ const emit = defineEmits<{
 }>()
 
 const columns = computed<TableColumn[]>(() => [
-  { key: 'id', label: t('leads.table.id'), hideOnMobile: true },
+  { key: 'index', label: t('leads.table.index'), rowNumber: true },
   { key: 'fullName', label: t('leads.table.fullName'), primary: true },
   { key: 'phone', label: t('leads.table.phone') },
   { key: 'status', label: t('leads.table.status') },
   { key: 'followUpDate', label: t('leads.table.followUpDate') },
 ])
 
-const fullName = (l: Lead) => `${l.firstName ?? ''} ${l.lastName ?? ''}`.trim() || '—'
+// Surname first, like every student table.
+const fullName = (l: Lead) => `${l.lastName ?? ''} ${l.firstName ?? ''}`.trim() || '—'
 </script>

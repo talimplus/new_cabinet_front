@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import {
   fetchLeads, createLead, updateLead, deleteLead, changeLeadStatus, transferLeadToStudent,
 } from '../api/leads.api'
@@ -162,8 +162,11 @@ export function useLeads() {
     await load()
   }
 
+  /** Rows on earlier pages — the table's № column continues from here. */
+  const rowOffset = computed(() => (filters.page - 1) * filters.perPage)
+
   return {
-    scope, rows, totalPages, loading, filters, groupOptions,
+    scope, rows, rowOffset, totalPages, loading, filters, groupOptions,
     modalOpen, editing, discardDialog,
     init, search, applyFilters, setPage,
     openCreate, openEdit, submit, remove, requestStatus, confirmDiscard, transferToStudent,

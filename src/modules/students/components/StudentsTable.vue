@@ -3,25 +3,23 @@
     :columns="columns"
     :rows="rows as unknown as Record<string, unknown>[]"
     :loading="loading"
+    :row-offset="rowOffset"
     :empty-text="t('students.empty')"
   >
-    <template #cell-subject="{ row }">{{ (row as Student).subject?.name ?? '—' }}</template>
+    <template #cell-phone="{ row }"><span class="whitespace-nowrap font-mono">{{ formatPhone((row as Student).phone) || '—' }}</span></template>
+    <template #cell-subject="{ row }">{{ subjectNames(row as Student) }}</template>
     <template #cell-birthDate="{ row }">{{ formatDate((row as Student).birthDate) }}</template>
     <template #cell-monthlyFee="{ row }">
       <span class="font-mono">{{ formatSom(toNumber((row as Student).monthlyFee)) }}</span>
     </template>
-    <template #cell-discount="{ row }">
-      <StudentDiscountCell :student="row as Student" />
-    </template>
+    <template #cell-discount="{ row }"><StudentDiscountCell :student="row as Student" /></template>
     <template #cell-preferredTime="{ row }">{{ timeLabel(row as Student) }}</template>
     <template #cell-preferredDays="{ row }">
       <StudentDaysCell :days="(row as Student).preferredDays" />
     </template>
     <template #cell-returnLikelihood="{ row }">{{ likelihoodLabel(row as Student) }}</template>
     <template #cell-comment="{ row }">
-      <span class="block max-w-[16rem] truncate" :title="(row as Student).comment ?? ''">{{
-        (row as Student).comment || '—'
-      }}</span>
+      <span class="block max-w-[16rem] truncate" :title="(row as Student).comment ?? ''">{{ (row as Student).comment || '—' }}</span>
     </template>
     <template #cell-status="{ row }">
       <StudentStatusCell
@@ -34,18 +32,8 @@
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
         <!-- Opens the student card: payments by month, debt, parent QR. -->
-        <UiIconButton
-          :icon="Eye"
-          :label="t('students.view.title')"
-          @click="emit('open', row as Student)"
-        />
-        <UiIconButton
-          v-if="canEdit"
-          :icon="Pencil"
-          tone="primary"
-          :label="t('common.edit')"
-          @click="emit('edit', row as Student)"
-        />
+        <UiIconButton :icon="Eye" :label="t('students.view.title')" @click="emit('open', row as Student)" />
+        <UiIconButton v-if="canEdit" :icon="Pencil" tone="primary" :label="t('common.edit')" @click="emit('edit', row as Student)" />
         <UiIconButton
           v-if="deletable?.(row as Student)"
           :icon="Trash2"
@@ -63,6 +51,7 @@ import { UiTable, UiIconButton } from '@/shared/components'
 import { Pencil, Eye, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
+import { formatPhone } from '@/shared/utils/format-phone'
 import { PREFERRED_TIME_LABEL_KEYS } from '../enums/student-preferred-time.enum'
 import { RETURN_LIKELIHOOD_LABEL_KEYS } from '../enums/return-likelihood.enum'
 import type { StudentStatus } from '../enums/student-status.enum'
@@ -79,6 +68,8 @@ defineProps<{
   columns: TableColumn[]
   rows: Student[]
   loading?: boolean
+  /** Rows on earlier pages — continues the № column. */
+  rowOffset?: number
   canEdit?: boolean
   /** Permission + NEW-status check for the delete action (`useStudentDelete().canDelete`). */
   deletable?: (student: Student) => boolean
@@ -92,6 +83,9 @@ const emit = defineEmits<{
 
 const toNumber = (v: string | null | undefined): number | null =>
   v == null || v === '' ? null : Number(v)
+// A reception student may want two subjects.
+const subjectNames = (s: Student) =>
+  [s.subject?.name, s.secondSubject?.name].filter(Boolean).join(', ') || '—'
 const timeLabel = (s: Student) =>
   s.preferredTime ? t(PREFERRED_TIME_LABEL_KEYS[s.preferredTime]) : '—'
 const likelihoodLabel = (s: Student) =>

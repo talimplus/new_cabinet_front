@@ -10,4 +10,9 @@ export interface TableColumn {
   primary?: boolean
   /** Left out of the mobile card — for noise like IDs. */
   hideOnMobile?: boolean
+  /**
+   * Renders the row's ordinal (`rowOffset + 1, 2, …`) instead of a field — the
+   * "№" column that replaces database IDs. Desktop only, like `hideOnMobile`.
+   */
+  rowNumber?: boolean
 }

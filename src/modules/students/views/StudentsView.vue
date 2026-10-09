@@ -72,7 +72,7 @@ const del = useStudentDelete(() => s.load())
     <StudentsTable
       :columns="columns"
       :rows="s.rows.value"
-      :loading="s.loading.value"
+      :loading="s.loading.value" :row-offset="s.rowOffset.value"
       :can-edit="canEdit"
       :deletable="del.canDelete"
       @open="router.push({ name: 'student-card', params: { id: $event.id } })"

@@ -9,6 +9,8 @@
       :value-prop="optionValue"
       :track-by="optionLabel"
       :searchable="searchable"
+      autocomplete="off"
+      :max="max ?? -1"
       :placeholder="placeholder"
       :can-clear="clearable"
       :close-on-select="mode === 'single'"
@@ -33,6 +35,8 @@ import { useFormControl, type FormControlProps } from '@/shared/composables/use-
 import UiFieldShell from './UiFieldShell.vue'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 
+// `autocomplete="off"` on the search box: without it the browser offered values
+// typed into other fields (a phone, "128") over the real options.
 // Selection value: single primitive, an array (multiple/tags), or empty.
 type SelectValue = string | number | Array<string | number> | null
 
@@ -47,6 +51,8 @@ interface Props extends FormControlProps<SelectValue> {
   disabled?: boolean
   searchable?: boolean
   clearable?: boolean
+  /** Most values `multiple`/`tags` mode accepts; unlimited when omitted. */
+  max?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {

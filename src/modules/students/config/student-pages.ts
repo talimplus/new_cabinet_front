@@ -21,9 +21,9 @@ export interface StudentPageConfig {
  * a language switch relabels the table without a reload.
  */
 const BASE: TableColumn[] = [
-  { key: 'id', label: 'students.table.id', hideOnMobile: true },
-  { key: 'firstName', label: 'students.table.firstName', primary: true },
-  { key: 'lastName', label: 'students.table.lastName' },
+  { key: 'index', label: 'students.table.index', rowNumber: true },
+  { key: 'lastName', label: 'students.table.lastName', primary: true },
+  { key: 'firstName', label: 'students.table.firstName' },
   { key: 'phone', label: 'students.table.phone' },
 ]
 

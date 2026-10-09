@@ -15,6 +15,14 @@ const rows = [
 ]
 
 describe('UiTable', () => {
+  it('numbers rows continuing from rowOffset and keeps the № column off mobile cards', () => {
+    const numbered: TableColumn[] = [{ key: 'index', label: '№', rowNumber: true }, ...columns]
+    const wrapper = mount(UiTable, { props: { columns: numbered, rows, rowOffset: 10 } })
+    const firstCells = wrapper.findAll('tbody tr').map((tr) => tr.findAll('td')[0]!.text())
+    expect(firstCells).toEqual(['11', '12'])
+    expect(wrapper.findAll('article dt').map((d) => d.text())).not.toContain('№')
+  })
+
   it('renders a header cell per column', () => {
     const wrapper = mount(UiTable, { props: { columns, rows: [] } })
     const heads = wrapper.findAll('thead th')

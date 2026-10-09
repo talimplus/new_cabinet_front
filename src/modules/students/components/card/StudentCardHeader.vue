@@ -9,7 +9,7 @@
     <div class="min-w-0">
       <h2 class="truncate text-lg font-semibold text-foreground">{{ fullName }}</h2>
       <p class="truncate text-sm text-muted-foreground">
-        {{ t('students.view.card.phone') }}: {{ student?.phone || '—' }}
+        {{ t('students.view.card.phone') }}: {{ formatPhone(student?.phone) || '—' }}
       </p>
     </div>
 
@@ -42,6 +42,7 @@ import { useI18n } from 'vue-i18n'
 import { UiBadge, UiButton, UiIcon } from '@/shared/components'
 import { Pencil, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
+import { formatPhone } from '@/shared/utils/format-phone'
 import {
   STUDENT_STATUS_LABEL_KEYS,
   STUDENT_STATUS_VARIANTS,
