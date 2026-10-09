@@ -5,6 +5,7 @@ export default {
     absences: 'Darsga kelmaganlar',
     statistics: 'Statistika',
     users: 'Ishchilar',
+    candidates: 'Ishga nomzodlar',
     groups: 'Guruhlar',
     payments: "To'lovlar",
     payroll: 'Ish haqi',

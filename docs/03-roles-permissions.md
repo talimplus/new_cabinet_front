@@ -4,7 +4,7 @@
 > permission key, which endpoint needs which key, and how the frontend gates UI.
 >
 > **Verified 2026-09-23** against the live dev backend: `GET /roles`,
-> `GET /roles/permissions` (**18 groups / 67 permission keys**), and the
+> `GET /roles/permissions` (**19 groups / 69 permission keys**), and the
 > generated endpoint table from the old `cabinet_front`
 > (`src/permissions/apiPermissions.generated.ts`, produced from the backend's
 > `@RequirePermissions(...)` decorators).
@@ -50,7 +50,7 @@ keys, `shared/permissions/` the endpoint table + matcher + `resolveHome`, and
 
 ---
 
-## 2. Permission catalog — all 67 keys
+## 2. Permission catalog — all 69 keys
 
 Source of truth: `GET /roles/permissions` (returns groups with `uz`/`ru` labels,
 which the `/roles` page renders directly — do not re-translate them locally).
@@ -93,6 +93,13 @@ which the `/roles` page renders directly — do not re-translate them locally).
 | `leads.update` | Lidni tahrirlash | Редактирование лида |
 | `leads.delete` | Lidni o'chirish | Удаление лида |
 | `leads.transfer` | Lidni o'quvchiga o'tkazish | Перевод лида в ученика |
+
+### candidates — Ishga nomzodlar (HR) / Кандидаты на работу (HR)
+*(2026-10-09, 2 keys — the catalog now has 19 groups / 69 keys)*
+| Key | uz | ru |
+|---|---|---|
+| `candidates.view` | Nomzodlarni ko'rish | Просмотр кандидатов |
+| `candidates.manage` | Nomzod qo'shish, tahrirlash va o'chirish | Добавление, редактирование и удаление кандидатов |
 
 ### groups — Guruhlar / Группы
 | Key | uz | ru |
@@ -224,7 +231,7 @@ own roles on top.
 
 ### Default sets (verified)
 
-**manager (40)**
+**manager (40)** — plus `candidates.view candidates.manage` for centers registered after 2026-10-09 (existing roles get them only when an admin ticks them)
 ```
 students.view students.create students.update students.changeStatus students.discounts
 leads.view leads.create leads.update leads.delete leads.transfer
@@ -335,6 +342,8 @@ automatically (`01-api-integration.md` §2.6).
 | GET | `/attendance/absences` | `attendance.view` | ⊕ |
 | GET | `/holidays` | `schedule.view` \| `groups.view` \| `attendance.view` | ⊕ |
 | POST/DELETE | `/holidays[/:id]` | `schedule.manage` | |
+| GET | `/candidates`, `/candidates/:id` | `candidates.view` | ⊕ (list) |
+| POST/PUT/DELETE | `/candidates[/:id]` | `candidates.manage` | |
 | PUT | `/attendance/absences/:id/follow-up` | `attendance.manage` | |
 | GET | `/groups/:groupId/attendance` | `attendance.view` | |
 | GET | `/groups/:groupId/attendance/lesson-dates` | `attendance.view` | |
@@ -436,6 +445,7 @@ the page is open to any authenticated user.
 | `/staff-attendance` | `staffAttendance.view` |
 | `/absences` (kelmaganlar) | `attendance.view` |
 | `/holidays` (bayram kunlari) | `schedule.view` |
+| `/candidates` (ishga nomzodlar) | `candidates.view` |
 | `/roles` | `roles.view` |
 | `/subjects` | `subjects.view` |
 | `/rooms` | `rooms.view` |

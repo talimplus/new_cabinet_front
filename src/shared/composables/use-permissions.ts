@@ -58,6 +58,10 @@ export function usePermissions() {
     canDeleteLead: computed(() => can(Permission.LEADS_DELETE)),
     canTransferLead: computed(() => can(Permission.LEADS_TRANSFER)),
 
+    // ---- job candidates (HR) ----
+    canViewCandidates: computed(() => can(Permission.CANDIDATES_VIEW)),
+    canManageCandidates: computed(() => can(Permission.CANDIDATES_MANAGE)),
+
     // ---- groups ----
     canViewGroups: computed(() => can(Permission.GROUPS_VIEW)),
     canCreateGroup: computed(() => can(Permission.GROUPS_CREATE)),

@@ -35,6 +35,10 @@ export enum Permission {
   LEADS_DELETE = 'leads.delete',
   LEADS_TRANSFER = 'leads.transfer',
 
+  // job candidates (HR)
+  CANDIDATES_VIEW = 'candidates.view',
+  CANDIDATES_MANAGE = 'candidates.manage',
+
   // groups
   GROUPS_VIEW = 'groups.view',
   GROUPS_CREATE = 'groups.create',

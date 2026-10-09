@@ -2,7 +2,7 @@ import {
   CalendarDays, LayoutDashboard, Users, Flag, BookOpen, CreditCard, Wallet,
   DollarSign, ReceiptText, ClipboardList, UserPlus, GraduationCap, Pause, Ban,
   CheckCheck, Coins, Building2, DoorOpen, Settings2, ShieldCheck, CalendarRange, UserCheck,
-  TrendingUp, Palette, Send, PhoneCall, CalendarOff,
+  TrendingUp, Palette, Send, PhoneCall, CalendarOff, Briefcase,
 } from '@/shared/icons'
 import { Permission } from '@/shared/enums/permission.enum'
 import { UserRole } from '@/shared/enums/user-role.enum'
@@ -36,6 +36,7 @@ export const navigation: NavGroup[] = [
         // Owners manage others, not themselves — hidden from their menu.
         hideForBaseRoles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
       },
+      { labelKey: 'layout.menu.candidates', to: '/candidates', icon: Briefcase, permission: [Permission.CANDIDATES_VIEW] },
       { labelKey: 'layout.menu.groups', to: '/groups', icon: Flag, permission: [Permission.GROUPS_VIEW] },
       { labelKey: 'layout.menu.schedule', to: '/schedule', icon: CalendarRange, permission: [Permission.SCHEDULE_VIEW] },
       { labelKey: 'layout.menu.syllabuses', to: '/syllabuses', icon: BookOpen, permission: [Permission.SYLLABUS_VIEW] },

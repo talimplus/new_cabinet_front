@@ -27,7 +27,7 @@ export {
   LocateFixed, Wifi, PhoneCall, UserX, CalendarOff,
   TrendingUp, TrendingDown, Flag, Coins, Settings2, Pause, Ban, CheckCheck,
   Printer, History, FileSpreadsheet, CalendarRange, Scissors, FilterX, CheckSquare,
-  QrCode, Link2Off, UserCheck, ArrowLeftRight, HandCoins, Palette, ImageOff,
+  QrCode, Link2Off, UserCheck, ArrowLeftRight, HandCoins, Palette, ImageOff, Briefcase,
   // syllabus / AI / drag
   Sparkles, GripVertical, Send, MessageSquare,
 } from '@lucide/vue'

@@ -917,6 +917,24 @@ status?, groupIds?[], centerId?, followUpDate?`
 Converting takes the **student** payload, creates the student and marks the lead
 `converted`.
 
+### 5.15.1 Job candidates — HR (5) *(2026-10-09, verified live)*
+| Method | Path | Params / Body |
+|---|---|---|
+| GET | `/candidates` | `centerId?, search?, subjectId?, page?, perPage?` (≤100) |
+| GET | `/candidates/{id}` | — |
+| POST | `/candidates` | `CreateCandidateDto` |
+| PUT | `/candidates/{id}` | `UpdateCandidateDto` (partial) |
+| DELETE | `/candidates/{id}` | → `{ success: true }` |
+
+Body: `lastName*, firstName*, phone*, experience*` (free text), `birthYear*`
+(1940…current year), `subjectId?, address?, comment?` (`null`/'' clears),
+`centerId` (admin; others are pinned to their own center). A subject from another
+center → 422 `subjectId`. Phone is **not** unique. `search` matches first/last
+name and phone digits.
+
+Row: `{ id, centerId, firstName, lastName, phone, experience, birthYear, subjectId,
+subject: { id, name } | null, address, comment, createdAt, updatedAt }`.
+
 ### 5.16 Syllabuses + AI (12)
 | Method | Path | Params / Body |
 |---|---|---|

@@ -5,6 +5,7 @@ export default {
     absences: 'Пропуски занятий',
     statistics: 'Статистика',
     users: 'Сотрудники',
+    candidates: 'Кандидаты на работу',
     groups: 'Группы',
     payments: 'Платежи',
     payroll: 'Зарплата',

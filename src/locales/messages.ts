@@ -2,6 +2,7 @@ import { AppLocale } from '@/shared/enums/app-locale.enum'
 
 import uzAbsences from './uz/absences'
 import uzAuth from './uz/auth'
+import uzCandidates from './uz/candidates'
 import uzCenters from './uz/centers'
 import uzCommon from './uz/common'
 import uzExpenses from './uz/expenses'
@@ -28,6 +29,7 @@ import uzUsers from './uz/users'
 
 import ruAbsences from './ru/absences'
 import ruAuth from './ru/auth'
+import ruCandidates from './ru/candidates'
 import ruCenters from './ru/centers'
 import ruCommon from './ru/common'
 import ruExpenses from './ru/expenses'
@@ -60,6 +62,7 @@ export const messages = {
   [AppLocale.UZ]: {
     absences: uzAbsences,
     auth: uzAuth,
+    candidates: uzCandidates,
     centers: uzCenters,
     common: uzCommon,
     expenses: uzExpenses,
@@ -87,6 +90,7 @@ export const messages = {
   [AppLocale.RU]: {
     absences: ruAbsences,
     auth: ruAuth,
+    candidates: ruCandidates,
     centers: ruCenters,
     common: ruCommon,
     expenses: ruExpenses,

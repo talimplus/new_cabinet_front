@@ -178,6 +178,13 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/payments/:id', permissions: [Permission.PAYMENTS_VIEW] },
   { method: PUT, path: '/payments/:id', permissions: [Permission.PAYMENTS_UPDATE] },
 
+  // ---- job candidates (HR) ----
+  { method: GET, path: '/candidates', permissions: [Permission.CANDIDATES_VIEW], acceptsCenterId: true },
+  { method: POST, path: '/candidates', permissions: [Permission.CANDIDATES_MANAGE] },
+  { method: GET, path: '/candidates/:id', permissions: [Permission.CANDIDATES_VIEW] },
+  { method: PUT, path: '/candidates/:id', permissions: [Permission.CANDIDATES_MANAGE] },
+  { method: DELETE, path: '/candidates/:id', permissions: [Permission.CANDIDATES_MANAGE] },
+
   // ---- expenses ----
   { method: GET, path: '/expenses', permissions: [Permission.EXPENSES_VIEW], acceptsCenterId: true },
   { method: POST, path: '/expenses', permissions: [Permission.EXPENSES_CREATE] },
