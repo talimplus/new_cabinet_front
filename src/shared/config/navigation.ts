@@ -22,8 +22,9 @@ export const navigation: NavGroup[] = [
   {
     labelKey: 'layout.sections.main',
     items: [
-      { labelKey: 'layout.menu.todayLessons', to: '/today', icon: CalendarDays, permission: [Permission.TEACHER_TODAY] },
+      // Statistika har doim birinchi — ko'rish ruxsati bo'lgan har bir rolda.
       { labelKey: 'layout.menu.statistics', to: '/', icon: LayoutDashboard, permission: [Permission.STATISTICS_VIEW] },
+      { labelKey: 'layout.menu.todayLessons', to: '/today', icon: CalendarDays, permission: [Permission.TEACHER_TODAY] },
       { labelKey: 'layout.menu.users', to: '/users', icon: Users, permission: [Permission.USERS_VIEW] },
       { labelKey: 'layout.menu.roles', to: '/roles', icon: ShieldCheck, permission: [Permission.ROLES_VIEW] },
       { labelKey: 'layout.menu.staffAttendance', to: '/staff-attendance', icon: UserCheck, permission: [Permission.STAFF_ATTENDANCE_VIEW] },

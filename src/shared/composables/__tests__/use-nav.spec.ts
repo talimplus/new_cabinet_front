@@ -71,6 +71,11 @@ describe('useNav', () => {
     expect(visiblePaths()).not.toContain('/today')
   })
 
+  it('puts Statistika (/) first whenever it is visible', () => {
+    seedUser([...TEACHER_KEYS, Permission.STATISTICS_VIEW], UserRole.TEACHER)
+    expect(visiblePaths()[0]).toBe('/')
+  })
+
   it('drops groups that become empty after filtering', () => {
     seedUser(TEACHER_KEYS, UserRole.TEACHER)
     const { groups } = useNav()
