@@ -30,8 +30,13 @@ export function editablePhoneDigits(raw: string | null | undefined): string {
   const local = uzLocalDigits(raw)
   if (local) return local
   const digits = phoneDigits(raw)
-  // Only a full `998` + 9 digits counts as prefixed: `99 812 34 56` is a real
-  // local number (Uzmobile), and one extra keystroke must not eat its `998`.
+  // `+998…` is always the country code — the field's own partial value
+  // (`+9989` after typing `9`) must read back as `9`, not `99 89`.
+  if ((raw ?? '').trim().startsWith(`+${UZ_CODE}`)) {
+    return digits.slice(UZ_CODE.length, UZ_CODE.length + LOCAL_LENGTH)
+  }
+  // Without a plus only a full `998` + 9 digits counts as prefixed: `99 812 34 56`
+  // is a real local number (Uzmobile), and one extra keystroke must not eat its `998`.
   const stripped = digits.length >= UZ_CODE.length + LOCAL_LENGTH && digits.startsWith(UZ_CODE)
     ? digits.slice(UZ_CODE.length)
     : digits

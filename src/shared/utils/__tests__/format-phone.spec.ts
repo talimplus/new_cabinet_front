@@ -47,6 +47,9 @@ describe('format-phone', () => {
     expect(editablePhoneDigits('')).toBe('')
     // A 99-operator number plus a stray keystroke keeps its digits.
     expect(editablePhoneDigits('9981234567')).toBe('998123456')
+    // The field's own partial value: `+998` is the prefix, not local digits.
+    expect(editablePhoneDigits('+9989')).toBe('9')
+    expect(editablePhoneDigits('+99899812')).toBe('99812')
   })
 
   it('builds a dialable tel: link', () => {

@@ -27,6 +27,22 @@ describe('UiPhoneInput', () => {
     expect((input.element as HTMLInputElement).value).toBe('97 752 20 14')
   })
 
+  it('keeps a partial number as typed under v-model (the +998 is not re-read as digits)', async () => {
+    const wrapper = mount({
+      components: { UiPhoneInput },
+      data: () => ({ phone: '' }),
+      template: `<UiPhoneInput v-model="phone" />`,
+    })
+    const input = wrapper.get('input')
+    await input.setValue('9')
+    await nextTick()
+    expect((input.element as HTMLInputElement).value).toBe('9')
+    expect(wrapper.vm.phone).toBe('+9989')
+    await input.setValue('91')
+    await nextTick()
+    expect((input.element as HTMLInputElement).value).toBe('91')
+  })
+
   it('strips letters, a pasted 998 prefix and extra digits', async () => {
     const wrapper = mount(UiPhoneInput)
     await wrapper.get('input').setValue('+998 (97) 752-20-14 99')
