@@ -44,6 +44,10 @@ export interface Student {
   /** so'm per month, the amount counterpart of `discountPercent` (string numeric) */
   discountAmount?: string | null
   discountReason?: string | null
+  /** First N months free (0 — none). */
+  freeMonths?: number
+  /** The free window (`GET /students/{id}` only); null until the student has a group. */
+  freeWindow?: FreeWindow | null
   status: StudentStatus
   returnLikelihood?: ReturnLikelihood | null
   activatedAt?: string | null
@@ -51,9 +55,8 @@ export interface Student {
   centerId?: number
   subjectId?: number | null
   subject?: Subject | null
-  /** A reception student may want a second subject (`secondSubjectId`). */
-  secondSubjectId?: number | null
-  secondSubject?: Subject | null
+  /** Every subject the student signed up for, the primary one (`subject`) first. */
+  subjects?: Subject[]
   groupIds?: number[]
   referrerId?: number | null
   discountPeriods?: DiscountPeriod[]
@@ -70,4 +73,10 @@ export interface Student {
 export interface StudentDetail extends Student {
   groups?: Array<{ id: number; name: string; monthlyFee?: string | null }>
   center?: { id: number; name: string } | null
+}
+
+/** "First N months free" range: `[from, untilExclusive)`, YYYY-MM-DD. */
+export interface FreeWindow {
+  from: string
+  untilExclusive: string
 }

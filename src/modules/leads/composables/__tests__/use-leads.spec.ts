@@ -10,7 +10,6 @@ import {
   changeLeadStatus as changeLeadStatusApi,
   transferLeadToStudent as transferLeadToStudentApi,
 } from '../../api/leads.api'
-import { fetchAllGroups as fetchAllGroupsApi } from '@/modules/groups/api/groups.api'
 import { useNotificationStore } from '@/stores/notification.store'
 import { NotificationType } from '@/shared/enums/notification-type.enum'
 import { LeadStatus } from '../../enums/lead-status.enum'
@@ -24,9 +23,6 @@ vi.mock('../../api/leads.api', () => ({
   changeLeadStatus: vi.fn(),
   transferLeadToStudent: vi.fn(),
 }))
-vi.mock('@/modules/groups/api/groups.api', () => ({
-  fetchAllGroups: vi.fn(),
-}))
 
 const mockedFetchLeads = vi.mocked(fetchLeadsApi)
 const mockedCreateLead = vi.mocked(createLeadApi)
@@ -34,7 +30,6 @@ const mockedUpdateLead = vi.mocked(updateLeadApi)
 const mockedDeleteLead = vi.mocked(deleteLeadApi)
 const mockedChangeStatus = vi.mocked(changeLeadStatusApi)
 const mockedTransfer = vi.mocked(transferLeadToStudentApi)
-const mockedFetchAllGroups = vi.mocked(fetchAllGroupsApi)
 
 
 function makeLead(overrides: Partial<Lead> = {}): Lead {
@@ -56,7 +51,6 @@ describe('useLeads', () => {
       data: [makeLead()],
       meta: { total: 1, page: 1, perPage: 10, totalPages: 4 },
     })
-    mockedFetchAllGroups.mockResolvedValue([])
     mockedChangeStatus.mockResolvedValue(undefined)
   })
 
@@ -73,7 +67,6 @@ describe('useLeads', () => {
         name: undefined,
         phone: undefined,
         status: undefined,
-        groupId: undefined,
         followUpDate: undefined,
       })
       expect(s.rows.value).toHaveLength(1)
@@ -84,7 +77,6 @@ describe('useLeads', () => {
       const s = useLeads()
       s.filters.name = 'ali'
       s.filters.status = LeadStatus.NEW
-      s.filters.groupId = 3
       await s.setPage(2)
       await flushPromises()
 
@@ -93,7 +85,6 @@ describe('useLeads', () => {
           page: 2,
           name: 'ali',
           status: LeadStatus.NEW,
-          groupId: 3,
         }),
       )
     })

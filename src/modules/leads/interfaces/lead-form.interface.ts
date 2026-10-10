@@ -20,7 +20,6 @@ export interface LeadForm {
   passportNumber?: string
   jshshir?: string
   status?: LeadStatus
-  groupIds?: number[]
   centerId?: number
   followUpDate?: string // "YYYY-MM-DD"
 }

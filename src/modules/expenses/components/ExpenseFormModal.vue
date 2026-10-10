@@ -6,9 +6,9 @@
   >
     <UiForm :key="formKey" ref="formRef" :validation-schema="schema" :initial-values="initialValues" class="space-y-4" @submit="onSubmit">
       <UiInput name="name" :label="t('expenses.name')" required />
-      <UiInput name="amount" type="number" :label="t('expenses.amount')" required>
+      <UiMoneyInput name="amount" :label="t('expenses.amount')" required>
         <template #suffix>{{ t('common.sum') }}</template>
-      </UiInput>
+      </UiMoneyInput>
       <UiSelect name="forMonth" :label="t('expenses.month')" :options="monthChoices" :searchable="false" :placeholder="t('expenses.selectMonth')" />
       <UiTextarea name="description" :label="t('expenses.description')" :rows="3" />
     </UiForm>
@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n'
 import { z } from 'zod'
 import { toTypedSchema } from '@vee-validate/zod'
 import type { GenericObject } from 'vee-validate'
-import { UiModal, UiForm, UiInput, UiSelect, UiTextarea, UiButton } from '@/shared/components'
+import { UiModal, UiForm, UiInput, UiMoneyInput, UiSelect, UiTextarea, UiButton } from '@/shared/components'
 import { monthOptions, currentMonth } from '../utils/month'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import type { Expense } from '../interfaces/expense.interface'

@@ -1,6 +1,4 @@
-import { reactive, ref, watch } from 'vue'
-import { fetchAllGroups } from '@/modules/groups/api/groups.api'
-import { optionalRequest } from '@/shared/permissions/optional-request'
+import { reactive } from 'vue'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { StudentPreferredTime } from '@/modules/students/enums/student-preferred-time.enum'
 import { LeadStatus } from '../enums/lead-status.enum'
@@ -9,7 +7,6 @@ import { toDateString, parseDate } from '@/shared/utils/format-date'
 import type { Lead } from '../interfaces/lead.interface'
 import type { LeadForm } from '../interfaces/lead-form.interface'
 import type { LeadTransferForm } from '../interfaces/lead-transfer-form.interface'
-import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { isValidUzPhone, normalizePhone } from '@/shared/utils/format-phone'
 import { t } from '@/locales'
 
@@ -25,7 +22,6 @@ export interface LeadFormState {
   preferredTime: StudentPreferredTime | null
   preferredDays: WeekDay[]
   centerId: number | null
-  groupIds: number[]
   passportSeries: string
   passportNumber: string
   jshshir: string
@@ -39,38 +35,19 @@ function blankState(centerId: number | null): LeadFormState {
   return {
     firstName: '', lastName: '', phone: '', secondPhone: '', birthDate: null,
     monthlyFee: '', heardAboutUs: '', preferredTime: null, preferredDays: [],
-    centerId, groupIds: [], passportSeries: '', passportNumber: '', jshshir: '',
+    centerId, passportSeries: '', passportNumber: '', jshshir: '',
     discountPercent: '', discountReason: '', comment: '', followUpDate: null,
   }
 }
 
 /**
- * Lead create/edit state. Owns the reactive form, the center-scoped group
- * options (reloaded when the center changes), validation and payload building.
+ * Lead create/edit state. Owns the reactive form, validation and payload
+ * building. A lead carries no group — the group is chosen once it becomes a
+ * student.
  */
 export function useLeadForm(defaultCenterId: () => number | null) {
   const form = reactive<LeadFormState>(blankState(defaultCenterId()))
   const errors = reactive<Record<string, string>>({})
-  const groups = ref<SelectOption[]>([])
-
-  async function loadGroups(centerId: number): Promise<void> {
-    const list = await optionalRequest(fetchAllGroups(centerId), [])
-    groups.value = list.map((g) => ({ label: g.name, value: g.id }))
-  }
-
-  // Center drives the group options; changing it (after init) clears the picks.
-  watch(
-    () => form.centerId,
-    async (id, old) => {
-      if (id === old) return
-      if (typeof id === 'number') {
-        if (old != null) form.groupIds = []
-        await loadGroups(id)
-      } else {
-        groups.value = []
-      }
-    },
-  )
 
   function clearErrors(): void {
     Object.keys(errors).forEach((k) => delete errors[k])
@@ -91,7 +68,6 @@ export function useLeadForm(defaultCenterId: () => number | null) {
     form.preferredTime = editing.preferredTime ?? null
     form.preferredDays = [...(editing.preferredDays ?? [])]
     form.centerId = editing.centerId ?? defaultCenterId()
-    form.groupIds = [...(editing.groupIds ?? [])]
     form.passportSeries = editing.passportSeries ?? ''
     form.passportNumber = editing.passportNumber ?? ''
     form.jshshir = editing.jshshir ?? ''
@@ -129,7 +105,6 @@ export function useLeadForm(defaultCenterId: () => number | null) {
     if (form.preferredTime) payload.preferredTime = form.preferredTime
     if (form.preferredDays.length) payload.preferredDays = [...form.preferredDays]
     if (form.centerId != null) payload.centerId = form.centerId
-    if (form.groupIds.length) payload.groupIds = [...form.groupIds]
     const fee = num(form.monthlyFee)
     if (fee !== undefined) payload.monthlyFee = fee
     const percent = num(form.discountPercent)
@@ -157,7 +132,7 @@ export function useLeadForm(defaultCenterId: () => number | null) {
       lastName: form.lastName.trim(),
       phone: normalizePhone(form.phone),
       status: LeadStatus.NEW,
-      groupIds: form.groupIds.length ? [...form.groupIds] : [],
+      groupIds: [],
       // The lead form only carries a flat discount, so no periods are created
       // (mirrors old cabinet_front, which always sent an empty array).
       discountPeriods: [],
@@ -168,5 +143,5 @@ export function useLeadForm(defaultCenterId: () => number | null) {
     Object.assign(errors, mapBackendErrors(error))
   }
 
-  return { form, errors, groups, reset, validate, toPayload, toTransferPayload, setBackendErrors }
+  return { form, errors, reset, validate, toPayload, toTransferPayload, setBackendErrors }
 }

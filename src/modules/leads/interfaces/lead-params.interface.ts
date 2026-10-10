@@ -6,7 +6,6 @@ export interface LeadsParams {
   name?: string
   phone?: string
   status?: LeadStatus
-  groupId?: number
   followUpDate?: string // "YYYY-MM-DD"
   page?: number
   perPage?: number

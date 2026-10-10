@@ -15,6 +15,10 @@ export interface DiscountRow {
 
 /** The discount block of the student form. */
 export interface DiscountState {
+  /** The block's switch — off means no discount field is sent at all. */
+  discountEnabled: boolean
+  /** First N months free (0 — none). */
+  freeMonths: number
   usePeriods: boolean
   discountType: DiscountType
   discountValue: string | number
@@ -28,6 +32,8 @@ export function emptyPeriod(): DiscountRow {
 
 export function blankDiscount(): DiscountState {
   return {
+    discountEnabled: false,
+    freeMonths: 0,
     usePeriods: false,
     discountType: DiscountType.PERCENT,
     discountValue: '',
@@ -47,9 +53,12 @@ function split(percent: unknown, amount: unknown): { type: DiscountType; value: 
 /** Editing an existing student: periods win over the single (permanent) discount. */
 export function discountFromStudent(student: Student): DiscountState {
   const periods = student.discountPeriods ?? []
+  const freeMonths = Number(student.freeMonths ?? 0)
   if (periods.length) {
     return {
       ...blankDiscount(),
+      discountEnabled: true,
+      freeMonths,
       usePeriods: true,
       discountPeriods: periods.map((p) => ({
         ...split(p.percent, p.amount),
@@ -63,6 +72,8 @@ export function discountFromStudent(student: Student): DiscountState {
   const single = split(student.discountPercent, student.discountAmount)
   return {
     ...blankDiscount(),
+    discountEnabled: single.value !== '' || freeMonths > 0,
+    freeMonths,
     discountType: single.type,
     discountValue: single.value,
     discountReason: student.discountReason ?? '',
@@ -75,8 +86,35 @@ function toNumber(value: string | number): number | undefined {
   return Number.isNaN(n) ? undefined : n
 }
 
-/** Writes the discount fields of the POST/PUT body. */
-export function applyDiscount(state: DiscountState, payload: StudentForm): void {
+/** What the student had when the form opened (all zero on create). */
+export interface DiscountBaseline {
+  /** The switch was on — the student had some discount. */
+  enabled: boolean
+  freeMonths: number
+}
+
+/**
+ * Writes the discount fields of the POST/PUT body.
+ *
+ * Switch off: on create nothing is sent; on edit of a student who had a
+ * discount everything is cleared. `freeMonths` goes only when it changed, so
+ * opening the block by mistake and saving never writes a free month.
+ */
+export function applyDiscount(
+  state: DiscountState,
+  payload: StudentForm,
+  baseline: DiscountBaseline = { enabled: false, freeMonths: 0 },
+): void {
+  if (!state.discountEnabled) {
+    if (!baseline.enabled) return
+    payload.discountPercent = 0
+    payload.discountAmount = 0
+    payload.discountPeriods = []
+    payload.discountReason = ''
+    if (baseline.freeMonths) payload.freeMonths = 0
+    return
+  }
+  if (state.freeMonths !== baseline.freeMonths) payload.freeMonths = state.freeMonths
   if (state.usePeriods) {
     const periods: DiscountPeriodForm[] = state.discountPeriods
       .filter((p) => toNumber(p.value) !== undefined && p.fromMonth)

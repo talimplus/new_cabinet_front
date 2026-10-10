@@ -90,4 +90,10 @@ export default {
     forbidden: "Sizda bu amalni bajarish uchun ruxsat yo'q.",
     unknown: "Xatolik yuz berdi. Qayta urinib ko'ring.",
   },
+  update: {
+    title: 'Yangi versiya chiqdi',
+    message: "Kabinet yangilandi. Yangi imkoniyatlar va tuzatishlar uchun sahifani yangilang.",
+    reload: 'Yangilash',
+    later: 'Keyinroq',
+  },
 }

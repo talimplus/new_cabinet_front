@@ -1,9 +1,9 @@
 <template>
   <UiModal :model-value="open" :title="t('staff.deduction.title')" size="sm" @update:model-value="emit('close')">
     <div class="space-y-3">
-      <UiInput
+      <UiMoneyInput
         :model-value="amount ?? ''"
-        type="number"
+       
         :label="t('staff.deduction.amount')"
         :hint="t('staff.deduction.amountHint')"
         :disabled="loading"
@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiButton, UiInput, UiSelect, UiTextarea } from '@/shared/components'
+import { UiMoneyInput, UiModal, UiButton, UiSelect, UiTextarea } from '@/shared/components'
 import { StaffDeductionType, DEDUCTION_TYPE_LABEL_KEYS } from '../enums/staff-deduction-type.enum'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 

@@ -7,7 +7,7 @@
   >
     <div class="space-y-4">
       <LeadContactFields :form="form" :errors="errors" />
-      <LeadPreferenceFields :form="form" :errors="errors" :groups="groups" />
+      <LeadPreferenceFields :form="form" :errors="errors" />
       <LeadPassportFields
         v-model:passport-series="form.passportSeries"
         v-model:passport-number="form.passportNumber"
@@ -42,7 +42,6 @@ import { useLeadForm } from '../composables/use-lead-form'
 import type { Lead } from '../interfaces/lead.interface'
 import type { LeadForm } from '../interfaces/lead-form.interface'
 import type { LeadTransferForm } from '../interfaces/lead-transfer-form.interface'
-import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 
 const { t } = useI18n()
 
@@ -59,7 +58,7 @@ const emit = defineEmits<{
   transfer: [payload: LeadTransferForm]
 }>()
 
-const { form, errors, groups, reset, validate, toPayload, toTransferPayload, setBackendErrors } =
+const { form, errors, reset, validate, toPayload, toTransferPayload, setBackendErrors } =
   useLeadForm(() => props.defaultCenterId)
 
 watch(() => props.modelValue, (open) => { if (open) reset(props.editing) })

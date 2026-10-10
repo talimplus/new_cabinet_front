@@ -23,10 +23,10 @@
       :disabled="disabled"
       @update:model-value="lessons = toNumberOrNull($event)"
     />
-    <UiInput
+    <UiMoneyInput
       v-if="mode === 'amount'"
       :model-value="amount ?? ''"
-      type="number"
+     
       :label="t('payments.exclusion.excludeAmount')"
       :hint="t('payments.dialog.sumSuffix')"
       :disabled="disabled"
@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiButton, UiInput, UiTextarea } from '@/shared/components'
+import { UiButton, UiInput, UiMoneyInput, UiTextarea } from '@/shared/components'
 import { formatSom } from '@/shared/utils/format-money'
 import PaymentInfoRow from './PaymentInfoRow.vue'
 import { usePaymentExclusion, type ExclusionMode } from '../composables/use-payment-exclusion'

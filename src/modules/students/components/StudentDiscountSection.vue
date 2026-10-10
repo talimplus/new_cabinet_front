@@ -1,76 +1,59 @@
 <template>
   <div class="space-y-3 border-t border-border pt-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3">
       <h3 class="text-sm font-semibold text-foreground">{{ t('students.form.discountTitle') }}</h3>
-      <UiCheckbox v-model="usePeriods" :label="t('students.form.byPeriods')" />
+      <UiSwitch v-model="enabled" :label="t('students.form.discountTitle')" />
     </div>
 
-    <div v-if="!usePeriods" class="grid gap-3 sm:grid-cols-3">
-      <UiSelect v-model="type" :options="typeOptions" :label="t('students.form.discountType')" :searchable="false" :clearable="false" />
-      <UiInput v-model="value" type="number" :label="t(DISCOUNT_TYPE_LABEL_KEYS[type])" />
-      <UiInput v-model="reason" :label="t('students.form.reason')" />
-    </div>
-
-    <div v-else class="space-y-2">
-      <StudentDiscountPeriodRow
-        v-for="(row, i) in periods"
-        :key="i"
-        v-model:type="row.type"
-        v-model:value="row.value"
-        v-model:group-id="row.groupId"
-        v-model:from-month="row.fromMonth"
-        v-model:to-month="row.toMonth"
-        v-model:reason="row.reason"
+    <template v-if="enabled">
+      <UiTabs :tabs="tabs" :model-value="tab" @update:model-value="tab = $event" />
+      <StudentDiscountFields
+        v-if="tab === 'discounts'"
+        v-model:use-periods="usePeriods"
+        v-model:type="type"
+        v-model:value="value"
+        v-model:reason="reason"
+        v-model:periods="periods"
         :group-options="groupOptions"
-        @remove="removeRow(i)"
       />
-      <UiButton variant="outline" size="sm" @click="addRow">
-        <UiIcon :icon="Plus" :size="14" /> {{ t('students.form.addPeriod') }}
-      </UiButton>
-    </div>
-    <p class="text-xs text-muted-foreground">{{ t('students.form.discountHint') }}</p>
-    <p v-if="!usePeriods" class="text-xs text-muted-foreground">{{ t('students.form.discountChangeHint') }}</p>
+      <StudentFreeMonthsField v-else v-model:free-months="freeMonths" :window="freeWindow" :stored-months="storedFreeMonths" />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiInput, UiCheckbox, UiButton, UiIcon, UiSelect } from '@/shared/components'
-import { Plus } from '@/shared/icons'
-import StudentDiscountPeriodRow from './StudentDiscountPeriodRow.vue'
-import { emptyPeriod, type DiscountRow } from '../utils/student-discount'
-import { DiscountType, DISCOUNT_TYPE_LABEL_KEYS } from '../enums/discount-type.enum'
-import { useDiscountTypeOptions } from '../composables/use-discount-type-options'
+import { UiSwitch, UiTabs } from '@/shared/components'
+import StudentDiscountFields from './StudentDiscountFields.vue'
+import StudentFreeMonthsField from './StudentFreeMonthsField.vue'
+import { DiscountType } from '../enums/discount-type.enum'
+import type { DiscountRow } from '../utils/student-discount'
+import type { FreeWindow } from '../interfaces/student.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
+import type { TabItem } from '@/shared/interfaces/tab-item.interface'
 
 const { t } = useI18n()
-const typeOptions = useDiscountTypeOptions()
 
-/** The student's selected groups — a period can be limited to one of them. */
-defineProps<{ groupOptions?: SelectOption[] }>()
+defineProps<{
+  /** The student's selected groups — a period can be limited to one of them. */
+  groupOptions?: SelectOption[]
+  freeWindow?: FreeWindow | null
+  storedFreeMonths?: number
+}>()
 
+/** Off by default: nothing discount-related is sent until it is switched on. */
+const enabled = defineModel<boolean>('enabled', { default: false })
+const freeMonths = defineModel<number>('freeMonths', { default: 0 })
 const usePeriods = defineModel<boolean>('usePeriods', { default: false })
 const type = defineModel<DiscountType>('type', { default: DiscountType.PERCENT })
 const value = defineModel<string | number>('value', { default: '' })
 const reason = defineModel<string>('reason', { default: '' })
 const periods = defineModel<DiscountRow[]>('periods', { default: () => [] })
 
-// Enabling period mode seeds one empty row and clears the simple fields.
-watch(usePeriods, (on) => {
-  if (on) {
-    value.value = ''
-    reason.value = ''
-    if (!periods.value.length) periods.value = [emptyPeriod()]
-  } else {
-    periods.value = []
-  }
-})
-
-function addRow() {
-  periods.value = [...periods.value, emptyPeriod()]
-}
-function removeRow(index: number) {
-  periods.value = periods.value.filter((_, i) => i !== index)
-}
+const tabs: TabItem[] = [
+  { key: 'discounts', labelKey: 'students.form.discountTabs.discounts' },
+  { key: 'free', labelKey: 'students.form.discountTabs.free' },
+]
+const tab = ref('discounts')
 </script>

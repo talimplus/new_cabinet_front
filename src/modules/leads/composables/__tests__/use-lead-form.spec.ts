@@ -6,13 +6,6 @@ import { LeadStatus } from '../../enums/lead-status.enum'
 import { t } from '@/locales'
 import type { Lead } from '../../interfaces/lead.interface'
 
-vi.mock('@/modules/groups/api/groups.api', () => ({
-  fetchAllGroups: vi.fn().mockResolvedValue([]),
-}))
-vi.mock('@/shared/permissions/optional-request', () => ({
-  optionalRequest: vi.fn().mockResolvedValue([]),
-}))
-
 function makeLead(overrides: Partial<Lead> = {}): Lead {
   return {
     id: 1,
@@ -73,7 +66,6 @@ describe('useLeadForm', () => {
       form.discountPercent = '10'
       form.discountReason = ' Chegirma sababi '
       form.preferredDays = [WeekDay.MONDAY]
-      form.groupIds = [5]
       await flushPromises()
 
       const payload = toPayload()
@@ -86,7 +78,6 @@ describe('useLeadForm', () => {
       expect(payload.discountPercent).toBe(10)
       expect(payload.discountReason).toBe('Chegirma sababi')
       expect(payload.preferredDays).toEqual([WeekDay.MONDAY])
-      expect(payload.groupIds).toEqual([5])
     })
 
     it('sends jshshir and omits passport fields when jshshir is set', async () => {
@@ -210,7 +201,6 @@ describe('useLeadForm', () => {
         phone: '998901112233',
         discountPercent: 15,
         jshshir: '12345678901234',
-        groupIds: [3, 4],
         preferredDays: [WeekDay.TUESDAY],
       })
 
@@ -222,7 +212,6 @@ describe('useLeadForm', () => {
       expect(form.phone).toBe('998901112233')
       expect(form.discountPercent).toBe(15)
       expect(form.jshshir).toBe('12345678901234')
-      expect(form.groupIds).toEqual([3, 4])
       expect(form.preferredDays).toEqual([WeekDay.TUESDAY])
     })
   })

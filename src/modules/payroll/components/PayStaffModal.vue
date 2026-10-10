@@ -8,9 +8,9 @@
     <div v-if="staff" class="space-y-4">
       <PayStaffSummary :staff="staff" />
 
-      <UiInput
+      <UiMoneyInput
         :model-value="amount ?? ''"
-        type="number"
+       
         :label="t('payroll.modal.amountLabel')"
         :hint="`${t('payroll.table.remainingShort')}: ${formatSom(remaining)}`"
         :error="amountError || undefined"
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiInput, UiTextarea, UiButton } from '@/shared/components'
+import { UiMoneyInput, UiModal, UiTextarea, UiButton } from '@/shared/components'
 import { formatSom } from '@/shared/utils/format-money'
 import { getRemaining } from '../utils/payroll-salary'
 import PayStaffSummary from './PayStaffSummary.vue'

@@ -81,30 +81,30 @@ describe('useStudentForm', () => {
   describe('subjects (reception only)', () => {
     const student = (status: StudentStatus): Student => ({
       id: 9, firstName: 'A', lastName: 'B', phone: '+998901112233', status,
-      subjectId: 3, secondSubjectId: 4,
+      subjectId: 3, subjects: [{ id: 3, name: 'IELTS' }, { id: 4, name: 'Math' }, { id: 5, name: 'Chess' }],
     })
 
-    it('sends up to two subjects on create, none when nothing is picked', async () => {
+    it('sends any number of subjects on create, none when nothing is picked', async () => {
       const f = useStudentForm(() => 1)
       f.reset(null)
       await flushPromises()
       expect(f.showSubjects.value).toBe(true)
-      expect(f.toPayload()).not.toHaveProperty('subjectId')
+      expect(f.toPayload()).not.toHaveProperty('subjectIds')
 
-      f.form.subjectIds = [3, 4]
-      expect(f.toPayload()).toMatchObject({ subjectId: 3, secondSubjectId: 4 })
+      f.form.subjectIds = [3, 4, 5, 6]
+      expect(f.toPayload()).toMatchObject({ subjectIds: [3, 4, 5, 6] })
     })
 
-    it('loads both subjects of a NEW student and sends null for a removed one', async () => {
+    it('loads every subject of a NEW student and sends the edited list', async () => {
       const f = useStudentForm(() => 1)
       f.reset(student(StudentStatus.NEW))
       await flushPromises()
-      expect(f.form.subjectIds).toEqual([3, 4])
+      expect(f.form.subjectIds).toEqual([3, 4, 5])
 
       f.form.subjectIds = [4]
-      expect(f.toPayload()).toMatchObject({ subjectId: 4, secondSubjectId: null })
+      expect(f.toPayload()).toMatchObject({ subjectIds: [4] })
       f.form.subjectIds = []
-      expect(f.toPayload()).toMatchObject({ subjectId: null, secondSubjectId: null })
+      expect(f.toPayload()).toMatchObject({ subjectIds: [] })
     })
 
     it('hides the select past reception and leaves the stored subjects alone', async () => {
@@ -114,8 +114,7 @@ describe('useStudentForm', () => {
 
       expect(f.showSubjects.value).toBe(false)
       const payload = f.toPayload()
-      expect(payload).not.toHaveProperty('subjectId')
-      expect(payload).not.toHaveProperty('secondSubjectId')
+      expect(payload).not.toHaveProperty('subjectIds')
     })
   })
 
@@ -193,6 +192,7 @@ describe('useStudentForm', () => {
 
     it('simple percent discount emits discountPercent (and zeroes the amount)', async () => {
       const f = await ready()
+      f.form.discountEnabled = true
       f.form.usePeriods = false
       f.form.discountType = DiscountType.PERCENT
       f.form.discountValue = '10'
@@ -208,6 +208,7 @@ describe('useStudentForm', () => {
 
     it('simple amount discount emits discountAmount (and zeroes the percent)', async () => {
       const f = await ready()
+      f.form.discountEnabled = true
       f.form.discountType = DiscountType.AMOUNT
       f.form.discountValue = '20000'
 
@@ -230,6 +231,7 @@ describe('useStudentForm', () => {
 
     it('period mode emits percent OR amount per row, with the group, and omits the simple fields', async () => {
       const f = await ready()
+      f.form.discountEnabled = true
       f.form.usePeriods = true
       f.form.discountValue = '10'
       f.form.discountReason = 'ignored'
@@ -325,6 +327,55 @@ describe('useStudentForm', () => {
       expect(f.form.discountType).toBe(DiscountType.AMOUNT)
       expect(f.form.discountValue).toBe(20000)
       expect(f.form.discountReason).toBe('Ikki fan')
+    })
+
+    it('sends no discount field at all while the switch is off', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.form.discountValue = '10'
+      f.form.freeMonths = 2
+
+      const payload = f.toPayload()
+      expect('discountPercent' in payload).toBe(false)
+      expect('freeMonths' in payload).toBe(false)
+    })
+
+    it('omits freeMonths when the switch is on but it stays 0', async () => {
+      const f = useStudentForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.form.discountEnabled = true
+
+      expect('freeMonths' in f.toPayload()).toBe(false)
+      f.form.freeMonths = 1
+      expect(f.toPayload().freeMonths).toBe(1)
+    })
+
+    it('opens the switch for a student with free months and sends only a change', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset({ id: 4, firstName: 'A', lastName: 'B', phone: '1', status: StudentStatus.ACTIVE, centerId: 7, freeMonths: 2 })
+      await flushPromises()
+
+      expect(f.form.discountEnabled).toBe(true)
+      expect(f.form.freeMonths).toBe(2)
+      expect('freeMonths' in f.toPayload()).toBe(false)
+      f.form.freeMonths = 0
+      expect(f.toPayload().freeMonths).toBe(0)
+    })
+
+    it('clears every discount when the switch is turned off on edit', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset({
+        id: 5, firstName: 'A', lastName: 'B', phone: '1', status: StudentStatus.ACTIVE, centerId: 7,
+        discountPercent: '10', freeMonths: 1,
+      })
+      await flushPromises()
+
+      f.form.discountEnabled = false
+      expect(f.toPayload()).toMatchObject({
+        discountPercent: 0, discountAmount: 0, discountPeriods: [], discountReason: '', freeMonths: 0,
+      })
     })
 
     it('reads periods back with their type and group', async () => {

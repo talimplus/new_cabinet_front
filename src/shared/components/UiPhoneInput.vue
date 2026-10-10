@@ -23,6 +23,7 @@ import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { cn } from '@/shared/utils/cn'
 import { editablePhoneDigits, groupLocalDigits } from '@/shared/utils/format-phone'
+import { rewriteKeepingCaret } from '@/shared/utils/caret'
 import { useFormControl, type FormControlProps } from '@/shared/composables/use-form-control'
 import UiFieldShell from './UiFieldShell.vue'
 
@@ -51,9 +52,9 @@ function onInput(e: Event) {
   const el = e.target as HTMLInputElement
   const digits = editablePhoneDigits(el.value)
   model.value = digits ? `+998${digits}` : ''
-  // Re-group in place: letters and over-long input never stay in the field.
-  const grouped = groupLocalDigits(digits)
-  if (el.value !== grouped) el.value = grouped
+  // Re-group in place (letters and over-long input never stay); the caret
+  // stays after the same digit, so a number can be fixed in the middle.
+  rewriteKeepingCaret(el, groupLocalDigits(digits), (c) => /\d/.test(c))
 }
 
 const shell =

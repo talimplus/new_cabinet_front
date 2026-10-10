@@ -398,14 +398,32 @@ preferredDays[] (repeated param), page, perPage`
 comment?, heardAboutUs?, preferredTime?, preferredDays?[], passportSeries?,
 passportNumber?, jshshir?, referrerId?, monthlyFee?, discountPercent?,
 discountAmount?, discountReason?, discountPeriods?[], status?, centerId?, groupIds?[], subjectId?,
-secondSubjectId?`
+subjectIds?[]`
 
-**Two subjects (2026-10-09, verified live):** a reception student may pick a
-second subject — `secondSubjectId` (same center as the first; equal to
-`subjectId` → ignored; `null` on update clears it). Responses carry
-`secondSubjectId` + `secondSubject: { id, name } | null`; the `subjectId` list
-filter matches either subject. The form shows the subject select (multiple,
-`max: 2`) only while the student is `new`; past reception neither key is sent.
+**Any number of subjects (2026-10-10, migration `…068`):** `secondSubjectId` is
+gone; subjects live in the `student_subjects` join table. Send `subjectIds: number[]`
+(all from the student's center, duplicates dropped, order kept — the first one is
+mirrored into `subjectId`; `[]` on update clears them all). A bare `subjectId`
+(old app) on update swaps only the primary subject and keeps the rest. Responses
+(list, `GET /students/{id}`, payment summary) carry `subjects: { id, name }[]`
+(primary first) next to `subject`; the `subjectId` list filter matches any of
+them. The form shows the subject select (multiple, no limit) only while the
+student is `new`; past reception `subjectIds` is not sent.
+
+**First N months free (2026-10-10, migration `…069`):** `freeMonths` (0–12, the
+form offers 0–3) on create/update; the response carries `freeMonths`, and
+`GET /students/{id}` adds `freeWindow: { from, untilExclusive } | null` (null until
+the student has a group). The window starts at the student's first lesson across
+all groups and lasts N calendar months; lessons inside it are not billed. The form
+hides the whole discount block behind a switch (off by default) with two tabs
+(discounts / free months); `freeMonths` is sent only when it differs from the
+stored value, so 0 never goes on create. Switching the block off on edit clears
+every discount (`discountPercent/Amount: 0`, `discountPeriods: []`, `freeMonths: 0`).
+A change touching a month with money → 422 `freeMonths`.
+
+**Leads carry no group (2026-10-10):** the new app's lead form, filter and
+transfer no longer offer a group (`groupIds` is sent as `[]` on transfer). The
+backend still accepts `groupIds` / `groupId` for the old app.
 **Phones:** the form stores `+998XXXXXXXXX` (`UiPhoneInput`); old rows keep any
 spelling and are shown through `formatPhone()`. The student `search` and the
 lead `phone` filter also compare digits only, so `97 752` finds `97-752-…`.

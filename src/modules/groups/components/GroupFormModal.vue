@@ -11,7 +11,7 @@
         <UiSelect :model-value="form.subjectId" :options="subjects" :label="t('groups.form.subject')" :error="errors.subjectId" :disabled="!form.centerId" @update:model-value="setSelect('subjectId', $event)" />
         <UiSelect :model-value="form.roomId" :options="rooms" :label="t('groups.form.room')" :error="errors.roomId" :disabled="!form.centerId" @update:model-value="setSelect('roomId', $event)" />
         <UiSelect :model-value="form.teacherId" :options="teachers" :label="t('groups.form.teacher')" :error="errors.teacherId" :disabled="!form.centerId" @update:model-value="setSelect('teacherId', $event)" />
-        <UiInput v-model="form.monthlyFee" type="number" :label="t('groups.form.monthlyFee')" :error="errors.monthlyFee" />
+        <UiMoneyInput v-model="form.monthlyFee" :label="t('groups.form.monthlyFee')" :error="errors.monthlyFee" />
         <UiInput v-model="form.lessonDurationMinutes" type="number" :label="t('groups.form.lessonDuration')" :hint="t('groups.form.minutesShort')" />
         <UiDatepicker :model-value="form.endDate" :enable-time="false" :label="t('groups.form.endDate')" :hint="t('groups.form.endDateHint')" :error="errors.endDate" @update:model-value="form.endDate = Array.isArray($event) ? ($event[0] ?? null) : $event" />
       </div>
@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiInput, UiSelect, UiDatepicker, UiButton, UiConfirmDialog } from '@/shared/components'
+import { UiModal, UiInput, UiMoneyInput, UiSelect, UiDatepicker, UiButton, UiConfirmDialog } from '@/shared/components'
 import GroupScheduleEditor from './GroupScheduleEditor.vue'
 import GroupFeeHint from './GroupFeeHint.vue'
 import GroupScheduleConflicts from './GroupScheduleConflicts.vue'

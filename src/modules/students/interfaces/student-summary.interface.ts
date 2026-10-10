@@ -44,6 +44,8 @@ export interface StudentSummaryProfile {
   centerId: number
   centerName?: string | null
   subject?: Subject | null
+  /** Every subject, the primary one (`subject`) first. */
+  subjects?: Subject[]
   groups: StudentSummaryGroup[]
 }
 

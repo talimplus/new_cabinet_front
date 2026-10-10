@@ -37,7 +37,6 @@ describe('leads.api', () => {
     const result = await fetchLeads({
       centerId: 1,
       status: LeadStatus.NEW,
-      groupId: 4,
       name: 'ali',
       phone: '998',
       followUpDate: '2026-09-10',
@@ -49,7 +48,6 @@ describe('leads.api', () => {
       params: {
         centerId: 1,
         status: LeadStatus.NEW,
-        groupId: 4,
         name: 'ali',
         phone: '998',
         followUpDate: '2026-09-10',

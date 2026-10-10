@@ -57,7 +57,7 @@ async function onTransfer(payload: LeadTransferForm) {
       </UiButton>
     </div>
 
-    <LeadFilters :filters="l.filters" :group-options="l.groupOptions.value" @change="l.applyFilters" />
+    <LeadFilters :filters="l.filters" @change="l.applyFilters" />
 
     <LeadsTable
       :rows="l.rows.value"

@@ -1,7 +1,7 @@
 <template>
-  <UiInput
+  <UiMoneyInput
     :model-value="modelValue ?? ''"
-    type="number"
+   
     :label="t('payments.dialog.amountLabel')"
     :hint="hint"
     :error="error"
@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiInput } from '@/shared/components'
+import { UiMoneyInput } from '@/shared/components'
 import { formatSom } from '@/shared/utils/format-money'
 
 const { t } = useI18n()

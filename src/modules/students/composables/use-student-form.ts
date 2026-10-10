@@ -12,6 +12,7 @@ import {
   applyDiscount,
   blankDiscount,
   discountFromStudent,
+  type DiscountBaseline,
   type DiscountState,
 } from '../utils/student-discount'
 import { t } from '@/locales'
@@ -30,7 +31,7 @@ interface StudentFormState extends DiscountState {
   preferredDays: WeekDay[]
   centerId: number | null
   groupIds: number[]
-  /** Up to two subjects → `subjectId` + `secondSubjectId`. */
+  /** Any number of subjects → `subjectIds`. */
   subjectIds: number[]
   passportSeries: string
   passportNumber: string
@@ -65,6 +66,8 @@ export function useStudentForm(defaultCenterId: () => number | null) {
    */
   const showSubjects = ref(true)
   let isEditing = false
+  /** The discount as it was on open — decides what the switch/free months send. */
+  let baseline: DiscountBaseline = { enabled: false, freeMonths: 0 }
 
   function clearErrors(): void {
     Object.keys(errors).forEach((k) => delete errors[k])
@@ -74,6 +77,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     clearErrors()
     Object.assign(form, blankState(defaultCenterId()))
     isEditing = !!editing
+    baseline = { enabled: false, freeMonths: 0 }
     showSubjects.value = !editing || editing.status === StudentStatus.NEW
     if (editing) fillFrom(editing)
     loadOptions()
@@ -103,14 +107,16 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     form.preferredDays = [...(editing.preferredDays ?? [])]
     form.centerId = editing.centerId ?? defaultCenterId()
     form.groupIds = [...(editing.groupIds ?? [])]
-    form.subjectIds = [editing.subjectId, editing.secondSubjectId].filter(
-      (id): id is number => typeof id === 'number',
-    )
+    form.subjectIds = editing.subjects?.length
+      ? editing.subjects.map((s) => s.id)
+      : [editing.subjectId].filter((id): id is number => typeof id === 'number')
     form.passportSeries = editing.passportSeries ?? ''
     form.passportNumber = editing.passportNumber ?? ''
     form.jshshir = editing.jshshir ?? ''
     form.comment = editing.comment ?? ''
-    Object.assign(form, discountFromStudent(editing))
+    const discount = discountFromStudent(editing)
+    Object.assign(form, discount)
+    baseline = { enabled: discount.discountEnabled, freeMonths: discount.freeMonths }
   }
 
   function validate(): boolean {
@@ -159,20 +165,18 @@ export function useStudentForm(defaultCenterId: () => number | null) {
       if (form.passportNumber.trim()) payload.passportNumber = form.passportNumber.trim()
     }
 
-    applyDiscount(form, payload)
+    applyDiscount(form, payload, baseline)
     return payload
   }
 
   /**
    * Hidden select → nothing sent, the stored subjects stay. Shown on edit →
-   * both keys always go, so removing a subject (null) is saved too.
+   * the full list always goes, so removing every subject ([]) is saved too.
    */
   function applySubjects(payload: StudentForm): void {
     if (!showSubjects.value) return
-    const [first, second] = form.subjectIds
-    if (first === undefined && !isEditing) return
-    payload.subjectId = first ?? null
-    payload.secondSubjectId = second ?? null
+    if (!form.subjectIds.length && !isEditing) return
+    payload.subjectIds = [...form.subjectIds]
   }
 
   function setBackendErrors(error: unknown): void {

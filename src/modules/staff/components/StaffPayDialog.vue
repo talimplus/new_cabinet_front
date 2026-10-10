@@ -12,9 +12,9 @@
         </div>
       </dl>
 
-      <UiInput
+      <UiMoneyInput
         :model-value="amount ?? ''"
-        type="number"
+       
         :label="t('staff.salary.payAmount')"
         :error="error || undefined"
         :disabled="loading"
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiButton, UiInput, UiTextarea } from '@/shared/components'
+import { UiMoneyInput, UiModal, UiButton, UiTextarea } from '@/shared/components'
 import { formatSom } from '@/shared/utils/format-money'
 
 const { t } = useI18n()

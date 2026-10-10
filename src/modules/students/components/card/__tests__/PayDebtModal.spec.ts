@@ -52,7 +52,7 @@ describe('PayDebtModal', () => {
 
   it('emits update:amount as a number, or null when cleared', async () => {
     const wrapper = mountModal()
-    const input = document.body.querySelector('input[type="number"]') as HTMLInputElement
+    const input = document.body.querySelector('input[inputmode="decimal"]') as HTMLInputElement
     input.value = '42'
     input.dispatchEvent(new Event('input'))
     await wrapper.vm.$nextTick()

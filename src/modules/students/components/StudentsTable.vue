@@ -83,9 +83,10 @@ const emit = defineEmits<{
 
 const toNumber = (v: string | null | undefined): number | null =>
   v == null || v === '' ? null : Number(v)
-// A reception student may want two subjects.
+// A student may sign up for any number of subjects.
 const subjectNames = (s: Student) =>
-  [s.subject?.name, s.secondSubject?.name].filter(Boolean).join(', ') || '—'
+  (s.subjects?.length ? s.subjects.map((x) => x.name) : [s.subject?.name])
+    .filter(Boolean).join(', ') || '—'
 const timeLabel = (s: Student) =>
   s.preferredTime ? t(PREFERRED_TIME_LABEL_KEYS[s.preferredTime]) : '—'
 const likelihoodLabel = (s: Student) =>

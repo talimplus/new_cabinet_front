@@ -73,7 +73,13 @@ Current kit: `UiButton`, `UiIconButton`, `UiInput`, `UiTextarea`, `UiSelect`,
 `UiDatepicker`, `UiCheckbox`, `UiCollapse`, `UiModal`, `UiDropdown`
 (+ `UiDropdownItem`), `UiBadge`, `UiIcon`, `UiTable`, `UiTabs`, `UiPagination`,
 `UiStatCard`, `UiSpinner`, `UiThemeToggle`, `UiLocaleToggle`, `UiToaster`,
-`UiMarkdown`, `UiForm`, `UiFieldShell`.
+`UiMarkdown`, `UiForm`, `UiFieldShell`, `UiPhoneInput`, `UiMoneyInput`.
+
+- **Money fields use `UiMoneyInput`, never `UiInput type="number"`.** It groups
+  thousands while typing (`100 000`) and emits a number ('' when empty) — the
+  same contract as `type="number"`. Showing a sum: `formatMoney` / `formatSom`.
+- **Phone fields use `UiPhoneInput`** (`+998` prefix, stores `+998XXXXXXXXX`);
+  show a phone with `formatPhone()` — old rows hold any spelling.
 
 - A component a **second** module needs stops being that module's business and
   moves to the kit as `Ui*` — that is how `UiStatCard` arrived from

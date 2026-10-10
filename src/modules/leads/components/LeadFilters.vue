@@ -7,12 +7,6 @@
       :placeholder="t('leads.filter.status')"
       @update:model-value="setField('status', $event as LeadStatus | null)"
     />
-    <UiSelect
-      :model-value="filters.groupId"
-      :options="groupOptions"
-      :placeholder="t('leads.filter.group')"
-      @update:model-value="setField('groupId', toNum($event))"
-    />
     <UiDatepicker
       :model-value="filters.followUpDate"
       :placeholder="t('leads.filter.followUpDate')"
@@ -34,21 +28,18 @@ import { Search } from '@/shared/icons'
 import { debounce } from '@/shared/utils/debounce'
 import { LeadStatus, LEAD_STATUS_LABEL_KEYS } from '../enums/lead-status.enum'
 import type { LeadFiltersState } from '../composables/use-leads'
-import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const props = defineProps<{
   filters: LeadFiltersState
-  groupOptions: SelectOption[]
 }>()
 const emit = defineEmits<{ change: [] }>()
 
 const statusOptions = computed(() =>
   Object.values(LeadStatus).map((v) => ({ label: t(LEAD_STATUS_LABEL_KEYS[v]), value: v })),
 )
-const toNum = (v: unknown): number | null => (typeof v === 'number' ? v : null)
 
 function setField<K extends keyof LeadFiltersState>(key: K, value: LeadFiltersState[K]): void {
   props.filters[key] = value

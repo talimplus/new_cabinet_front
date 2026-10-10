@@ -35,11 +35,12 @@ export interface StudentForm {
   /** so'm per month; sent instead of `discountPercent` when the type is "amount" */
   discountAmount?: number
   discountReason?: string
+  /** First N months free; sent only when it differs from the stored value (0 on create is omitted). */
+  freeMonths?: number
   discountPeriods?: DiscountPeriodForm[]
   status?: StudentStatus
   centerId?: number
   groupIds?: number[]
-  /** null on update clears the subject. */
-  subjectId?: number | null
-  secondSubjectId?: number | null
+  /** Any number of subjects; the first becomes `subjectId`. [] on update clears them. */
+  subjectIds?: number[]
 }

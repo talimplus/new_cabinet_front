@@ -12,7 +12,7 @@
       <UiInput name="phone" type="tel" :label="t('users.form.phone')" required />
       <UiInput name="password" type="password" :label="t('users.form.password')" :required="!editing" :placeholder="editing ? t('users.form.passwordKeepHint') : ''" />
       <UiSelect name="roleId" :label="t('users.form.role')" :options="roleOptions" :searchable="false" :placeholder="t('users.form.selectRole')" />
-      <UiInput name="salary" type="number" :label="t('users.form.salary')" />
+      <UiMoneyInput name="salary" :label="t('users.form.salary')" />
       <UiInput name="commissionPercentage" type="number" :label="t('users.form.commissionPercentage')" />
       <p v-if="editing" class="rounded-md bg-info-soft px-3 py-2 text-xs text-info sm:col-span-2">{{ t('users.form.payChangeHint') }}</p>
     </UiForm>
@@ -28,7 +28,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { GenericObject } from 'vee-validate'
-import { UiModal, UiForm, UiInput, UiSelect, UiButton } from '@/shared/components'
+import { UiModal, UiForm, UiInput, UiMoneyInput, UiSelect, UiButton } from '@/shared/components'
 import { useUserForm } from '../composables/use-user-form'
 import type { User } from '../interfaces/user.interface'
 import type { UserForm } from '../interfaces/user-form.interface'

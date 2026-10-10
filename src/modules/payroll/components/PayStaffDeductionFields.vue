@@ -3,9 +3,9 @@
     <UiCheckbox v-model="enabled" :label="t('payroll.modal.addDeduction')" :disabled="disabled" />
 
     <template v-if="enabled">
-      <UiInput
+      <UiMoneyInput
         :model-value="amount ?? ''"
-        type="number"
+       
         :label="t('staff.deduction.amount')"
         :hint="t('staff.deduction.amountHint')"
         :disabled="disabled"
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiCheckbox, UiInput, UiSelect, UiTextarea } from '@/shared/components'
+import { UiMoneyInput, UiCheckbox, UiSelect, UiTextarea } from '@/shared/components'
 import {
   StaffDeductionType,
   DEDUCTION_TYPE_LABEL_KEYS,

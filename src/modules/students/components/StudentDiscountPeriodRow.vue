@@ -5,7 +5,7 @@
       <UiSelect v-model="type" :options="typeOptions" :label="t('students.form.discountType')" :searchable="false" :clearable="false" />
     </div>
     <div class="md:col-span-3">
-      <UiInput v-model="value" type="number" :label="t(DISCOUNT_TYPE_LABEL_KEYS[type])" />
+      <UiMoneyInput v-model="value" :label="t(DISCOUNT_TYPE_LABEL_KEYS[type])" />
     </div>
     <div class="col-span-2 md:col-span-6">
       <UiSelect
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { UiInput, UiSelect, UiIconButton } from '@/shared/components'
+import { UiInput, UiMoneyInput, UiSelect, UiIconButton } from '@/shared/components'
 import { Trash2 } from '@/shared/icons'
 import { DiscountType, DISCOUNT_TYPE_LABEL_KEYS } from '../enums/discount-type.enum'
 import { useDiscountTypeOptions } from '../composables/use-discount-type-options'

@@ -1,7 +1,6 @@
 export default {
   title: 'Лиды',
   center: 'Центр',
-  group: 'Группа',
   searchByName: 'По имени',
   searchByPhone: 'По телефону',
   followUpDate: 'Дата напоминания',
@@ -27,7 +26,6 @@ export default {
   },
   filter: {
     status: 'Статус',
-    group: 'Группа',
     followUpDate: 'Дата связи',
   },
   form: {
@@ -43,7 +41,6 @@ export default {
     preferredTime: 'Удобное время',
     preferredDays: 'Удобные дни',
     center: 'Центр',
-    groups: 'Группы',
     passport: 'Паспорт',
     jshshir: 'ПИНФЛ',
     jshshirPlaceholder: '14-значный номер',

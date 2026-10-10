@@ -1,7 +1,6 @@
 export default {
   title: 'Leads',
   center: 'Markaz',
-  group: 'Guruh',
   searchByName: "Ism bo'yicha",
   searchByPhone: "Telefon bo'yicha",
   followUpDate: 'Keyinroq sanasi',
@@ -27,7 +26,6 @@ export default {
   },
   filter: {
     status: 'Holati',
-    group: 'Guruh',
     followUpDate: "Bog'lanish sanasi",
   },
   form: {
@@ -43,7 +41,6 @@ export default {
     preferredTime: 'Qulay vaqt',
     preferredDays: 'Qulay kunlar',
     center: 'Markaz',
-    groups: 'Guruhlar',
     passport: 'Passport',
     jshshir: 'JSHSHIR',
     jshshirPlaceholder: '14 xonali raqam',

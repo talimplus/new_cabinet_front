@@ -75,17 +75,26 @@ describe('PayStaffModal', () => {
     expect(text).toContain(formatSom(1_500_000))
   })
 
-  it('errors when the amount is negative', async () => {
+  it('cannot take a negative amount — the money field drops the minus', async () => {
     const wrapper = mountModal({ staff: makeStaff({ remaining: 1_000_000 }) })
-    const input = document.body.querySelector('input[type="number"]') as HTMLInputElement
+    const input = document.body.querySelector('input[inputmode="decimal"]') as HTMLInputElement
     setNumberInput(input, -100)
     await wrapper.vm.$nextTick()
-    expect(document.body.textContent).toContain(t('payroll.validation.greaterThanZero'))
+    expect(input.value).toBe('100')
+    expect(document.body.textContent).not.toContain(t('payroll.validation.greaterThanZero'))
+  })
+
+  it('shows the typed amount grouped by thousands', async () => {
+    const wrapper = mountModal({ staff: makeStaff({ remaining: 1_000_000 }) })
+    const input = document.body.querySelector('input[inputmode="decimal"]') as HTMLInputElement
+    setNumberInput(input, 250000)
+    await wrapper.vm.$nextTick()
+    expect(input.value).toBe('250 000')
   })
 
   it('errors when the amount exceeds remaining', async () => {
     const wrapper = mountModal({ staff: makeStaff({ remaining: 1_000_000 }) })
-    const input = document.body.querySelector('input[type="number"]') as HTMLInputElement
+    const input = document.body.querySelector('input[inputmode="decimal"]') as HTMLInputElement
     setNumberInput(input, 1_500_000)
     await wrapper.vm.$nextTick()
     expect(document.body.textContent).toContain(
@@ -95,7 +104,7 @@ describe('PayStaffModal', () => {
 
   it('does not error at exactly 0 — a fine alone is legal', async () => {
     const wrapper = mountModal({ staff: makeStaff({ remaining: 1_000_000 }) })
-    const input = document.body.querySelector('input[type="number"]') as HTMLInputElement
+    const input = document.body.querySelector('input[inputmode="decimal"]') as HTMLInputElement
     setNumberInput(input, 0)
     await wrapper.vm.$nextTick()
     expect(document.body.textContent).not.toContain(t('payroll.validation.greaterThanZero'))

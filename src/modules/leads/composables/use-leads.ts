@@ -2,8 +2,6 @@ import { computed, reactive, ref } from 'vue'
 import {
   fetchLeads, createLead, updateLead, deleteLead, changeLeadStatus, transferLeadToStudent,
 } from '../api/leads.api'
-import { fetchAllGroups } from '@/modules/groups/api/groups.api'
-import { optionalRequest } from '@/shared/permissions/optional-request'
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
 import { LeadStatus } from '../enums/lead-status.enum'
@@ -12,14 +10,12 @@ import type { Lead } from '../interfaces/lead.interface'
 import type { LeadForm } from '../interfaces/lead-form.interface'
 import type { LeadsParams } from '../interfaces/lead-params.interface'
 import type { LeadTransferForm } from '../interfaces/lead-transfer-form.interface'
-import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
 
 export interface LeadFiltersState {
   name: string
   phone: string
   status: LeadStatus | null
-  groupId: number | null
   followUpDate: Date | null
   page: number
   perPage: number
@@ -38,9 +34,8 @@ export function useLeads() {
   const rows = ref<Lead[]>([])
   const totalPages = ref(1)
   const loading = ref(false)
-  const groupOptions = ref<SelectOption[]>([])
   const filters = reactive<LeadFiltersState>({
-    name: '', phone: '', status: null, groupId: null, followUpDate: null, page: 1, perPage: 10,
+    name: '', phone: '', status: null, followUpDate: null, page: 1, perPage: 10,
   })
 
   const modalOpen = ref(false)
@@ -56,7 +51,6 @@ export function useLeads() {
         name: filters.name || undefined,
         phone: filters.phone || undefined,
         status: filters.status ?? undefined,
-        groupId: filters.groupId ?? undefined,
         followUpDate: toDateString(filters.followUpDate) || undefined,
       }
       const { data, meta } = await fetchLeads(params)
@@ -67,23 +61,17 @@ export function useLeads() {
     }
   }
 
-  async function loadGroups(): Promise<void> {
-    const groups = await optionalRequest(fetchAllGroups(), [])
-    groupOptions.value = groups.map((g) => ({ label: g.name, value: g.id }))
-  }
-
   function resetFilters(): void {
     filters.name = ''
     filters.phone = ''
     filters.status = null
-    filters.groupId = null
     filters.followUpDate = null
     filters.page = 1
   }
 
   async function init(): Promise<void> {
     resetFilters()
-    await Promise.all([load(), loadGroups()])
+    await load()
   }
 
 
@@ -166,7 +154,7 @@ export function useLeads() {
   const rowOffset = computed(() => (filters.page - 1) * filters.perPage)
 
   return {
-    scope, rows, rowOffset, totalPages, loading, filters, groupOptions,
+    scope, rows, rowOffset, totalPages, loading, filters,
     modalOpen, editing, discardDialog,
     init, search, applyFilters, setPage,
     openCreate, openEdit, submit, remove, requestStatus, confirmDiscard, transferToStudent,

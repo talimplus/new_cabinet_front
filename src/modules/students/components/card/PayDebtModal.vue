@@ -7,9 +7,9 @@
     @update:model-value="emit('close')"
   >
     <div class="space-y-4">
-      <UiInput
+      <UiMoneyInput
         :model-value="amount ?? ''"
-        type="number"
+       
         :label="t('students.view.modal.amount')"
         :hint="`${t('students.view.stats.payableNow')}: ${formatSom(payableNow)}`"
         :error="error || undefined"
@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiButton, UiInput } from '@/shared/components'
+import { UiMoneyInput, UiModal, UiButton } from '@/shared/components'
 import ReceptionFields from '@/shared/components/receipt/ReceptionFields.vue'
 import { formatSom } from '@/shared/utils/format-money'
 import PayDebtPreview from './PayDebtPreview.vue'

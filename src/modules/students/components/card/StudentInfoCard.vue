@@ -58,7 +58,7 @@ const fields = computed(() => {
   const time = s?.preferredTime
   const discount = formatDiscount(s?.discountPercent, s?.discountAmount)
   return [
-    { label: t('students.view.info.subject'), value: s?.subject?.name || '—' },
+    { label: t('students.view.info.subject'), value: (s?.subjects?.length ? s.subjects.map((x) => x.name).join(', ') : s?.subject?.name) || '—' },
     { label: t('students.view.info.center'), value: s?.centerName || '—' },
     { label: t('students.view.info.birthDate'), value: formatDate(s?.birthDate) },
     { label: t('students.view.info.preferredTime'), value: time ? t(PREFERRED_TIME_LABEL_KEYS[time]) : '—' },
