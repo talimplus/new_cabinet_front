@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import { useAppUpdate, UPDATE_CHECK_INTERVAL_MS, UPDATE_SNOOZE_MS } from '../use-app-update'
 
@@ -12,6 +12,8 @@ function setup(current = 'v1') {
   const wrapper = mount(defineComponent({ setup: () => { api = useAppUpdate(current); return () => h('div') } }))
   return { api, wrapper }
 }
+
+enableAutoUnmount(afterEach)
 
 describe('useAppUpdate', () => {
   beforeEach(() => {
@@ -70,11 +72,21 @@ describe('useAppUpdate', () => {
     expect(api.available.value).toBe(true)
   })
 
-  it('stops polling on unmount', async () => {
+  it('a stale chunk that fails to load shows the prompt at once, even while snoozed', () => {
+    const { api } = setup()
+    api.later()
+    window.dispatchEvent(new Event('vite:preloadError'))
+    expect(api.available.value).toBe(true)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('stops polling and listening on unmount', async () => {
     respond('v2')
-    const { wrapper } = setup()
+    const { api, wrapper } = setup()
     wrapper.unmount()
     await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS * 3)
+    window.dispatchEvent(new Event('vite:preloadError'))
     expect(fetchMock).not.toHaveBeenCalled()
+    expect(api.available.value).toBe(false)
   })
 })

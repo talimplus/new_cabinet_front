@@ -46,13 +46,22 @@ export function useAppUpdate(current: string = __APP_VERSION__) {
     if (document.visibilityState === 'visible') void check()
   }
 
+  // A deploy deletes the old hashed chunks, so a stale tab fails to load the
+  // next lazy route. That is proof of a new build — offer the reload at once,
+  // even while snoozed, instead of leaving the user on a page that won't open.
+  function onChunkError(): void {
+    available.value = true
+  }
+
   onMounted(() => {
     timer = setInterval(check, UPDATE_CHECK_INTERVAL_MS)
     document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('vite:preloadError', onChunkError)
   })
   onBeforeUnmount(() => {
     clearInterval(timer)
     document.removeEventListener('visibilitychange', onVisible)
+    window.removeEventListener('vite:preloadError', onChunkError)
   })
 
   return { available, check, later, reload }
