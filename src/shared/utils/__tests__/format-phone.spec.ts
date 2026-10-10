@@ -50,6 +50,10 @@ describe('format-phone', () => {
     // The field's own partial value: `+998` is the prefix, not local digits.
     expect(editablePhoneDigits('+9989')).toBe('9')
     expect(editablePhoneDigits('+99899812')).toBe('99812')
+    // 6 typed digits = 9 digits in total, still partial — not a local number.
+    expect(editablePhoneDigits('+998911234')).toBe('911234')
+    expect(isValidUzPhone('+998911234')).toBe(false)
+    expect(normalizePhone('+998911234')).toBe('+998911234')
   })
 
   it('builds a dialable tel: link', () => {

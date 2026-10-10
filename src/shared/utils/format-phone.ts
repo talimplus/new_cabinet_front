@@ -12,9 +12,18 @@ export function phoneDigits(raw: string | null | undefined): string {
   return (raw ?? '').replace(/\D/g, '')
 }
 
+function hasPlusCode(raw: string | null | undefined): boolean {
+  return (raw ?? '').trim().startsWith(`+${UZ_CODE}`)
+}
+
 /** The 9 local digits (`977522014`), or null when `raw` is not an Uzbek number. */
 export function uzLocalDigits(raw: string | null | undefined): string | null {
   const digits = phoneDigits(raw)
+  // `+998…` is always the country code: `+998911234` is a partial `91 12 34`,
+  // never the 9-digit local `99 891 12 34`.
+  if (hasPlusCode(raw)) {
+    return digits.length === UZ_CODE.length + LOCAL_LENGTH ? digits.slice(UZ_CODE.length) : null
+  }
   if (digits.length === LOCAL_LENGTH) return digits
   if (digits.length === UZ_CODE.length + LOCAL_LENGTH && digits.startsWith(UZ_CODE)) {
     return digits.slice(UZ_CODE.length)
@@ -32,7 +41,7 @@ export function editablePhoneDigits(raw: string | null | undefined): string {
   const digits = phoneDigits(raw)
   // `+998…` is always the country code — the field's own partial value
   // (`+9989` after typing `9`) must read back as `9`, not `99 89`.
-  if ((raw ?? '').trim().startsWith(`+${UZ_CODE}`)) {
+  if (hasPlusCode(raw)) {
     return digits.slice(UZ_CODE.length, UZ_CODE.length + LOCAL_LENGTH)
   }
   // Without a plus only a full `998` + 9 digits counts as prefixed: `99 812 34 56`

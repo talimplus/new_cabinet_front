@@ -43,6 +43,29 @@ describe('UiPhoneInput', () => {
     expect((input.element as HTMLInputElement).value).toBe('91')
   })
 
+  it('types 911234567 digit by digit and erases it back without re-reading 998', async () => {
+    const wrapper = mount({
+      components: { UiPhoneInput },
+      data: () => ({ phone: '' }),
+      template: `<UiPhoneInput v-model="phone" />`,
+    })
+    const input = wrapper.get('input')
+    const el = input.element as HTMLInputElement
+    const full = '911234567'
+    for (let i = 1; i <= full.length; i++) {
+      await input.setValue(full.slice(0, i))
+      await nextTick()
+      expect(el.value.replace(/\s/g, '')).toBe(full.slice(0, i))
+    }
+    expect(wrapper.vm.phone).toBe('+998911234567')
+    for (let i = full.length - 1; i >= 0; i--) {
+      await input.setValue(el.value.replace(/\s/g, '').slice(0, i))
+      await nextTick()
+      expect(el.value.replace(/\s/g, '')).toBe(full.slice(0, i))
+    }
+    expect(wrapper.vm.phone).toBe('')
+  })
+
   it('strips letters, a pasted 998 prefix and extra digits', async () => {
     const wrapper = mount(UiPhoneInput)
     await wrapper.get('input').setValue('+998 (97) 752-20-14 99')
