@@ -27,7 +27,7 @@ describe('transfer.api', () => {
   describe('previewTransfer', () => {
     it('POSTs /students/transfer/preview and returns the bare array', async () => {
       const rows: TransferPreviewRow[] = [
-        { studentId: 29, firstName: 'TestEdited', lastName: 'Claude', debt: 31461.54, overpaid: 0 },
+        { studentId: 29, firstName: 'TestEdited', lastName: 'Claude', debt: 31461.54, overpaid: 0, attendanceAfterDate: 0 },
       ]
       mockedHttp.post.mockResolvedValueOnce({ data: rows })
 
@@ -64,6 +64,7 @@ describe('transfer.api', () => {
           firstName: 'TestEdited',
           lastName: 'Claude',
           carriedOverAmount: 0,
+          deletedAttendance: 0,
           refundedAmount: 0,
           remainingDebtInSourceGroup: 31461.54,
         },

@@ -371,7 +371,7 @@ Geo/IP fields exist **only for staff attendance**: `capture-ip` is pressed while
 on the center's Wi-Fi and stores the request's public IP. Send `null` (not `0`)
 to clear coordinates.
 
-### 5.6 Students (13)
+### 5.6 Students (14)
 | Method | Path | Params / Body | Response |
 |---|---|---|---|
 | GET | `/students` | `StudentsParams` | `{ data, meta }` |
@@ -382,13 +382,14 @@ to clear coordinates.
 | PUT | `/students/{id}` | `UpdateStudentDto` | Student |
 | DELETE | `/students/{id}` | — | `{ success: true }` (only `new`, no history — see below) |
 | PUT | `/students/change-status/{id}?status=` | `{ status*, comment?, returnLikelihood? }` | Student |
-| POST | `/students/transfer/preview` | `{ studentIds*[], fromGroupId* }` | per-student debt/credit |
-| POST | `/students/transfer` | `{ studentIds*[], fromGroupId*, toGroupId*, transferDate?, reason?, closeSourceGroup? }` | `{ …, sourceGroupClosed }` |
+| POST | `/students/transfer/preview` | `{ studentIds*[], fromGroupId*, transferDate? }` | per-student `{ debt, overpaid, attendanceAfterDate }` — the last is the count of source-group marks on/after `transferDate` (0 without it) |
+| POST | `/students/transfer` | `{ studentIds*[], fromGroupId*, toGroupId*, transferDate?, reason?, closeSourceGroup? }` | `{ …, sourceGroupClosed, results[].deletedAttendance }` — **deletes** the student's source-group attendance on/after `transferDate` (attendance lives in one group only). A past date moves the held lessons' fee and teacher commission to the new group; the modal warns (`backdate`) |
 | GET | `/students/{id}/discount-periods` | — | **bare array** |
 | POST | `/students/{id}/discount-periods` | `{ percent? \| amount?, groupId?, fromMonth*, toMonth?, reason? }` | period |
 | PUT | `/students/{id}/discount-periods/{periodId}` | same, all optional; sending `percent` or `amount` switches the type | period |
 | DELETE | `/students/{id}/discount-periods/{periodId}` | — | — |
 | GET | `/student` | alias of `/students` | — |
+| GET | `/students/{id}/timeline` | — | `{ items: StudentTimelineItem[] }` newest first (see below) |
 
 `StudentsParams`: `centerId, name, phone, search, status, groupId,
 returnLikelihood(never|maybe|sure), preferredTime(morning|evening), subjectId,
@@ -487,6 +488,48 @@ no `student` base role seeded — a backend seeding concern, not a client bug.
 **without** their schedule), `login`. It does **not** include `centerName`, and
 its `groups[]` carry no `schedule` — the student card should read those from
 `/payments/student/{id}/summary`, which does return both.
+
+#### Student timeline — `GET /students/{id}/timeline` *(2026-10-13, verified live)*
+
+Permission `students.view`. Everything that happened to one student, **newest
+first**, in one response (no pagination — the client filters, pages and groups
+by day). Payment events come only with `payments.view`, attendance events only
+with `attendance.view`; the **backend** drops them, the client does not filter.
+
+```jsonc
+{ "items": [
+  { "id": "event:4",            // stable key: <source>:<id>
+    "type": "transferred",      // StudentTimelineType
+    "category": "groups",       // status | groups | payments | attendance | profile
+    "occurredAt": "2026-10-13T05:49:48.248Z",  // ISO, or "YYYY-MM-DD" when dateOnly
+    "dateOnly": false,
+    "actor": { "id": 52, "name": "Lazizbek Isaqov" },   // or null
+    "group": null,                                     // { id, name } or null
+    "details": { "fromGroupName": "Feruza-2", "toGroupName": "Feruza-1",
+                 "transferDate": "2026-10-13", "reason": "…",
+                 "carriedOverAmount": 0, "refundedAmount": 0, "remainingDebt": 373846.15 } } ] }
+```
+
+| `type` | Source | `details` |
+|---|---|---|
+| `lead_created`, `created` | `leads`, `students.createdAt` | `fromLead` |
+| `activated` | `students.activatedAt` (first activation only) | — |
+| `status_changed` | `student_events` (+ current `stoppedAt` for old data, `derived: true`) | `fromStatus`, `toStatus`, `returnLikelihood`, `comment` |
+| `group_joined` / `group_left` | `student_group_enrollments` | `reason` (left) |
+| `transferred` | `student_events` (actor + sums); older ones from enrollments | see sample |
+| `payment_received` | `payment_receipts` (carry-over receipts excluded) | `amount`, `status`, `method`, `checkNo`, `forMonth` (`YYYY-MM`), `paidAt`, `comment`, `confirmedByName`, `confirmedAt` |
+| `payment_refunded` | `payments.refundedAmount/refundedAt` | `amount`, `forMonth` |
+| `payment_excluded` | `student_events` | `amount`, `lessons`, `comment`, `forMonth`, `newAmountDue` |
+| `discount_period` | `student_discount_periods` — **dated by `fromMonth`** (rows are rewritten on every form save) | `percent`, `amount`, `fromMonth`, `toMonth`, `reason` |
+| `fee_changed` | `student_base_discounts` | `monthlyFee`, `percent`, `amount`, `fromMonth`, `reason` |
+| `referred` | `referrals` | `referrerId`, `referrerName` |
+| `telegram_linked` / `telegram_unlinked` | `telegram_parent_links` | `parentName`, `username`, `blocked` |
+| `attendance` | `attendance` — only `absent` / `late` / `excused` | `status`, `comment`; `actor` = who marked it |
+| `profile_updated` | `student_events` | `fields: string[]` — keys only, **never values** (passport etc.) |
+
+`student_events` (journal) exists only since 2026-10-13: status changes, edits,
+transfer authors and exclusions before that date have no entry. Amounts here
+are **numbers**, not numeric strings.
 
 ### 5.7 Groups (8) + schedule (7) + attendance (4) + lesson plan (4)
 

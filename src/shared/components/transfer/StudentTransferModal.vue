@@ -39,7 +39,14 @@
       <p v-if="state.previewing" class="text-xs text-muted-foreground">
         {{ t('payments.exclusion.calculating') }}
       </p>
-      <template v-else>
+      <!-- Past date moves held lessons; marks from that day on are deleted. -->
+      <div v-if="impact" class="space-y-1 rounded-md bg-warning-soft px-3 py-2 text-xs text-warning">
+        <p v-if="impact.past">{{ t('students.transfer.backdateWarning') }}</p>
+        <p v-if="impact.attendanceToDelete > 0" class="font-semibold">
+          {{ t('students.transfer.attendanceDeleted', { count: impact.attendanceToDelete }) }}
+        </p>
+      </div>
+      <template v-if="!state.previewing">
         <!-- A debt never blocks the move — it simply stays with the old group. -->
         <p v-if="totalDebt > 0" class="rounded-md bg-warning-soft px-3 py-2 text-xs text-warning">
           {{ t('students.transfer.debtWarning', { amount: formatSom(totalDebt) }) }}
@@ -67,6 +74,7 @@ import { UiModal, UiButton, UiSelect, UiDatepicker, UiTextarea, UiCheckbox } fro
 import { formatSom } from '@/shared/utils/format-money'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import type { useStudentTransfer } from '@/shared/composables/use-student-transfer'
+import type { TransferImpact } from '@/shared/interfaces/student-transfer.interface'
 
 const { t } = useI18n()
 
@@ -76,6 +84,8 @@ defineProps<{
   groupOptions: SelectOption[]
   totalDebt: number
   totalOverpaid: number
+  /** Set when the date is past or source-group marks will be deleted. */
+  impact?: TransferImpact | null
   valid?: boolean
 }>()
 const emit = defineEmits<{ close: []; confirm: [] }>()

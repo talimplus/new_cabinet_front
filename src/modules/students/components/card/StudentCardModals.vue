@@ -20,6 +20,7 @@
     :group-options="transfer.groupOptions.value"
     :total-debt="transfer.totalDebt.value"
     :total-overpaid="transfer.totalOverpaid.value"
+    :impact="transfer.impact.value"
     :valid="transfer.valid.value"
     @close="transfer.close"
     @confirm="transfer.submit"

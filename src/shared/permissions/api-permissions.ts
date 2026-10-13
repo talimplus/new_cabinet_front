@@ -99,6 +99,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/student', permissions: [Permission.STUDENTS_VIEW], acceptsCenterId: true },
   { method: POST, path: '/students', permissions: [Permission.STUDENTS_CREATE] },
   { method: GET, path: '/students/:id', permissions: [Permission.STUDENTS_VIEW] },
+  { method: GET, path: '/students/:id/timeline', permissions: [Permission.STUDENTS_VIEW] },
   { method: PUT, path: '/students/:id', permissions: [Permission.STUDENTS_UPDATE] },
   { method: DELETE, path: '/students/:id', permissions: [Permission.STUDENTS_DELETE] },
 

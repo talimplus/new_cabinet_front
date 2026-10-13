@@ -399,6 +399,10 @@ Eski: `views/students/view.vue` (797 qator).
 - [x] O'quvchini tahrirlash modali (mavjud `StudentFormModal` qayta ishlatiladi)
 - [x] **Ko'chirish modali** (`previewTransfer` → `transferStudents`) — §2.4 dagi bandning bir qismi
       shu yerda bajarildi (bitta o'quvchi uchun); guruh kartasidagi ko'p tanlash qolmoqda.
+- [x] **Tarix (timeline)** — *eskisida yo'q, yangi funksiya (2026-10-13)*:
+      `GET /students/{id}/timeline`, `StudentTimeline.vue` (+ `Entry`, `Filters`),
+      `use-student-timeline.ts`, `use-timeline-entry.ts`. Bo'lim bo'yicha filtr,
+      kunlarga ajratish, 30 tadan "Yana ko'rsatish"; karta qayta yuklansa tarix ham yangilanadi.
 
 > ⚠️ Eski loyiha `detail.centerName` va `group.schedule` ni `GET /students/{id}`
 > dan o'qirdi — **backend ularni u yerda qaytarmaydi** (2026-09-24 jonli

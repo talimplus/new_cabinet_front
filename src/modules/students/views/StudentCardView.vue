@@ -16,6 +16,7 @@ import StudentTelegramSection from '../components/card/StudentTelegramSection.vu
 import StudentStatsCards from '../components/card/StudentStatsCards.vue'
 import StudentMonthsTable from '../components/card/StudentMonthsTable.vue'
 import StudentCardModals from '../components/card/StudentCardModals.vue'
+import StudentTimeline from '../components/card/StudentTimeline.vue'
 import type { StudentSummaryGroup } from '../interfaces/student-summary.interface'
 
 const { t } = useI18n()
@@ -72,10 +73,7 @@ const payable = computed(() => card.payableNow.value > 0)
       <StudentInfoCard :student="card.student.value" :can-transfer="canTransferStudents" @transfer="openTransfer" />
 
       <StudentTelegramSection
-        v-if="canViewStudents"
-        :student-id="studentId"
-        :student-name="card.fullName.value"
-        :can-edit="canEditStudent"
+        v-if="canViewStudents" :student-id="studentId" :student-name="card.fullName.value" :can-edit="canEditStudent"
       />
 
       <StudentStatsCards :totals="card.totals.value" />
@@ -88,6 +86,7 @@ const payable = computed(() => card.payableNow.value > 0)
       </div>
 
       <StudentMonthsTable :months="card.months.value" :loading="card.loading.value" />
+      <StudentTimeline v-if="canViewStudents" :student-id="studentId" :refresh-key="card.summary.value" />
     </template>
 
     <StudentCardModals

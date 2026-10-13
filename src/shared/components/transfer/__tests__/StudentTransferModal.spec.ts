@@ -89,6 +89,34 @@ describe('StudentTransferModal', () => {
     expect(document.body.textContent).toContain(t('payments.exclusion.calculating'))
   })
 
+  it('past date: shows the backdate warning and the marks to delete', () => {
+    mountModal({ impact: { past: true, attendanceToDelete: 4 }, totalDebt: 50000 })
+    const text = document.body.textContent ?? ''
+    expect(text).toContain(t('students.transfer.backdateWarning'))
+    expect(text).toContain(t('students.transfer.attendanceDeleted', { count: 4 }))
+    // The debt warning still shows next to it — they are independent.
+    expect(text).toContain(t('students.transfer.debtWarning', { amount: formatSom(50000) }))
+  })
+
+  it('today with marks: only the deletion line, no backdate text', () => {
+    mountModal({ impact: { past: false, attendanceToDelete: 1 } })
+    const text = document.body.textContent ?? ''
+    expect(text).not.toContain(t('students.transfer.backdateWarning'))
+    expect(text).toContain(t('students.transfer.attendanceDeleted', { count: 1 }))
+  })
+
+  it('past date without marks: no deletion line', () => {
+    mountModal({ impact: { past: true, attendanceToDelete: 0 } })
+    const text = document.body.textContent ?? ''
+    expect(text).toContain(t('students.transfer.backdateWarning'))
+    expect(text).not.toContain(t('students.transfer.attendanceDeleted', { count: 0 }))
+  })
+
+  it('shows nothing without an impact', () => {
+    mountModal({ impact: null })
+    expect(document.body.textContent).not.toContain(t('students.transfer.backdateWarning'))
+  })
+
   it('disables the submit button unless valid, and emits confirm', async () => {
     mountModal({ valid: false })
     expect(findButton(t('students.transfer.submit')).disabled).toBe(true)

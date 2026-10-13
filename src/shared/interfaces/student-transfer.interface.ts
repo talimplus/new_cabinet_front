@@ -2,6 +2,8 @@
 export interface TransferPreviewForm {
   studentIds: number[]
   fromGroupId: number
+  /** `YYYY-MM-DD`; when sent, each row carries `attendanceAfterDate`. */
+  transferDate?: string
 }
 
 /** POST /students/transfer/preview returns a BARE ARRAY of these. */
@@ -13,6 +15,16 @@ export interface TransferPreviewRow {
   debt: number
   /** Overpaid in the source group — carried over to the new group. */
   overpaid: number
+  /** Marks in the source group on/after `transferDate` — deleted by the transfer. */
+  attendanceAfterDate: number
+}
+
+/** What the chosen transfer date does beyond splitting the month. */
+export interface TransferImpact {
+  /** The date is before today: lessons already held move to the new group. */
+  past: boolean
+  /** Source-group attendance marks the transfer will delete. */
+  attendanceToDelete: number
 }
 
 /** Body for POST /students/transfer. */
@@ -34,6 +46,7 @@ export interface TransferResultRow {
   carriedOverAmount: number
   refundedAmount: number
   remainingDebtInSourceGroup: number
+  deletedAttendance: number
 }
 
 export interface TransferResponse {

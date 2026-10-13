@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { nextTick } from 'vue'
 import { setActivePinia, createPinia } from 'pinia'
 import { useStudentTransfer } from '../use-student-transfer'
 import type { TransferGroupOption } from '../use-student-transfer'
@@ -31,7 +32,10 @@ function makeTransfer(
 }
 
 function makeRow(overrides: Partial<TransferPreviewRow> = {}): TransferPreviewRow {
-  return { studentId: 1, firstName: 'Ali', lastName: 'Valiyev', debt: 0, overpaid: 0, ...overrides }
+  return {
+    studentId: 1, firstName: 'Ali', lastName: 'Valiyev', debt: 0, overpaid: 0, attendanceAfterDate: 0,
+    ...overrides,
+  }
 }
 
 function makeTransferResponse(overrides: Partial<TransferResponse> = {}): TransferResponse {
@@ -69,7 +73,9 @@ describe('useStudentTransfer', () => {
       expect(s.state.reason).toBe('')
       expect(s.state.closeSourceGroup).toBe(false)
       expect(s.state.previewing).toBe(false)
-      expect(mockedPreview).toHaveBeenCalledWith({ studentIds: [1], fromGroupId: 1 })
+      expect(mockedPreview).toHaveBeenCalledWith(
+        expect.objectContaining({ studentIds: [1], fromGroupId: 1, transferDate: expect.any(String) }),
+      )
       expect(s.groupOptions.value).toEqual([{ label: 'Dest', value: 2 }])
       expect(s.rows.value).toEqual([makeRow({ debt: 100, overpaid: 0 })])
     })
@@ -212,6 +218,109 @@ describe('useStudentTransfer', () => {
 
       expect(s.state.previewing).toBe(false)
       expect(s.rows.value).toEqual([])
+    })
+  })
+
+  describe('impact (marks to delete / past date)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 9, 13, 10, 0))
+    })
+    afterEach(() => vi.useRealTimers())
+
+    const flush = async () => {
+      await nextTick()
+      await Promise.resolve()
+      await Promise.resolve()
+    }
+
+    it('open() previews today right away (no date = today on the server)', async () => {
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      expect(mockedPreview).toHaveBeenCalledWith({ studentIds: [1], fromGroupId: 1, transferDate: '2026-10-13' })
+    })
+
+    it('is null for today/future with nothing to delete', async () => {
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      expect(s.impact.value).toBeNull()
+
+      s.state.date = new Date(2026, 9, 20)
+      await flush()
+      expect(s.impact.value).toBeNull()
+    })
+
+    it('warns about today\'s marks even without a past date', async () => {
+      mockedPreview.mockResolvedValueOnce([makeRow({ attendanceAfterDate: 1 })])
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      expect(s.impact.value).toEqual({ past: false, attendanceToDelete: 1 })
+    })
+
+    it('does not re-preview when today is picked explicitly (already previewed)', async () => {
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      mockedPreview.mockClear()
+      s.state.date = new Date(2026, 9, 13)
+      await flush()
+      expect(mockedPreview).not.toHaveBeenCalled()
+    })
+
+    it('a past date re-previews with it and sums the marks', async () => {
+      const s = makeTransfer([1, 2])
+      await s.open(1, 'Source')
+      mockedPreview.mockResolvedValueOnce([
+        makeRow({ studentId: 1, attendanceAfterDate: 4 }),
+        makeRow({ studentId: 2, attendanceAfterDate: 3 }),
+      ])
+
+      s.state.date = new Date(2026, 9, 1)
+      await flush()
+
+      expect(mockedPreview).toHaveBeenLastCalledWith({
+        studentIds: [1, 2], fromGroupId: 1, transferDate: '2026-10-01',
+      })
+      expect(s.impact.value).toEqual({ past: true, attendanceToDelete: 7 })
+    })
+
+    it('a past date with no marks still flags past', async () => {
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      s.state.date = new Date(2026, 9, 1)
+      await flush()
+      expect(s.impact.value).toEqual({ past: true, attendanceToDelete: 0 })
+    })
+
+    it('reopening resets to today without an extra preview', async () => {
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      s.state.date = new Date(2026, 9, 1)
+      await flush()
+      mockedPreview.mockClear()
+
+      await s.open(1, 'Source')
+      await flush()
+
+      expect(mockedPreview).toHaveBeenCalledTimes(1)
+      expect(mockedPreview).toHaveBeenCalledWith({ studentIds: [1], fromGroupId: 1, transferDate: '2026-10-13' })
+    })
+
+    it('drops a response overtaken by a newer date pick', async () => {
+      const s = makeTransfer([1])
+      await s.open(1, 'Source')
+      let resolveSlow: (rows: TransferPreviewRow[]) => void = () => {}
+      mockedPreview
+        .mockImplementationOnce(() => new Promise((r) => { resolveSlow = r }))
+        .mockResolvedValueOnce([makeRow({ attendanceAfterDate: 2 })])
+
+      s.state.date = new Date(2026, 9, 1)
+      await flush()
+      s.state.date = new Date(2026, 9, 8)
+      await flush()
+      resolveSlow([makeRow({ attendanceAfterDate: 9 })])
+      await flush()
+
+      expect(s.impact.value).toEqual({ past: true, attendanceToDelete: 2 })
     })
   })
 })

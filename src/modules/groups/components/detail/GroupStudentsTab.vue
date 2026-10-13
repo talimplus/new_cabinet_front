@@ -38,6 +38,7 @@
       :group-options="tx.transfer.groupOptions.value"
       :total-debt="tx.transfer.totalDebt.value"
       :total-overpaid="tx.transfer.totalOverpaid.value"
+      :impact="tx.transfer.impact.value"
       :valid="tx.transfer.valid.value"
       @close="tx.transfer.close"
       @confirm="tx.transfer.submit"
