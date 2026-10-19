@@ -2,6 +2,8 @@ import type { ReceiptStatus } from '@/shared/enums/receipt-status.enum'
 import type { PaymentMethod } from '@/shared/enums/payment-method.enum'
 import type { PayrollStatus } from '@/modules/payroll/enums/payroll-status.enum'
 import type { StaffDeductionType } from '../enums/staff-deduction-type.enum'
+import type { GroupStatus } from '@/modules/groups/enums/group-status.enum'
+import type { WeekDay } from '@/modules/groups/enums/week-day.enum'
 
 export interface StaffOverviewUser {
   id: number
@@ -107,6 +109,27 @@ export interface StaffOverview {
   deductions: StaffDeductionRow[]
   /** Null when no salary row exists for that month yet. */
   salary: StaffOverviewSalary | null
+  /** Teachers only: groups that are not finished (started first). Empty for other roles. */
+  groups: StaffTeacherGroup[]
+}
+
+/** One lesson slot of a teacher's group; `startTime` is "HH:mm". */
+export interface StaffTeacherGroupSchedule {
+  day: WeekDay
+  startTime: string
+}
+
+/** A group the employee teaches — `overview.groups[]`. */
+export interface StaffTeacherGroup {
+  id: number
+  name: string
+  status: GroupStatus
+  subject: string | null
+  room: string | null
+  studentsCount: number
+  startDate: string | null
+  endDate: string | null
+  schedules: StaffTeacherGroupSchedule[]
 }
 
 /** GET /staff/{userId}/deductions, and each row of `overview.deductions`. */

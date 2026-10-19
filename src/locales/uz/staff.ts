@@ -87,10 +87,23 @@ export default {
     reason: 'Sabab',
   },
 
+  groups: {
+    title: 'Guruhlari',
+    totalStudents: "Jami o'quvchilar: {count}",
+    name: 'Guruh',
+    subject: 'Fan',
+    schedule: 'Dars kunlari',
+    room: 'Xona',
+    students: "O'quvchilar",
+    period: 'Muddati',
+    status: 'Holati',
+  },
+
   empty: {
     late: "Bu oyda kechikish yo'q",
     receipts: "Topshirilmagan pul yo'q",
     deductions: "Jarima yozilmagan",
     months: "Ma'lumot yo'q",
+    groups: "Hozircha guruh biriktirilmagan",
   },
 }

@@ -38,6 +38,8 @@ export interface Group {
   /** `YYYY-MM-01` — the month the upcoming price starts. */
   upcomingFeeFromMonth?: string | null
   createdAt?: string
+  /** Students currently in the group (junction). Only `GET /groups` (paginated list) returns it. */
+  studentsCount?: number
   /** UI-only: per-row status-change spinner. */
   statusLoading?: boolean
 }

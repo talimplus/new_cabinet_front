@@ -38,6 +38,7 @@ export default {
   titles: {
     group: 'Guruh',
     syllabus: 'Kurs rejasi',
+    candidate: 'Nomzod',
   },
   menuToggle: 'Menyu',
   groups: {

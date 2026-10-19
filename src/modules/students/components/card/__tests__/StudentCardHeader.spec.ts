@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import StudentCardHeader from '../StudentCardHeader.vue'
-import { StudentStatus, STUDENT_STATUS_LABEL_KEYS } from '../../../enums/student-status.enum'
+import { StudentStatus, STUDENT_STATUS_LABEL_KEYS, STUDENT_STATUS_LIST_ROUTES } from '../../../enums/student-status.enum'
 import { formatSom } from '@/shared/utils/format-money'
-import { UiBadge } from '@/shared/components'
+import { UiBadge, UiBackButton } from '@/shared/components'
 import { t } from '@/locales'
 import type { StudentSummaryProfile } from '../../../interfaces/student-summary.interface'
 
@@ -23,7 +23,11 @@ function makeStudent(overrides: Partial<StudentSummaryProfile> = {}): StudentSum
 }
 
 function mountHeader(props: Record<string, unknown> = {}) {
-  return mount(StudentCardHeader, { props: { student: makeStudent(), ...props } })
+  // The back button is covered by its own spec; stubbed so button counts stay about the actions.
+  return mount(StudentCardHeader, {
+    props: { student: makeStudent(), ...props },
+    global: { stubs: { UiBackButton: true } },
+  })
 }
 
 describe('StudentCardHeader', () => {
@@ -54,6 +58,14 @@ describe('StudentCardHeader', () => {
     const wrapper = mountHeader({ student: null })
     expect(wrapper.text()).not.toContain('undefined')
     expect(wrapper.findComponent(UiBadge).exists()).toBe(false)
+  })
+
+  it('has a back button that falls back to the list of the student\'s status', () => {
+    for (const status of Object.values(StudentStatus)) {
+      const back = mountHeader({ student: makeStudent({ status }) }).findComponent(UiBackButton)
+      expect(back.props('fallback')).toEqual({ name: STUDENT_STATUS_LIST_ROUTES[status] })
+    }
+    expect(mountHeader({ student: null }).findComponent(UiBackButton).props('fallback')).toEqual({ name: 'students' })
   })
 
   it('shows the edit button only with canEdit and emits edit on click', async () => {

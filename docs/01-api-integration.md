@@ -323,6 +323,8 @@ Employee row (verified):
   "center": {…}, "userRole": { "id","key","name","baseRole","permissions",
                                "isSystem","isLocked","createdAt","updatedAt" } }
 ```
+A teacher's groups are **not** on this row — they come with the employee page
+(`overview.groups`, §5.11).
 `GET /users/me` additionally returns `organization {…}`, `centerId`,
 `organizationId`, `roleId`, `roleName`.
 
@@ -579,6 +581,9 @@ correcting a mistake.
 ```
 `upcomingMonthlyFee` / `upcomingFeeFromMonth` are set when a fee change is
 pending for next month — the list shows "from <date>: <fee>".
+`studentsCount` (number, 2026-10-19) — students currently in the group (the
+`students_groups_groups` junction, any status — same set as the detail page's
+Students tab). Only the paginated `GET /groups` returns it, not `/groups/all*`.
 
 Changing `endDate` recalculates the group's status **and its open payments**.
 Starting a group requires `endDate` and `roomId`; missing ones come back as a
@@ -877,8 +882,18 @@ StaffSalary *(old-project verified)*:
               "unsettledCount","unsettledAmount","rejectedCount","rejectedAmount",
               "deductionThisMonth","deductionOutstanding" },
   "months":[…], "lateRecords":[…], "attendanceRecords":[…],
-  "unsettledReceipts":[…], "deductions":[…], "salary":null }
+  "unsettledReceipts":[…], "deductions":[…], "salary":null,
+  "groups":[ { "id":195, "name":"1B", "status":"started", "subject":"Koreys tili",
+               "room":"3-xona", "studentsCount":9, "startDate":"2026-07-02",
+               "endDate":null,
+               "schedules":[ { "day":"tuesday", "startTime":"14:00" } ] } ] }
 ```
+`groups` (2026-10-19, verified against the DB) — only for `user.role = teacher`:
+the groups they teach that are not `finished`, `started` first, then by name;
+`schedules` are in week order, `startTime` is `HH:mm`; `studentsCount` counts
+current members. Every other role gets `[]`. The page shows them in the
+"Guruhlari" table (`StaffGroupsCard`); a name links to `/groups/:id` only with
+`groups.view`.
 Element shapes of `months` / `deductions` / `unsettledReceipts` / `salary` are in
 the old project's `staff.types.ts` *(old-project verified)*. A deduction larger
 than one month's salary carries over automatically to later months. A deduction
@@ -995,6 +1010,8 @@ name and phone digits.
 
 Row: `{ id, centerId, firstName, lastName, phone, experience, birthYear, subjectId,
 subject: { id, name } | null, address, comment, createdAt, updatedAt }`.
+`GET /candidates/{id}` and `PUT` return the same row shape (`toView`) — the
+candidate card page (`/candidates/:id`, 2026-10-19) reads and edits through them.
 
 ### 5.16 Syllabuses + AI (12)
 | Method | Path | Params / Body |

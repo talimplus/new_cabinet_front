@@ -38,6 +38,7 @@ export default {
   titles: {
     group: 'Группа',
     syllabus: 'Учебный план',
+    candidate: 'Кандидат',
   },
   menuToggle: 'Меню',
   groups: {

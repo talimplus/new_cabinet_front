@@ -23,6 +23,7 @@ export default {
     phone: 'Telefon',
     status: 'Holati',
     followUpDate: "Bog'lanish sanasi",
+    comment: 'Izoh',
   },
   filter: {
     status: 'Holati',

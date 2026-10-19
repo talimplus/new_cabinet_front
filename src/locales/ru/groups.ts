@@ -14,6 +14,7 @@ export default {
     endDate: 'Дата окончания',
     monthlyFee: 'Стоимость курса',
     upcomingFee: 'с {date}: {fee}',
+    studentsCount: 'Учеников',
     room: 'Кабинет',
     teacher: 'Преподаватель',
   },

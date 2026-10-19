@@ -177,6 +177,12 @@ const appChildren: RouteRecordRaw[] = [
     meta: { titleKey: 'layout.menu.candidates', permission: [Permission.CANDIDATES_VIEW] },
   },
   {
+    path: 'candidates/:id',
+    name: 'candidate-detail',
+    component: () => import('@/modules/candidates/views/CandidateDetailView.vue'),
+    meta: { titleKey: 'layout.titles.candidate', permission: [Permission.CANDIDATES_VIEW] },
+  },
+  {
     path: 'expenses',
     name: 'expenses',
     component: () => import('@/modules/expenses/views/ExpensesView.vue'),

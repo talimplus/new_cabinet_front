@@ -9,6 +9,12 @@ export async function fetchCandidates(params: CandidatesParams): Promise<Paginat
   return data
 }
 
+/** GET /candidates/:id — the same shape as a list row. */
+export async function fetchCandidate(id: number): Promise<Candidate> {
+  const { data } = await http.get<Candidate>(`/candidates/${id}`)
+  return data
+}
+
 export async function createCandidate(form: CandidateForm): Promise<Candidate> {
   const { data } = await http.post<Candidate>('/candidates', form)
   return data

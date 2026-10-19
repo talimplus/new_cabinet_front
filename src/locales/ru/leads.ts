@@ -23,6 +23,7 @@ export default {
     phone: 'Телефон',
     status: 'Статус',
     followUpDate: 'Дата связи',
+    comment: 'Комментарий',
   },
   filter: {
     status: 'Статус',

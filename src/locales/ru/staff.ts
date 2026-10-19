@@ -87,10 +87,23 @@ export default {
     reason: 'Причина',
   },
 
+  groups: {
+    title: 'Группы',
+    totalStudents: 'Всего учеников: {count}',
+    name: 'Группа',
+    subject: 'Предмет',
+    schedule: 'Дни занятий',
+    room: 'Кабинет',
+    students: 'Ученики',
+    period: 'Срок',
+    status: 'Статус',
+  },
+
   empty: {
     late: 'В этом месяце опозданий нет',
     receipts: 'Нет несданных денег',
     deductions: 'Штрафов нет',
     months: 'Нет данных',
+    groups: 'Группы пока не назначены',
   },
 }

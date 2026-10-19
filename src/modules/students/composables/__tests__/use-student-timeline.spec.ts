@@ -133,11 +133,19 @@ describe('useStudentTimeline', () => {
         item({ occurredAt: '2026-09-14' }),
         item({ occurredAt: '2026-09-10' }),
       ])
+      // API order is newest-first; the card shows oldest-first.
       expect(tl.days.value.map((d) => [d.key, d.entries.length])).toEqual([
-        ['2026-09-14', 2],
         ['2026-09-10', 1],
+        ['2026-09-14', 2],
       ])
-      expect(tl.days.value[0]!.label).toBe(formatDate('2026-09-14'))
+      expect(tl.days.value[0]!.label).toBe(formatDate('2026-09-10'))
+    })
+
+    it('reverses the API order so the oldest entry comes first', async () => {
+      const newest = item({ occurredAt: '2026-09-14' })
+      const oldest = item({ occurredAt: '2026-09-01' })
+      const tl = await loaded([newest, oldest])
+      expect(tl.days.value.flatMap((d) => d.entries.map((e) => e.id))).toEqual([oldest.id, newest.id])
     })
 
     it('timestamps are keyed by the local calendar date', async () => {
@@ -166,9 +174,9 @@ describe('useStudentTimeline', () => {
         item({ occurredAt: '2026-10-11' }),
       ])
       expect(tl.days.value.map((d) => d.label)).toEqual([
-        t('students.timeline.today'),
-        t('students.timeline.yesterday'),
         formatDate('2026-10-11'),
+        t('students.timeline.yesterday'),
+        t('students.timeline.today'),
       ])
     })
   })

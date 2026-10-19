@@ -104,6 +104,7 @@ function makeOverview(overrides: Partial<StaffOverview> = {}): StaffOverview {
       status: PayrollStatus.UNPAID,
       appliedDeductions: [],
     },
+    groups: [],
     ...overrides,
   }
 }

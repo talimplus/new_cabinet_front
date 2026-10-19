@@ -1,5 +1,6 @@
 <template>
   <div class="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4 shadow-card">
+    <UiBackButton :fallback="{ name: backRoute }" />
     <span
       class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary-soft text-lg font-bold text-on-primary-soft"
     >
@@ -39,13 +40,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiBadge, UiButton, UiIcon } from '@/shared/components'
+import { UiBadge, UiButton, UiIcon, UiBackButton } from '@/shared/components'
 import { Pencil, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatPhone } from '@/shared/utils/format-phone'
 import {
   STUDENT_STATUS_LABEL_KEYS,
   STUDENT_STATUS_VARIANTS,
+  STUDENT_STATUS_LIST_ROUTES,
 } from '../../enums/student-status.enum'
 import type { StudentSummaryProfile } from '../../interfaces/student-summary.interface'
 
@@ -63,6 +65,7 @@ const emit = defineEmits<{ edit: []; delete: [] }>()
 const fullName = computed(() =>
   props.student ? `${props.student.firstName} ${props.student.lastName}`.trim() : '',
 )
+const backRoute = computed(() => (props.student ? STUDENT_STATUS_LIST_ROUTES[props.student.status] : 'students'))
 const initials = computed(() =>
   `${props.student?.firstName?.[0] ?? ''}${props.student?.lastName?.[0] ?? ''}`.toUpperCase(),
 )

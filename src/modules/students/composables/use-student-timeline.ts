@@ -69,9 +69,14 @@ export function useStudentTimeline(studentId: () => number | null) {
     limit.value = TIMELINE_PAGE_SIZE
   }
 
-  const filtered = computed(() =>
-    category.value ? items.value.filter((i) => i.category === category.value) : items.value,
-  )
+  /**
+   * Backend returns newest → oldest; the card reads like a story instead —
+   * oldest at the top, the latest action at the bottom (and behind "show more").
+   */
+  const filtered = computed(() => {
+    const chronological = [...items.value].reverse()
+    return category.value ? chronological.filter((i) => i.category === category.value) : chronological
+  })
 
   /** Events per category — only the buckets that have any become filter chips. */
   const counts = computed(() => {

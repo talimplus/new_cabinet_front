@@ -36,3 +36,12 @@ export const STUDENT_STATUS_TRANSITIONS: Record<StudentStatus, StudentStatus[]> 
   [StudentStatus.STOPPED]: [StudentStatus.NEW],
   [StudentStatus.FINISHED]: [StudentStatus.NEW],
 }
+
+/** The list page (route name) each status lives on — where "back" lands when the card was opened directly. */
+export const STUDENT_STATUS_LIST_ROUTES: Record<StudentStatus, string> = {
+  [StudentStatus.NEW]: 'reception',
+  [StudentStatus.ACTIVE]: 'students',
+  [StudentStatus.IGNORED]: 'ignored',
+  [StudentStatus.STOPPED]: 'stopped',
+  [StudentStatus.FINISHED]: 'finished',
+}

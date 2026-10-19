@@ -13,6 +13,10 @@
     <template #cell-followUpDate="{ row }">
       <span class="font-mono">{{ formatDate((row as Lead).followUpDate) }}</span>
     </template>
+    <template #cell-comment="{ row }">
+      <p v-if="(row as Lead).comment" class="min-w-48 max-w-sm whitespace-pre-line break-words text-xs leading-relaxed text-muted-foreground">{{ (row as Lead).comment }}</p>
+      <span v-else class="text-muted-foreground">—</span>
+    </template>
     <template #cell-status="{ row }">
       <LeadStatusCell
         :status="(row as Lead).status"
@@ -71,6 +75,7 @@ const columns = computed<TableColumn[]>(() => [
   { key: 'phone', label: t('leads.table.phone') },
   { key: 'status', label: t('leads.table.status') },
   { key: 'followUpDate', label: t('leads.table.followUpDate') },
+  { key: 'comment', label: t('leads.table.comment') },
 ])
 
 // Surname first, like every student table.

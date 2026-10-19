@@ -29,7 +29,7 @@ function makeCandidate(overrides: Partial<Candidate> = {}): Candidate {
 const cells = (wrapper: ReturnType<typeof mount>) => wrapper.findAll('tbody td').map((td) => td.text())
 
 describe('CandidatesTable', () => {
-  it('renders surname-first name, formatted phone, subject and text columns', () => {
+  it('renders surname-first name, formatted phone, subject and address', () => {
     const wrapper = mount(CandidatesTable, { props: { rows: [makeCandidate()] } })
     const row = cells(wrapper)
 
@@ -37,18 +37,25 @@ describe('CandidatesTable', () => {
     expect(row).toContain(formatPhone('+998977522014'))
     expect(row).toContain('1995')
     expect(row).toContain('Matematika')
-    expect(row).toContain('3 yil, 21-maktab')
     expect(row).toContain('Toshkent')
-    expect(row).toContain('Yaxshi nomzod')
     expect(row).toContain(formatDate('2026-09-01T10:00:00.000Z'))
   })
 
-  it('shows a dash for a missing subject, address and comment', () => {
+  it('shows a dash for a missing subject and address', () => {
     const wrapper = mount(CandidatesTable, {
-      props: { rows: [makeCandidate({ subject: null, subjectId: null, address: null, comment: '' })] },
+      props: { rows: [makeCandidate({ subject: null, subjectId: null, address: null })] },
     })
     const dashes = cells(wrapper).filter((text) => text === '—')
-    expect(dashes).toHaveLength(3)
+    expect(dashes).toHaveLength(2)
+  })
+
+  it('has no experience or comment column — they are on the candidate page', () => {
+    const wrapper = mount(CandidatesTable, { props: { rows: [makeCandidate()] } })
+    const head = wrapper.find('thead').text()
+    expect(head).not.toContain(t('candidates.detail.experience'))
+    expect(head).not.toContain(t('candidates.detail.comment'))
+    expect(cells(wrapper)).not.toContain('3 yil, 21-maktab')
+    expect(cells(wrapper)).not.toContain('Yaxshi nomzod')
   })
 
   it('renders the empty text when there are no rows', () => {
@@ -56,19 +63,24 @@ describe('CandidatesTable', () => {
     expect(wrapper.text()).toContain(t('candidates.empty'))
   })
 
-  it('hides the action buttons without canManage', () => {
-    const wrapper = mount(CandidatesTable, { props: { rows: [makeCandidate()] } })
-    expect(wrapper.findAll('tbody button')).toHaveLength(0)
+  it('shows only the view button without canManage, and it emits view', async () => {
+    const candidate = makeCandidate()
+    const wrapper = mount(CandidatesTable, { props: { rows: [candidate] } })
+    const buttons = wrapper.findAll('tbody button')
+    expect(buttons).toHaveLength(1)
+
+    await buttons[0]!.trigger('click')
+    expect(wrapper.emitted('view')?.[0]).toEqual([candidate])
   })
 
-  it('emits edit and delete with the row when canManage', async () => {
+  it('emits view, edit and delete with the row when canManage', async () => {
     const candidate = makeCandidate()
     const wrapper = mount(CandidatesTable, { props: { rows: [candidate], canManage: true } })
     const buttons = wrapper.findAll('tbody button')
-    expect(buttons).toHaveLength(2)
+    expect(buttons).toHaveLength(3)
 
-    await buttons[0]!.trigger('click')
     await buttons[1]!.trigger('click')
+    await buttons[2]!.trigger('click')
 
     expect(wrapper.emitted('edit')?.[0]).toEqual([candidate])
     expect(wrapper.emitted('delete')?.[0]).toEqual([candidate])

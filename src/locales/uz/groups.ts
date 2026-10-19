@@ -14,6 +14,7 @@ export default {
     endDate: 'Tugash sanasi',
     monthlyFee: 'Kurs summasi',
     upcomingFee: '{date} dan: {fee}',
+    studentsCount: "O'quvchilar",
     room: 'Xona',
     teacher: 'Ustoz',
   },

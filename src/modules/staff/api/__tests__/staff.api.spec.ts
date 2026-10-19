@@ -88,6 +88,7 @@ const overview: StaffOverview = {
     status: PayrollStatus.UNPAID,
     appliedDeductions: [],
   },
+  groups: [],
 }
 
 const deductionRow: StaffDeductionRow = {

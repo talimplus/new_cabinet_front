@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center gap-3">
-      <UiIconButton :icon="ArrowLeft" :label="t('common.back')" @click="router.back()" />
+      <UiBackButton :fallback="{ name: 'groups' }" />
       <h1 class="text-lg font-bold text-foreground">
         {{ group?.name ?? t('layout.titles.group') }}
       </h1>
@@ -44,9 +44,8 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { UiSpinner, UiIconButton, UiTabs } from '@/shared/components'
-import { ArrowLeft } from '@/shared/icons'
+import { useRoute } from 'vue-router'
+import { UiSpinner, UiBackButton, UiTabs } from '@/shared/components'
 import GroupAttendanceTab from '../components/detail/GroupAttendanceTab.vue'
 import GroupStudentsTab from '../components/detail/GroupStudentsTab.vue'
 import GroupInfoTab from '../components/detail/GroupInfoTab.vue'
@@ -60,7 +59,6 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const route = useRoute()
-const router = useRouter()
 const groupId = Number(route.params.id)
 
 const { group, students, loading, loadingStudents, activeTab, tabs, canEditPlan, canTransfer, load } =

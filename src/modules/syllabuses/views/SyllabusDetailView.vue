@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { UiButton, UiBadge, UiIcon, UiIconButton, UiSpinner } from '@/shared/components'
-import { ArrowLeft, Plus, BookOpen, Pencil } from '@/shared/icons'
+import { UiButton, UiBadge, UiIcon, UiIconButton, UiBackButton, UiSpinner } from '@/shared/components'
+import { Plus, BookOpen, Pencil } from '@/shared/icons'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { useSyllabusDetail } from '../composables/use-syllabus-detail'
 import TopicList from '../components/topics/TopicList.vue'
@@ -24,13 +24,7 @@ onMounted(s.load)
 
   <div v-else-if="s.syllabus.value" class="space-y-4">
     <header class="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-4">
-      <RouterLink
-        to="/syllabuses"
-        class="flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-muted md:size-9"
-        :aria-label="t('syllabuses.back')"
-      >
-        <UiIcon :icon="ArrowLeft" :size="18" />
-      </RouterLink>
+      <UiBackButton :fallback="{ name: 'syllabuses' }" :label="t('syllabuses.back')" />
       <div class="min-w-0 flex-1">
         <h1 class="truncate text-lg font-bold text-foreground">{{ s.syllabus.value.name }}</h1>
         <p v-if="s.syllabus.value.description" class="mt-0.5 text-sm text-muted-foreground">

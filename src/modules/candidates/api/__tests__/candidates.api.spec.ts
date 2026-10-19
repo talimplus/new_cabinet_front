@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchCandidates, createCandidate, updateCandidate, deleteCandidate } from '../candidates.api'
+import { fetchCandidates, fetchCandidate, createCandidate, updateCandidate, deleteCandidate } from '../candidates.api'
 import { http } from '@/shared/api/http'
 import type { Candidate } from '../../interfaces/candidate.interface'
 import type { CandidateForm } from '../../interfaces/candidate-form.interface'
@@ -35,6 +35,16 @@ describe('candidates.api', () => {
       params: { search: 'ali', subjectId: 2, page: 1, perPage: 20 },
     })
     expect(result).toEqual(body)
+  })
+
+  it('fetchCandidate GETs /candidates/{id} and returns the candidate', async () => {
+    const candidate = { id: 7, firstName: 'Ali' } as Candidate
+    mockedHttp.get.mockResolvedValueOnce({ data: candidate })
+
+    const result = await fetchCandidate(7)
+
+    expect(mockedHttp.get).toHaveBeenCalledWith('/candidates/7')
+    expect(result).toEqual(candidate)
   })
 
   it('createCandidate POSTs the form to /candidates and returns the created candidate', async () => {

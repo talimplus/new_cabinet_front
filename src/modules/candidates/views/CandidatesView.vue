@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { GenericObject } from 'vee-validate'
 import { UiButton, UiInput, UiSelect, UiPagination, UiIcon } from '@/shared/components'
@@ -13,6 +14,7 @@ import CandidateFormModal from '../components/CandidateFormModal.vue'
 import CandidateDeleteDialog from '../components/CandidateDeleteDialog.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const { canManageCandidates } = usePermissions()
 const c = useCandidates()
@@ -71,6 +73,7 @@ async function onSubmit(values: GenericObject) {
       :loading="c.loading.value"
       :row-offset="rowOffset"
       :can-manage="canManageCandidates"
+      @view="(row) => router.push({ name: 'candidate-detail', params: { id: row.id } })"
       @edit="c.openEdit"
       @delete="c.requestDelete"
     />

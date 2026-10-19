@@ -18,6 +18,7 @@ vi.mock('../../components/StaffOverviewCard.vue', () => ({
 const routes = [
   { path: '/my-performance', component: StaffPerformanceView },
   { path: '/users/:id', component: StaffPerformanceView },
+  { path: '/users', name: 'users', component: { template: '<div />' } },
 ]
 
 function makeRouter() {
@@ -55,14 +56,25 @@ describe('StaffPerformanceView', () => {
     expect(backButton.exists()).toBe(true)
   })
 
-  it('calls router.back() when the back button is clicked', async () => {
+  it('goes back to the previous in-app page when there is one', async () => {
+    window.history.replaceState({ back: '/users' }, '')
     const { wrapper, router } = await mountAt('/users/49')
     const backSpy = vi.spyOn(router, 'back').mockImplementation(() => {})
 
-    const backButton = wrapper.find('button[aria-label="' + t('common.back') + '"]')
-    await backButton.trigger('click')
+    await wrapper.find('button[aria-label="' + t('common.back') + '"]').trigger('click')
 
     expect(backSpy).toHaveBeenCalledTimes(1)
+    window.history.replaceState(null, '')
+  })
+
+  it('opens the staff list when the page was opened directly', async () => {
+    window.history.replaceState(null, '')
+    const { wrapper, router } = await mountAt('/users/49')
+    const pushSpy = vi.spyOn(router, 'push')
+
+    await wrapper.find('button[aria-label="' + t('common.back') + '"]').trigger('click')
+
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'users' })
   })
 
   it('passes userId=null and disables actions on /my-performance', async () => {

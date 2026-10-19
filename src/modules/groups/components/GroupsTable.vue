@@ -27,6 +27,9 @@
     <template #cell-status="{ row }">
       <GroupStatusCell :status="(row as Group).status" :can-edit="canChangeStatus" @change="(s) => emit('status', row as Group, s)" />
     </template>
+    <template #cell-studentsCount="{ row }">
+      <span class="font-mono">{{ (row as Group).studentsCount ?? '—' }}</span>
+    </template>
     <template #cell-room="{ row }">{{ (row as Group).room?.name ?? '—' }}</template>
     <template #cell-teacher="{ row }">{{ teacherName(row as Group) }}</template>
     <template #actions="{ row }">
@@ -73,6 +76,7 @@ const columns = computed(() => [
   { key: 'startDate', label: t('groups.table.startDate') },
   { key: 'endDate', label: t('groups.table.endDate') },
   { key: 'monthlyFee', label: t('groups.table.monthlyFee'), align: 'right' as const },
+  { key: 'studentsCount', label: t('groups.table.studentsCount'), align: 'right' as const },
   { key: 'status', label: t('groups.table.status') },
   { key: 'room', label: t('groups.table.room') },
   { key: 'teacher', label: t('groups.table.teacher') },

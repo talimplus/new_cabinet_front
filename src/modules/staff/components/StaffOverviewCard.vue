@@ -12,6 +12,8 @@
 
     <StaffOverviewStats :summary="s.data.value.summary" />
 
+    <StaffGroupsCard v-if="s.data.value.user.role === UserRole.TEACHER" :groups="s.data.value.groups ?? []" />
+
     <StaffSalaryCard
       v-if="s.salary.value"
       :salary="s.salary.value"
@@ -51,9 +53,11 @@ import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiSpinner, UiTabs, UiButton } from '@/shared/components'
 import { usePermissions } from '@/shared/composables/use-permissions'
+import { UserRole } from '@/shared/enums/user-role.enum'
 import { useStaffOverview } from '../composables/use-staff-overview'
 import StaffOverviewHeader from './StaffOverviewHeader.vue'
 import StaffOverviewStats from './StaffOverviewStats.vue'
+import StaffGroupsCard from './StaffGroupsCard.vue'
 import StaffSalaryCard from './StaffSalaryCard.vue'
 import StaffOverviewTabBody from './StaffOverviewTabBody.vue'
 import StaffOverviewDialogs from './StaffOverviewDialogs.vue'
