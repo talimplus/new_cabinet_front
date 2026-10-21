@@ -11,6 +11,8 @@
       :placeholder="placeholder"
       :disabled="disabled"
       :clearable="clearable"
+      :min-date="minDate"
+      :max-date="maxDate"
       :auto-apply="!enableTime"
       :teleport="true"
       :state="errorMessage ? false : undefined"
@@ -39,6 +41,9 @@ interface Props extends FormControlProps<DateModel> {
   required?: boolean
   disabled?: boolean
   clearable?: boolean
+  /** Days before / after these are disabled in the calendar. */
+  minDate?: Date
+  maxDate?: Date
 }
 
 const props = withDefaults(defineProps<Props>(), {

@@ -275,11 +275,6 @@ export default {
     subtitle: 'Все действия, связанные с учеником',
     empty: 'В истории пока ничего нет',
     emptyFiltered: 'В этом разделе нет событий',
-    loadError: 'Не удалось загрузить историю',
-    retry: 'Повторить',
-    showMore: 'Показать ещё ({count})',
-    today: 'Сегодня',
-    yesterday: 'Вчера',
     filters: {
       all: 'Все',
       status: 'Статус',

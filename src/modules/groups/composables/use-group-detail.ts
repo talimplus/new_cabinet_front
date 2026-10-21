@@ -47,6 +47,9 @@ export function useGroupDetail(groupId: number) {
     if (perms.canViewStudents.value)
       list.push({ key: GroupTab.STUDENTS, labelKey: GROUP_TAB_LABEL_KEYS[GroupTab.STUDENTS] })
     list.push({ key: GroupTab.INFO, labelKey: GROUP_TAB_LABEL_KEYS[GroupTab.INFO] })
+    // The timeline needs only `groups.view` — the page's own route key.
+    if (perms.canViewGroups.value)
+      list.push({ key: GroupTab.TIMELINE, labelKey: GROUP_TAB_LABEL_KEYS[GroupTab.TIMELINE] })
     return list
   })
 

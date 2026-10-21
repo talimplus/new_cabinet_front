@@ -90,6 +90,15 @@ export default {
     forbidden: "Sizda bu amalni bajarish uchun ruxsat yo'q.",
     unknown: "Xatolik yuz berdi. Qayta urinib ko'ring.",
   },
+  timeline: {
+    loadError: "Tarixni yuklab bo'lmadi",
+    retry: 'Qayta urinish',
+    showMore: "Yana ko'rsatish ({count})",
+    today: 'Bugun',
+    yesterday: 'Kecha',
+    expand: "Ro'yxatni ochish ({count})",
+    collapse: 'Yopish',
+  },
   update: {
     title: 'Yangi versiya chiqdi',
     message: "Kabinet yangilandi. Yangi imkoniyatlar va tuzatishlar uchun sahifani yangilang.",

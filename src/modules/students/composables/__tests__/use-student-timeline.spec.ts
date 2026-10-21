@@ -175,8 +175,8 @@ describe('useStudentTimeline', () => {
       ])
       expect(tl.days.value.map((d) => d.label)).toEqual([
         formatDate('2026-10-11'),
-        t('students.timeline.yesterday'),
-        t('students.timeline.today'),
+        t('common.timeline.yesterday'),
+        t('common.timeline.today'),
       ])
     })
   })

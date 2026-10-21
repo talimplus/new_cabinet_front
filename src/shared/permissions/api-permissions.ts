@@ -120,6 +120,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   // ---- groups ----
   { method: GET, path: '/groups/all', permissions: [Permission.GROUPS_VIEW], acceptsCenterId: true },
   { method: GET, path: '/groups/:id/pauses', permissions: [Permission.GROUPS_VIEW] },
+  { method: GET, path: '/groups/:id/timeline', permissions: [Permission.GROUPS_VIEW] },
   { method: POST, path: '/groups/:id/pauses', permissions: [Permission.GROUPS_UPDATE] },
   { method: DELETE, path: '/groups/:id/pauses/:pauseId', permissions: [Permission.GROUPS_UPDATE] },
   { method: GET, path: '/group/all', permissions: [Permission.GROUPS_VIEW], acceptsCenterId: true },

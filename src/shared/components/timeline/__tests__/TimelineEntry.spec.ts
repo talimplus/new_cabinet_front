@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import StudentTimelineEntry from '../StudentTimelineEntry.vue'
-import { TimelineTone, TIMELINE_TONE_MARKER, TIMELINE_TONE_TEXT } from '../../../enums/timeline-tone.enum'
+import TimelineEntry from '../TimelineEntry.vue'
+import TimelineChildren from '../TimelineChildren.vue'
+import { TimelineTone, TIMELINE_TONE_MARKER, TIMELINE_TONE_TEXT } from '@/shared/enums/timeline-tone.enum'
 import { Users } from '@/shared/icons'
-import type { TimelineEntryView } from '../../../interfaces/student-timeline-entry.interface'
+import type { TimelineEntryView } from '@/shared/interfaces/timeline-entry.interface'
 
 function entry(over: Partial<TimelineEntryView> = {}): TimelineEntryView {
   return {
@@ -23,9 +24,9 @@ function entry(over: Partial<TimelineEntryView> = {}): TimelineEntryView {
 }
 
 const mountEntry = (e: TimelineEntryView, last = false) =>
-  mount(StudentTimelineEntry, { props: { entry: e, last } })
+  mount(TimelineEntry, { props: { entry: e, last } })
 
-describe('StudentTimelineEntry', () => {
+describe('TimelineEntry', () => {
   it('renders the title and tone-coloured marker', () => {
     const w = mountEntry(entry())
     expect(w.text()).toContain('Title text')
@@ -59,7 +60,7 @@ describe('StudentTimelineEntry', () => {
   })
 
   it('renders meta time, actor and group, and hides the row when all are empty', () => {
-    const w = mountEntry(entry({ time: '14:05', actor: 'Teacher X', group: 'Feruza-2' }))
+    const w = mountEntry(entry({ time: '14:05', actor: 'Teacher X', group: { text: 'Feruza-2', to: null } }))
     expect(w.text()).toContain('14:05')
     expect(w.text()).toContain('Teacher X')
     expect(w.text()).toContain('Feruza-2')
@@ -76,5 +77,30 @@ describe('StudentTimelineEntry', () => {
     const connector = 'span.absolute[aria-hidden="true"]'
     expect(mountEntry(entry(), false).find(connector).exists()).toBe(true)
     expect(mountEntry(entry(), true).find(connector).exists()).toBe(false)
+  })
+
+  it('renders the subject before the title, as a link when `to` is set', () => {
+    const RouterLink = { props: ['to'], template: '<a class="rl"><slot /></a>' }
+    const w = mount(TimelineEntry, {
+      props: { entry: entry({ subject: { text: 'Ali', to: { name: 'student-card', params: { id: 1 } } } }) },
+      global: { stubs: { RouterLink } },
+    })
+    expect(w.get('a.rl').text()).toBe('Ali')
+    const p = w.get('p.font-semibold').text()
+    expect(p.indexOf('Ali')).toBeLessThan(p.indexOf('Title text'))
+    const plain = mountEntry(entry({ subject: { text: 'Vali', to: null } }))
+    expect(plain.find('a').exists()).toBe(false)
+    expect(plain.text()).toContain('Vali')
+  })
+
+  it('fades a planned entry', () => {
+    expect(mountEntry(entry({ planned: true })).get('li').classes()).toContain('opacity-60')
+    expect(mountEntry(entry()).get('li').classes()).not.toContain('opacity-60')
+  })
+
+  it('renders TimelineChildren only when there are children', () => {
+    expect(mountEntry(entry()).findComponent(TimelineChildren).exists()).toBe(false)
+    const w = mountEntry(entry({ children: [entry({ id: 'c1' })] }))
+    expect(w.findComponent(TimelineChildren).exists()).toBe(true)
   })
 })

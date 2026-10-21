@@ -8,9 +8,11 @@
         <!--
           Keying the view on the active center remounts the page when the
           header's center changes, so every screen reloads its data without
-          each one needing its own watcher (docs §4.3).
+          each one needing its own watcher (docs §4.3). The path is in the key
+          too: /groups/1 → /groups/2 (a link on the group timeline) must load
+          the other group, not keep the mounted one. Query changes don't remount.
         -->
-        <RouterView :key="`center-${scope.activeCenterId ?? 'all'}`" />
+        <RouterView :key="`center-${scope.activeCenterId ?? 'all'}:${route.path}`" />
       </main>
     </div>
   </div>

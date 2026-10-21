@@ -547,6 +547,7 @@ are **numbers**, not numeric strings.
 | GET | `/groups/{id}/pauses` | — | `[{ id, groupId, fromDate, toDate, reason, createdAt }]` (newest first) |
 | POST | `/groups/{id}/pauses` | `{ fromDate*, toDate*, reason* }` (`YYYY-MM-DD`, inclusive) | pause · **422** on overlap (`fromDate`) or when attendance exists inside the range |
 | DELETE | `/groups/{id}/pauses/{pauseId}` | — | `{ success: true }` |
+| GET | `/groups/{id}/timeline` | — (`groups.view`) | **bare array**, newest first — see *Group timeline* below |
 | GET | `/group/all` | alias | — |
 
 `CreateGroupDto`: `name*, subjectId*, teacherId*, roomId*, monthlyFee*, days*[{day,startTime}],
@@ -558,6 +559,35 @@ changed): lessons before that day keep the old schedule (journal, billing,
 lateness) and the old teacher keeps the commission for them. The form sends
 them only on a real change (2026-09-27). A teacher must be a `teacher`-type
 user (422 `teacherId` otherwise).
+
+**`teacherEffectiveFrom` 422s** (backend ba185ef, verified live 2026-10-21):
+`{ errors: { teacherEffectiveFrom: "<uz text>" } }` (a string, not an array)
+when the day is in the future, or when the replaced teacher's salary for that
+month is already paid (*"Feruzaning 2026-09 oyligi berib bo'lingan — almashuv
+sanasi 2026-10-01 dan oldin bo'lolmaydi"*). The form shows it verbatim under the
+date field (`GroupTeacherFromDate`), which also disables days after today.
+
+#### Group timeline — `GET /groups/{id}/timeline` *(2026-10-21, verified live)*
+
+`[{ date: 'YYYY-MM-DD', type, title, data }]`, newest first; on one day group
+events come before student events. `date` is the day the change took effect
+(a fee: the month's 1st). `title` is a ready **Uzbek** sentence — the front
+builds its own translated title from `data` (names become links) and falls
+back to `title` only for an unknown `type`.
+
+| `type` | `data` |
+|---|---|
+| `group_created`, `group_started`, `group_finished`, `group_end_planned` | `{}` |
+| `teacher_assigned`, `teacher_changed` | `teacherId, teacherName, previousTeacherId, previousTeacherName` (names may be `null`) |
+| `schedule_set`, `schedule_changed` | `days, previousDays` — `[{ day, startTime: 'HH:mm:ss' }]`, `previousDays: null` on set |
+| `fee_set`, `fee_changed` | `monthlyFee, previousMonthlyFee` (numbers; `null` on set) |
+| `pause`, `lesson_moved` | `fromDate, toDate, reason, createdByName` |
+| `student_joined`, `student_left` (+ `reason`) | `studentId, studentName` |
+| `student_transferred_in`, `student_transferred_out` | `studentId, studentName, groupId, groupName` (the *other* group) |
+
+No category field — the front buckets types itself (`GROUP_TIMELINE_CATEGORY_OF`).
+Status and room history are not stored; only pauses and moved lessons know who
+made them.
 
 **Paused periods** (`/groups/{id}/pauses`): lessons on those days are not held —
 hidden from the journal, no attendance, not billed (`lessonsPlanned` unchanged,

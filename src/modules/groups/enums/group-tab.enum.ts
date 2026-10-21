@@ -4,6 +4,7 @@ export enum GroupTab {
   PLAN = 'plan',
   STUDENTS = 'students',
   INFO = 'info',
+  TIMELINE = 'timeline',
 }
 
 export const GROUP_TAB_LABEL_KEYS: Record<GroupTab, string> = {
@@ -11,4 +12,5 @@ export const GROUP_TAB_LABEL_KEYS: Record<GroupTab, string> = {
   [GroupTab.PLAN]: 'groups.tabs.plan',
   [GroupTab.STUDENTS]: 'groups.tabs.students',
   [GroupTab.INFO]: 'groups.tabs.info',
+  [GroupTab.TIMELINE]: 'groups.tabs.timeline',
 }

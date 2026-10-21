@@ -378,6 +378,46 @@ describe('useGroupForm', () => {
     })
   })
 
+  describe('teacherEffectiveFrom errors', () => {
+    it('setBackendErrors maps a 422 teacherEffectiveFrom verbatim', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.setBackendErrors({ response: { data: { errors: { teacherEffectiveFrom: 'msg' } } } })
+      expect(f.errors.teacherEffectiveFrom).toBe('msg')
+    })
+
+    it('setTeacherFrom sets the date and clears its error', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.setFieldErrors({ teacherEffectiveFrom: 'msg' })
+      const d = new Date(2026, 9, 1)
+      f.setTeacherFrom(d)
+      expect(f.form.teacherEffectiveFrom).toBe(d)
+      expect(f.errors.teacherEffectiveFrom).toBeUndefined()
+    })
+
+    it('picking another teacher clears the switch-date error', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.setFieldErrors({ teacherEffectiveFrom: 'msg' })
+      f.setSelect('teacherId', 12)
+      expect(f.form.teacherId).toBe(12)
+      expect(f.errors.teacherEffectiveFrom).toBeUndefined()
+    })
+
+    it('other selects keep the teacher-date error', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      f.setFieldErrors({ teacherEffectiveFrom: 'msg' })
+      f.setSelect('roomId', 3)
+      expect(f.errors.teacherEffectiveFrom).toBe('msg')
+    })
+  })
+
   describe('scheduleChanged / teacherChanged + effective-from dates', () => {
     // Local noon — so "today" is the same calendar day in every timezone.
     const NOW = new Date(2026, 8, 27, 12, 0, 0)

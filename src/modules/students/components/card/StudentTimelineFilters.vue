@@ -1,31 +1,20 @@
 <template>
-  <!-- Scrolls inside itself on a phone — the page never scrolls sideways. -->
-  <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist">
-    <button
-      v-for="option in options"
-      :key="option.key"
-      type="button"
-      role="tab"
-      :aria-selected="option.value === modelValue"
-      class="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-semibold transition-colors md:h-8"
-      :class="option.value === modelValue
-        ? 'bg-primary text-primary-foreground'
-        : 'bg-surface-muted text-muted-foreground hover:text-foreground'"
-      @click="emit('update:modelValue', option.value)"
-    >
-      {{ option.label }}
-      <span class="font-mono text-xs opacity-80">{{ option.count }}</span>
-    </button>
-  </div>
+  <TimelineFilterChips
+    :model-value="modelValue"
+    :options="options"
+    @update:model-value="emit('update:modelValue', $event as Cat | null)"
+  />
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import TimelineFilterChips from '@/shared/components/timeline/TimelineFilterChips.vue'
 import {
   StudentTimelineCategory as Cat,
   TIMELINE_CATEGORY_LABEL_KEYS,
 } from '../../enums/student-timeline.enum'
+import type { TimelineFilterOption } from '@/shared/interfaces/timeline-entry.interface'
 
 const props = defineProps<{
   modelValue: Cat | null
@@ -38,7 +27,7 @@ const { t } = useI18n()
 /** Chip order on screen; empty buckets get no chip. */
 const ORDER: Cat[] = [Cat.PAYMENTS, Cat.GROUPS, Cat.STATUS, Cat.ATTENDANCE, Cat.PROFILE]
 
-const options = computed(() => {
+const options = computed<TimelineFilterOption[]>(() => {
   const total = Object.values(props.counts).reduce((sum, n) => sum + (n ?? 0), 0)
   return [
     { key: 'all', value: null, label: t('students.timeline.filters.all'), count: total },

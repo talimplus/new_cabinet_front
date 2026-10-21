@@ -1,10 +1,10 @@
 <template>
-  <li class="relative flex gap-3 pb-5 last:pb-0">
+  <li class="relative flex gap-3 pb-5 last:pb-0" :class="entry.planned && 'opacity-60'">
     <!-- Connector to the next marker; the last entry of a day has none. -->
     <span v-if="!last" class="absolute bottom-0 left-[17px] top-10 w-px bg-border" aria-hidden="true" />
     <span
       class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-      :class="TIMELINE_TONE_MARKER[entry.tone]"
+      :class="[TIMELINE_TONE_MARKER[entry.tone], entry.planned && 'border border-dashed border-input']"
       aria-hidden="true"
     >
       <UiIcon :icon="entry.icon" :size="16" />
@@ -13,6 +13,7 @@
     <div class="min-w-0 flex-1 pt-1.5">
       <div class="flex items-start justify-between gap-3">
         <p class="min-w-0 break-words text-sm font-semibold text-foreground">
+          <TimelineLinkText v-if="entry.subject" :link="entry.subject" />
           {{ entry.title }}
           <UiBadge v-if="entry.badge" :variant="entry.badge.variant" class="ml-1 align-middle">
             {{ entry.badge.text }}
@@ -34,6 +35,8 @@
         class="mt-2 whitespace-pre-line break-words rounded-md border-l-2 border-input bg-surface-muted px-3 py-1.5 text-sm text-foreground"
       >{{ entry.note }}</p>
 
+      <TimelineChildren v-if="entry.children?.length" :entries="entry.children" />
+
       <p
         v-if="entry.time || entry.actor || entry.group"
         class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-fg-subtle"
@@ -43,7 +46,7 @@
           <UiIcon :icon="User" :size="12" />{{ entry.actor }}
         </span>
         <span v-if="entry.group" class="rounded-sm bg-surface-muted px-1.5 py-0.5 text-muted-foreground">
-          {{ entry.group }}
+          <TimelineLinkText :link="entry.group" />
         </span>
       </p>
     </div>
@@ -51,10 +54,13 @@
 </template>
 
 <script setup lang="ts">
-import { UiBadge, UiIcon } from '@/shared/components'
+import UiBadge from '../UiBadge.vue'
+import UiIcon from '../UiIcon.vue'
 import { User } from '@/shared/icons'
-import { TIMELINE_TONE_MARKER, TIMELINE_TONE_TEXT } from '../../enums/timeline-tone.enum'
-import type { TimelineEntryView } from '../../interfaces/student-timeline-entry.interface'
+import { TIMELINE_TONE_MARKER, TIMELINE_TONE_TEXT } from '@/shared/enums/timeline-tone.enum'
+import TimelineLinkText from './TimelineLinkText.vue'
+import TimelineChildren from './TimelineChildren.vue'
+import type { TimelineEntryView } from '@/shared/interfaces/timeline-entry.interface'
 
 defineProps<{ entry: TimelineEntryView; last?: boolean }>()
 </script>

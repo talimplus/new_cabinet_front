@@ -13,7 +13,7 @@ import {
   StudentTimelineType as T,
   TIMELINE_FIELD_LABEL_KEYS,
 } from '../../enums/student-timeline.enum'
-import { TimelineTone } from '../../enums/timeline-tone.enum'
+import { TimelineTone } from '@/shared/enums/timeline-tone.enum'
 import type {
   StudentTimelineDetails,
   StudentTimelineItem,
@@ -232,7 +232,7 @@ describe('describeTimelineItem — groups', () => {
 
   it('other types keep the group name', () => {
     const v = describeTimelineItem(make(T.PAYMENT_REFUNDED, { amount: 1 }))
-    expect(v.group).toBe(GROUP.name)
+    expect(v.group).toEqual({ text: GROUP.name, to: null })
     expect(v.actor).toBe(ACTOR.name)
   })
 })

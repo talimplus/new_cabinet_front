@@ -1,11 +1,11 @@
 import { computed, ref } from 'vue'
-import { t } from '@/locales'
-import { formatDate, toDateString } from '@/shared/utils/format-date'
+import { toDateString } from '@/shared/utils/format-date'
+import { timelineDayLabel } from '@/shared/utils/timeline-day'
 import { fetchStudentTimeline } from '../api/student-timeline.api'
 import { StudentTimelineCategory } from '../enums/student-timeline.enum'
 import { describeTimelineItem } from './use-timeline-entry'
 import type { StudentTimelineItem } from '../interfaces/student-timeline.interface'
-import type { TimelineDay } from '../interfaces/student-timeline-entry.interface'
+import type { TimelineDay } from '@/shared/interfaces/timeline-entry.interface'
 
 /** Entries rendered before "show more" — a year of history can be hundreds. */
 export const TIMELINE_PAGE_SIZE = 30
@@ -14,14 +14,6 @@ export const TIMELINE_PAGE_SIZE = 30
 function dayKeyOf(item: StudentTimelineItem): string {
   if (item.dateOnly) return item.occurredAt.slice(0, 10)
   return toDateString(new Date(item.occurredAt)) || item.occurredAt.slice(0, 10)
-}
-
-function dayLabel(key: string, now: Date): string {
-  if (key === toDateString(now)) return t('students.timeline.today')
-  const yesterday = new Date(now)
-  yesterday.setDate(now.getDate() - 1)
-  if (key === toDateString(yesterday)) return t('students.timeline.yesterday')
-  return formatDate(key)
 }
 
 /**
@@ -94,7 +86,7 @@ export function useStudentTimeline(studentId: () => number | null) {
       const key = dayKeyOf(item)
       let day = out[out.length - 1]
       if (!day || day.key !== key) {
-        day = { key, label: dayLabel(key, now), entries: [] }
+        day = { key, label: timelineDayLabel(key, now), entries: [] }
         out.push(day)
       }
       day.entries.push(describeTimelineItem(item))

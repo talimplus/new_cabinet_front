@@ -34,6 +34,7 @@
         :can-transfer="canTransfer"
         @reload="load"
       />
+      <GroupTimelineTab v-else-if="activeTab === GroupTab.TIMELINE" :group-id="groupId" />
       <template v-else>
         <GroupInfoTab :group="group" :student-count="students.length" />
         <GroupPausesCard :group-id="groupId" :can-edit="canEditGroup" />
@@ -50,6 +51,7 @@ import GroupAttendanceTab from '../components/detail/GroupAttendanceTab.vue'
 import GroupStudentsTab from '../components/detail/GroupStudentsTab.vue'
 import GroupInfoTab from '../components/detail/GroupInfoTab.vue'
 import GroupPausesCard from '../components/detail/GroupPausesCard.vue'
+import GroupTimelineTab from '../components/detail/GroupTimelineTab.vue'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import GroupPlanTab from '../components/plan/GroupPlanTab.vue'
 import { useGroupDetail } from '../composables/use-group-detail'

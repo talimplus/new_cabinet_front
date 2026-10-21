@@ -12,9 +12,9 @@ import { AttendanceStatus } from '@/modules/groups/enums/attendance-status.enum'
 import { STUDENT_STATUS_LABEL_KEYS, StudentStatus } from '../enums/student-status.enum'
 import { RETURN_LIKELIHOOD_LABEL_KEYS, ReturnLikelihood } from '../enums/return-likelihood.enum'
 import { StudentTimelineType as T, TIMELINE_FIELD_LABEL_KEYS } from '../enums/student-timeline.enum'
-import { TimelineTone as Tone } from '../enums/timeline-tone.enum'
+import { TimelineTone as Tone } from '@/shared/enums/timeline-tone.enum'
 import type { StudentTimelineDetails as D, StudentTimelineItem } from '../interfaces/student-timeline.interface'
-import type { TimelineEntryView } from '../interfaces/student-timeline-entry.interface'
+import type { TimelineEntryView } from '@/shared/interfaces/timeline-entry.interface'
 
 /** What a type contributes on top of the shared fields (time, actor, group). */
 interface Shape {
@@ -160,6 +160,6 @@ export function describeTimelineItem(item: StudentTimelineItem): TimelineEntryVi
     badge: shape.badge ?? null,
     time: timeOf(item),
     actor: item.actor?.name || null,
-    group: showGroup ? (item.group?.name ?? null) : null,
+    group: showGroup && item.group ? { text: item.group.name, to: null } : null,
   }
 }

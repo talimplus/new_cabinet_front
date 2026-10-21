@@ -250,6 +250,13 @@ export function useGroupForm(
 
   function setSelect(key: 'centerId' | 'subjectId' | 'roomId' | 'teacherId', value: unknown): void {
     form[key] = typeof value === 'number' ? value : null
+    // A 422 on the switch date is about the old pick — drop it with the pick.
+    if (key === 'teacherId') delete errors.teacherEffectiveFrom
+  }
+  /** Picking another day clears the backend's verdict on the previous one. */
+  function setTeacherFrom(value: Date | null): void {
+    form.teacherEffectiveFrom = value
+    delete errors.teacherEffectiveFrom
   }
 
   return {
@@ -261,6 +268,6 @@ export function useGroupForm(
     conflictChecking: conflictCheck.checking,
     conflictChecked: conflictCheck.checked,
     conflictMessages: conflictCheck.messages,
-    reset, validate, toPayload, setBackendErrors, setFieldErrors, setSelect,
+    reset, validate, toPayload, setBackendErrors, setFieldErrors, setSelect, setTeacherFrom,
   }
 }

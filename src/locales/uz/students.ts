@@ -276,11 +276,6 @@ export default {
     subtitle: "O'quvchi bilan bog'liq barcha amallar",
     empty: "Hozircha tarixda hech narsa yo'q",
     emptyFiltered: "Bu bo'limda voqealar yo'q",
-    loadError: "Tarixni yuklab bo'lmadi",
-    retry: 'Qayta urinish',
-    showMore: "Yana ko'rsatish ({count})",
-    today: 'Bugun',
-    yesterday: 'Kecha',
     filters: {
       all: 'Hammasi',
       status: 'Holat',

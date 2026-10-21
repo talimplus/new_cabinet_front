@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import StudentTimeline from '../StudentTimeline.vue'
-import StudentTimelineEntry from '../StudentTimelineEntry.vue'
+import TimelineEntry from '@/shared/components/timeline/TimelineEntry.vue'
 import { UiSpinner } from '@/shared/components'
 import { fetchStudentTimeline } from '../../../api/student-timeline.api'
 import { TIMELINE_PAGE_SIZE } from '../../../composables/use-student-timeline'
@@ -52,7 +52,7 @@ describe('StudentTimeline', () => {
     await flushPromises()
     expect(fetchMock).toHaveBeenCalledWith(1)
     expect(w.findComponent(UiSpinner).exists()).toBe(false)
-    expect(w.findAllComponents(StudentTimelineEntry)).toHaveLength(2)
+    expect(w.findAllComponents(TimelineEntry)).toHaveLength(2)
     expect(w.text()).toContain(t('students.timeline.title.absent'))
   })
 
@@ -85,34 +85,34 @@ describe('StudentTimeline', () => {
     await flushPromises()
     const chip = w.findAll('[role="tab"]').find((b) => b.text().includes(t(TIMELINE_CATEGORY_LABEL_KEYS[Cat.ATTENDANCE])))!
     await chip.trigger('click')
-    expect(w.findAllComponents(StudentTimelineEntry)).toHaveLength(1)
+    expect(w.findAllComponents(TimelineEntry)).toHaveLength(1)
   })
 
   it('shows an error with a retry button that re-fetches', async () => {
     fetchMock.mockRejectedValueOnce(new Error('x'))
     const w = mountTimeline()
     await flushPromises()
-    expect(w.text()).toContain(t('students.timeline.loadError'))
+    expect(w.text()).toContain(t('common.timeline.loadError'))
 
     fetchMock.mockResolvedValueOnce({ items: [item()] })
-    const retry = w.findAll('button').find((b) => b.text() === t('students.timeline.retry'))!
+    const retry = w.findAll('button').find((b) => b.text() === t('common.timeline.retry'))!
     await retry.trigger('click')
     await flushPromises()
     expect(fetchMock).toHaveBeenCalledTimes(2)
-    expect(w.text()).not.toContain(t('students.timeline.loadError'))
-    expect(w.findAllComponents(StudentTimelineEntry)).toHaveLength(1)
+    expect(w.text()).not.toContain(t('common.timeline.loadError'))
+    expect(w.findAllComponents(TimelineEntry)).toHaveLength(1)
   })
 
   it('shows "show more" with the remaining count and reveals the next page', async () => {
     fetchMock.mockResolvedValue({ items: Array.from({ length: TIMELINE_PAGE_SIZE + 4 }, () => item()) })
     const w = mountTimeline()
     await flushPromises()
-    expect(w.findAllComponents(StudentTimelineEntry)).toHaveLength(TIMELINE_PAGE_SIZE)
-    const more = w.findAll('button').find((b) => b.text() === t('students.timeline.showMore', { count: 4 }))
+    expect(w.findAllComponents(TimelineEntry)).toHaveLength(TIMELINE_PAGE_SIZE)
+    const more = w.findAll('button').find((b) => b.text() === t('common.timeline.showMore', { count: 4 }))
     expect(more).toBeDefined()
     await more!.trigger('click')
-    expect(w.findAllComponents(StudentTimelineEntry)).toHaveLength(TIMELINE_PAGE_SIZE + 4)
-    expect(w.text()).not.toContain(t('students.timeline.showMore', { count: 4 }))
+    expect(w.findAllComponents(TimelineEntry)).toHaveLength(TIMELINE_PAGE_SIZE + 4)
+    expect(w.text()).not.toContain(t('common.timeline.showMore', { count: 4 }))
   })
 
   it('refetches when refreshKey changes and when studentId changes', async () => {
