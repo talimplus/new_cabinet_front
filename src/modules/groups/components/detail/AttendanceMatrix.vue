@@ -51,11 +51,11 @@ import { UiIcon } from '@/shared/components'
 import { RefreshCw } from '@/shared/icons'
 import AttendanceCell from './AttendanceCell.vue'
 import type { useAttendance } from '../../composables/use-attendance'
-import type { Student } from '@/modules/students/interfaces/student.interface'
+import type { AttendanceRow } from '../../interfaces/attendance.interface'
 
 const { t } = useI18n()
 
-defineProps<{ a: ReturnType<typeof useAttendance>; students: Student[] }>()
+defineProps<{ a: ReturnType<typeof useAttendance>; students: AttendanceRow[] }>()
 
 const scroller = ref<HTMLElement | null>(null)
 const nameHead = ref<HTMLElement | null>(null)

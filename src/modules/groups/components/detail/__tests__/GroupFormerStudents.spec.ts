@@ -30,6 +30,8 @@ describe('GroupFormerStudents', () => {
     ])
     const w = mountIt()
     await flushPromises()
+    // Folded by default — open it.
+    await w.get('button[aria-expanded]').trigger('click')
     expect(mockedFetch).toHaveBeenCalledWith(4)
     const text = w.text()
     expect(text).toContain(t('groups.formerStudents.title', { count: 1 }))

@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-[100dvh] bg-background">
+    <AppNavProgress />
     <AppSidebar :open="drawerOpen" @close="drawerOpen = false" />
 
     <div class="lg:pl-60">
@@ -20,15 +21,21 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppSidebar from './AppSidebar.vue'
+import AppNavProgress from './AppNavProgress.vue'
+import { prefetchRouteChunks } from '@/shared/utils/prefetch-routes'
 import AppHeader from './AppHeader.vue'
 import { useScopeStore } from '@/stores/scope.store'
 import { useBrandingStore } from '@/stores/branding.store'
+import { useUserStore } from '@/stores/user.store'
+import type { Permission } from '@/shared/enums/permission.enum'
 
 const route = useRoute()
+const router = useRouter()
 const scope = useScopeStore()
 const branding = useBrandingStore()
+const user = useUserStore()
 const drawerOpen = ref(false)
 
 // The center list and the org brand are loaded once for the whole session, not
@@ -36,6 +43,8 @@ const drawerOpen = ref(false)
 onMounted(() => {
   scope.loadCenters()
   if (!branding.loaded) branding.load()
+  // Download the other pages' JS in the background — the first menu click is instant.
+  prefetchRouteChunks(router, (keys) => user.can(...(keys as Permission[])))
 })
 
 // Close the mobile drawer whenever navigation happens.

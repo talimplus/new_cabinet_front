@@ -19,11 +19,18 @@ import { t } from '@/locales'
  * per-date editability rules, the cell status picker, and the reschedule dialog.
  * The `students` ref (shared with the page) provides the matrix rows.
  */
-export function useAttendance(groupId: number, students: Ref<Student[]>) {
+export function useAttendance(
+  groupId: number,
+  students: Ref<Student[]>,
+  /** `YYYY-MM-DD` — an ended group opens on its last month, not on an empty current one. */
+  endDate?: string | null,
+) {
   const notify = useNotificationStore()
   const { canManageAttendance, canManagePastAttendance } = usePermissions()
 
-  const now = new Date()
+  const today0 = new Date()
+  const ended = endDate ? new Date(`${endDate.slice(0, 10)}T00:00:00`) : null
+  const now = ended && ended < today0 ? ended : today0
   const data = ref<LessonDatesResponse | null>(null)
   const loading = ref(false)
   // The matrix is browsed one month at a time (1-based month, matches the old app).

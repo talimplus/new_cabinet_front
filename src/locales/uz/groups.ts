@@ -104,6 +104,7 @@ export default {
     },
   },
   attendance: {
+    formerTitle: "Sobiq o'quvchilar davomati ({count})",
     fromDate: 'Boshlanish sanasi',
     toDate: 'Tugash sanasi (ixtiyoriy)',
     clear: 'Tozalash',

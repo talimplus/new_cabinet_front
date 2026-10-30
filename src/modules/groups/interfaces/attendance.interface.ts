@@ -27,6 +27,13 @@ export interface LessonDateOverride {
  * One student's enrollment window inside the group, as the lesson-dates endpoint
  * returns it. Cells outside the window are read-only in the matrix.
  */
+/** One matrix row — a current or a former member. */
+export interface AttendanceRow {
+  id: number
+  firstName: string
+  lastName: string
+}
+
 export interface GroupStudentMembership {
   id: number
   firstName: string

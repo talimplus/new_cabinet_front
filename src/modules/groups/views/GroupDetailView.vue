@@ -21,6 +21,8 @@
         v-if="activeTab === GroupTab.ATTENDANCE"
         :group-id="groupId"
         :students="students"
+        :finished="group?.status === GroupStatus.FINISHED"
+        :end-date="group?.endDate"
       />
       <GroupPlanTab
         v-else-if="activeTab === GroupTab.PLAN"

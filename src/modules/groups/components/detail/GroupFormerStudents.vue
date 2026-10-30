@@ -1,9 +1,7 @@
 <template>
-  <section v-if="former.length" class="space-y-2">
-    <h4 class="text-sm font-semibold text-foreground">
-      {{ t('groups.formerStudents.title', { count: former.length }) }}
-    </h4>
-    <p class="text-xs text-muted-foreground">{{ t('groups.formerStudents.hint') }}</p>
+  <!-- Folded by default — the current list stays the focus of the tab. -->
+  <UiCollapse v-if="former.length" :title="t('groups.formerStudents.title', { count: former.length })">
+    <p class="mb-2 text-xs text-muted-foreground">{{ t('groups.formerStudents.hint') }}</p>
     <ul class="divide-y divide-border rounded-md border border-border text-sm">
       <li v-for="m in former" :key="m.studentId" class="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
@@ -20,13 +18,14 @@
       </li>
     </ul>
     <GroupMemberPayModal :member="paying" :group-id="groupId" :group-name="groupName" @close="paying = null" @paid="onPaid" />
-  </section>
+  </UiCollapse>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
+import { UiCollapse } from '@/shared/components'
 import { fetchGroupMembers } from '../../api/groups.api'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { formatDate } from '@/shared/utils/format-date'

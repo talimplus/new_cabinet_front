@@ -104,6 +104,7 @@ export default {
     },
   },
   attendance: {
+    formerTitle: 'Посещаемость бывших учеников ({count})',
     fromDate: 'Дата начала',
     toDate: 'Дата окончания (необязательно)',
     clear: 'Очистить',
