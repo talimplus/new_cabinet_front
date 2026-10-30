@@ -25,7 +25,9 @@ const paymentRows = computed(() => {
   return [
     { label: t('statistics.details.charged'), value: formatSom(p?.amountDue) },
     { label: t('statistics.details.paid'), value: formatSom(p?.amountPaid), tone: 'success' as const, percent: pct(p?.amountPaid, p?.amountDue) },
-    { label: t('statistics.details.remaining'), value: formatSom(p?.remainingAmount), tone: 'danger' as const, percent: pct(p?.remainingAmount, p?.amountDue) },
+    // Money reception holds but an admin has not confirmed — not the student's debt.
+    { label: t('statistics.details.pending', { count: p?.pendingCount ?? 0 }), value: formatSom(p?.pendingAmount ?? 0), tone: 'warning' as const, percent: pct(p?.pendingAmount, p?.amountDue) },
+    { label: t('statistics.details.collectable'), value: formatSom(p?.collectableAmount ?? p?.remainingAmount), tone: 'danger' as const, percent: pct(p?.collectableAmount ?? p?.remainingAmount, p?.amountDue) },
   ]
 })
 

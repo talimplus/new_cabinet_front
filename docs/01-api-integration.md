@@ -411,6 +411,21 @@ carried over by receipt); removing it on edit booked the money as a cash refund
 and billed the new group in full. The form disables those options, keeps them on
 "clear", and shows a hint. A finished group can still be dropped.
 
+**Stop date (2026-10-30, verified live).** `PUT /students/change-status/{id}?status=stopped`
+body `stopDate?` (`YYYY-MM-DD`, exclusive, past allowed, default today). 422
+`errors.stopDate` when it is before activation / the latest join / the org's
+opening, or a lesson on/after it is marked present/late. The stop dialog
+(`StudentReturnDialog` with `status`) asks it only for STOPPED.
+
+**Payments — awaiting confirmation (2026-10-30, verified live).** A row whose
+month is fully handed over (`amountPaid + pendingAmount >= amountDue`) is the
+reception's responsibility: `isOverdue=false`, excluded from `status=unpaid|partial`
+and `overdueOnly`; `GET /payments?pendingOnly=true` lists rows with pending
+receipts (status filter option "Tasdiqlash kutilmoqda", `PaymentListFilter`).
+The status cell shows "Tasdiqlash kutilmoqda" instead of "To'lanmagan"; the
+`amountDue` column is labelled "Oy uchun hisoblangan". Dashboard
+`payments.pendingAmount/pendingCount/collectableAmount`.
+
 **Backdated start / join (2026-10-30, verified live).**
 - `PUT /students/change-status/{id}?status=ACTIVE` body `{ startDate? }` — first
   activation only (new/ignored → ACTIVE): `activatedAt` = that day and each open
@@ -703,6 +718,24 @@ Preview response (`GroupStartPreview`):
   teacher salary is paid stays frozen; late money becomes carryover.
 - UI: `GroupStartDialog` (NEW → STARTED, and the edit form when `startDate`
   changed) + shared `BackdateImpact`.
+
+#### Finish a group *(2026-10-30, verified live)*
+`POST /groups/{id}/finish` `{ endDate, targetGroupId?, studentIds?, reason? }` →
+`{ transferred, finishedStudents, transferDate, … }`. `endDate` = last lesson day
+(not future); ticked students move from the next day; a NEW target is started;
+the rest finish with the group. UI: `GroupFinishDialog` — opened by STARTED →
+FINISHED in the list and by "Guruhni yakunlash" on the detail page; "Yangi guruh
+yaratish" opens `GroupFormModal` with `template` (prefilled from this group,
+start = day after `endDate`).
+
+#### Former groups & members *(2026-10-30, verified live)*
+- `GET /groups?status=new,started` (default in the list) / `status=finished` —
+  closed groups live under "Tugagan / yopilgan" (`GroupListScope`).
+- `GET /groups/{id}/members` → `GroupMember[]` (everyone who ever studied there:
+  `joinedAt`, `leftAt`, `transferredToGroupName`, `isCurrent`, `debt` — null
+  without `payments.view`). The Students tab lists the former ones below the table.
+- `GET /students/{id}/attendance` → `{ groups, items }` — every mark across all
+  groups, transferred-out and finished ones too (student card, `attendance.view`).
 
 **Attendance (`/groups/{groupId}/attendance`)**
 | Method | Path | Params / Body | Response |

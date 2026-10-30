@@ -21,16 +21,17 @@ import { cn } from '@/shared/utils/cn'
 interface DetailRow {
   label: string
   value: string
-  tone?: 'default' | 'success' | 'danger'
+  tone?: 'default' | 'success' | 'danger' | 'warning'
   percent?: number
 }
 
 defineProps<{ title: string; rows: DetailRow[] }>()
 
-const toneCls: Record<'default' | 'success' | 'danger', string> = {
+const toneCls: Record<'default' | 'success' | 'danger' | 'warning', string> = {
   default: 'text-foreground',
   success: 'text-success',
   danger: 'text-danger',
+  warning: 'text-warning',
 }
 
 function clamp(n: number): number {

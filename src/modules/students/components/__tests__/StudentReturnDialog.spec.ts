@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import { mount } from '@vue/test-utils'
 import StudentReturnDialog from '../StudentReturnDialog.vue'
-import { UiSelect, UiTextarea, UiButton } from '@/shared/components'
+import { UiSelect, UiTextarea, UiButton, UiDatepicker } from '@/shared/components'
+import { StudentStatus } from '../../enums/student-status.enum'
 import { ReturnLikelihood } from '../../enums/return-likelihood.enum'
 
 const last = (events: unknown[][] | undefined) =>
@@ -14,6 +16,8 @@ function confirmButton(wrapper: ReturnType<typeof mount>) {
 }
 
 describe('StudentReturnDialog', () => {
+  beforeEach(() => setActivePinia(createPinia()))
+
   it('emits confirm with the chosen likelihood and comment', async () => {
     const wrapper = mount(StudentReturnDialog, {
       props: { modelValue: true },
@@ -53,5 +57,24 @@ describe('StudentReturnDialog', () => {
     expect(last(wrapper.emitted('confirm'))).toEqual([
       { returnLikelihood: undefined, comment: undefined },
     ])
+  })
+
+  it('asks no stop date when ignoring', () => {
+    const wrapper = mount(StudentReturnDialog, { props: { modelValue: true, status: StudentStatus.IGNORED }, ...mountOpts })
+    expect(wrapper.findComponent(UiDatepicker).exists()).toBe(false)
+  })
+
+  it('STOPPED: sends a past stop date, but not today (the backend default)', async () => {
+    const wrapper = mount(StudentReturnDialog, { props: { modelValue: true, status: StudentStatus.STOPPED }, ...mountOpts })
+    const picker = wrapper.findComponent(UiDatepicker)
+    expect(picker.exists()).toBe(true)
+
+    await confirmButton(wrapper).trigger('click')
+    expect(last(wrapper.emitted('confirm'))![0]).toMatchObject({ stopDate: undefined })
+
+    picker.vm.$emit('update:modelValue', new Date(2026, 9, 12))
+    await wrapper.vm.$nextTick()
+    await confirmButton(wrapper).trigger('click')
+    expect(last(wrapper.emitted('confirm'))![0]).toMatchObject({ stopDate: '2026-10-12' })
   })
 })

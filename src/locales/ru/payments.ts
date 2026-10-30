@@ -31,7 +31,7 @@ export default {
     student: 'Ученик',
     group: 'Группа',
     lessons: 'Уроки',
-    amountDue: 'К оплате',
+    amountDue: 'Начислено за месяц',
     amountPaid: 'Оплачено',
     remaining: 'К оплате учеником',
     pendingConfirmation: 'Ожидает подтверждения',
@@ -47,6 +47,7 @@ export default {
   chips: {
     overdue: 'ПРОСРОЧЕНО',
     pendingAdmin: 'Ожидает подтверждения администратора',
+    handedOver: 'Ожидает подтверждения',
   },
   buttons: {
     payFull: 'Оплатить полностью',

@@ -15,6 +15,7 @@ import { fetchTeachers as fetchTeachersApi } from '@/modules/users/api/users.api
 import { useNotificationStore } from '@/stores/notification.store'
 import { NotificationType } from '@/shared/enums/notification-type.enum'
 import { PaymentStatus } from '../../enums/payment-status.enum'
+import { PaymentListFilter } from '../../enums/payment-list-filter.enum'
 import { PaymentMethod } from '@/shared/enums/payment-method.enum'
 import { ReceiptStatus } from '@/shared/enums/receipt-status.enum'
 import type { Payment } from '../../interfaces/payment.interface'
@@ -308,6 +309,26 @@ describe('usePayments', () => {
       await flushPromises()
 
       expect(mockedPartial).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('"awaiting confirmation" filter', () => {
+    it('maps to pendingOnly instead of a row status', async () => {
+      const p = usePayments()
+      p.setStatus(PaymentListFilter.PENDING)
+      await flushPromises()
+      expect(mockedFetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: undefined, pendingOnly: true }),
+      )
+    })
+
+    it('a real status sends no pendingOnly', async () => {
+      const p = usePayments()
+      p.setStatus(PaymentStatus.UNPAID)
+      await flushPromises()
+      expect(mockedFetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: PaymentStatus.UNPAID, pendingOnly: undefined }),
+      )
     })
   })
 })

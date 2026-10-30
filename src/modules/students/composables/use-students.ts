@@ -203,7 +203,7 @@ export function useStudents(
     }
     applyStatus(student, next)
   }
-  async function confirmReturn(payload: { returnLikelihood?: ReturnLikelihood; comment?: string }): Promise<void> {
+  async function confirmReturn(payload: StudentStatusChangeForm): Promise<void> {
     if (returnDialog.student && returnDialog.status) {
       // A failed change keeps the dialog open (the interceptor toasted why).
       if (!(await applyStatus(returnDialog.student, returnDialog.status, payload))) return

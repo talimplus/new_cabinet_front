@@ -61,6 +61,8 @@ const props = defineProps<{
   modelValue: boolean
   editing: Group | null
   defaultCenterId: number | null
+  /** Create only: prefill from another group (the next group when finishing one). */
+  template?: Group | null
   /** Field errors from a status-change 422, shown under endDate/roomId on open. */
   statusErrors?: Record<string, string> | null
   loading?: boolean
@@ -79,7 +81,7 @@ watch(
   () => props.modelValue,
   (open) => {
     if (!open) return
-    reset(props.editing)
+    reset(props.editing, props.template ?? null)
     if (props.statusErrors) setFieldErrors(props.statusErrors)
   },
 )

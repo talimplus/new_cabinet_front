@@ -77,4 +77,17 @@ describe('DashboardDetails', () => {
     expect(wrapper.findAllComponents({ name: 'DetailCard' })).toHaveLength(3)
     expect(wrapper.text()).toContain('—')
   })
+
+  it('splits the open amount into "awaiting confirmation" and "to collect"', () => {
+    const withPending = {
+      ...data,
+      payments: { ...data.payments, pendingAmount: 250000, pendingCount: 2, collectableAmount: 150000 },
+    }
+    const wrapper = mount(DashboardDetails, { props: { data: withPending } })
+    const text = normalize(wrapper.text())
+    expect(text).toContain(normalize(t('statistics.details.pending', { count: 2 })))
+    expect(text).toContain(normalize(formatSom(250000)))
+    expect(text).toContain(t('statistics.details.collectable'))
+    expect(text).toContain(normalize(formatSom(150000)))
+  })
 })

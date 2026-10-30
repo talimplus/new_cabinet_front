@@ -10,6 +10,7 @@ import {
   previewGroupStartDate as previewGroupStartDateApi,
 } from '../../api/groups.api'
 import { GroupStartMode } from '../../enums/group-start-mode.enum'
+import { GroupListScope } from '../../enums/group-list-scope.enum'
 import { StudentStatus } from '@/modules/students/enums/student-status.enum'
 import { toDateString } from '@/shared/utils/format-date'
 import type { GroupStartPreview } from '../../interfaces/group-start.interface'
@@ -87,7 +88,21 @@ describe('useGroups', () => {
     it('loads groups with the default filters', async () => {
       const g = setup()
       await g.init()
-      expect(mockedFetchGroups).toHaveBeenCalledWith({ page: 1, perPage: 10, teacherId: undefined })
+      // Finished groups sit under their own filter — the default is the active ones.
+      expect(mockedFetchGroups).toHaveBeenCalledWith({ page: 1, perPage: 10, teacherId: undefined, status: 'new,started' })
+    })
+
+    it('setScope switches to the finished groups and back to all, from page 1', async () => {
+      const g = setup()
+      await g.init()
+      g.filters.page = 2
+      g.setScope(GroupListScope.FINISHED)
+      await flushPromises()
+      expect(g.filters.page).toBe(1)
+      expect(mockedFetchGroups).toHaveBeenLastCalledWith({ page: 1, perPage: 10, teacherId: undefined, status: 'finished' })
+      g.setScope(GroupListScope.ALL)
+      await flushPromises()
+      expect(mockedFetchGroups).toHaveBeenLastCalledWith({ page: 1, perPage: 10, teacherId: undefined, status: undefined })
     })
 
     it('loads teacher options mapped to {label, value} for a non-teacher with view permission', async () => {
@@ -119,7 +134,7 @@ describe('useGroups', () => {
 
       expect(g.filters.page).toBe(1)
       expect(g.filters.teacherId).toBe(5)
-      expect(mockedFetchGroups).toHaveBeenLastCalledWith({ page: 1, perPage: 10, teacherId: 5 })
+      expect(mockedFetchGroups).toHaveBeenLastCalledWith({ page: 1, perPage: 10, teacherId: 5, status: 'new,started' })
     })
   })
 

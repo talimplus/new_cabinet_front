@@ -115,7 +115,11 @@ export function useGroupForm(
     Object.keys(errors).forEach((k) => delete errors[k])
   }
 
-  function reset(editing: Group | null): void {
+  /**
+   * `template` (create only): prefill a NEW group from another — the "next
+   * group" made while finishing one (same subject/teacher/room/price/schedule).
+   */
+  function reset(editing: Group | null, template: Group | null = null): void {
     clearErrors()
     conflictsAccepted.value = false
     isEditing.value = !!editing
@@ -172,7 +176,26 @@ export function useGroupForm(
       allTime.value = ''
       times.value = []
       differentTime.value = false
+      if (template) applyTemplate(template)
     }
+  }
+
+  function applyTemplate(g: Group): void {
+    form.name = g.name
+    // The new group stays in the same branch (scope may be "all centers").
+    form.centerId = g.center?.id ?? form.centerId
+    form.subjectId = g.subject?.id ?? null
+    form.roomId = g.room?.id ?? null
+    form.teacherId = g.teacher?.id ?? null
+    form.monthlyFee = g.monthlyFee ?? ''
+    form.lessonDurationMinutes = g.lessonDurationMinutes ?? DEFAULT_LESSON_DURATION
+    form.startDate = parseDate(g.startDate)
+    form.endDate = parseDate(g.endDate)
+    const sch = g.schedules ?? []
+    days.value = sch.map((s) => s.day)
+    differentTime.value = sch.length > 1
+    times.value = sch.length > 1 ? sch.map((s) => s.startTime) : []
+    allTime.value = sch.length > 1 ? '' : (sch[0]?.startTime ?? '')
   }
 
   /** Edit-only: the schedule really changed (the form always re-sends it). */

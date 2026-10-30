@@ -21,7 +21,7 @@ export {
   // theme & locale
   Sun, Moon, Languages,
   // domain (TalimPlus CRM)
-  Users, User, UserPlus, GraduationCap, BookOpen, FileText, CalendarDays, Calendar,
+  Users, User, UserPlus, GraduationCap, BookOpen, FileText, CalendarDays, Calendar, CalendarCheck,
   Clock, CreditCard, DollarSign, ReceiptText, Wallet, BadgeDollarSign, DoorOpen,
   Layers, ClipboardList, LayoutDashboard, Bell, Phone, Mail, Building2, MapPin,
   LocateFixed, Wifi, PhoneCall, UserX, CalendarOff,

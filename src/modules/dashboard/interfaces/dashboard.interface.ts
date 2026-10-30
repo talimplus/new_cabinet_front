@@ -10,6 +10,11 @@ export interface PaymentsStats {
   amountPaid: number
   refundedAmount?: number
   remainingAmount: number
+  /** Taken by reception, not yet confirmed by an admin. Absent on an older backend. */
+  pendingAmount?: number
+  pendingCount?: number
+  /** Still to collect from students: remaining − pending (per row, ≥ 0). */
+  collectableAmount?: number
   totalCount: number
   paidCount: number
   partialCount: number

@@ -41,6 +41,8 @@ export default {
     charged: 'Начислено',
     paid: 'Оплачено',
     remaining: 'Остаток',
+    pending: 'Ожидает подтверждения ({count})',
+    collectable: 'Осталось получить с учеников',
     totalAmount: 'Общая сумма',
     totalCount: 'Общее количество',
     paidWithAmount: 'Оплачено: {amount}',

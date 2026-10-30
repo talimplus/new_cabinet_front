@@ -31,7 +31,7 @@ export default {
     student: "O'quvchi",
     group: 'Guruh',
     lessons: 'Darslar',
-    amountDue: "To'lanishi kerak",
+    amountDue: 'Oy uchun hisoblangan',
     amountPaid: "To'langan",
     remaining: "O'quvchidan olinishi kerak",
     pendingConfirmation: 'Tasdiqlash kutilmoqda',
@@ -47,6 +47,7 @@ export default {
   chips: {
     overdue: "MUDDATI O'TGAN",
     pendingAdmin: 'Admin tasdiqlashi kutilmoqda',
+    handedOver: 'Tasdiqlash kutilmoqda',
   },
   buttons: {
     payFull: "To'liq to'lash",

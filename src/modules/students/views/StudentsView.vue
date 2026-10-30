@@ -90,7 +90,7 @@ const del = useStudentDelete(() => s.load())
       :loading="s.saving.value"
       @submit="onSubmit"
     />
-    <StudentReturnDialog v-model="s.returnDialog.open" @confirm="s.confirmReturn" />
+    <StudentReturnDialog v-model="s.returnDialog.open" :status="s.returnDialog.status" @confirm="s.confirmReturn" />
     <StudentStartDialog v-bind="s.start.dialogProps.value" @close="s.start.close" @update:date="s.start.setDate" @confirm="s.start.confirm" />
     <StudentDeleteDialog
       :open="!!del.target.value" :name="del.name.value" :loading="del.deleting.value"

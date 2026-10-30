@@ -8,6 +8,8 @@ export interface PaymentsParams {
   status?: PaymentStatus
   forMonth?: string
   overdueOnly?: boolean
+  /** Only rows with a receipt waiting for admin confirmation. */
+  pendingOnly?: boolean
   studentId?: number
   groupId?: number
   teacherId?: number

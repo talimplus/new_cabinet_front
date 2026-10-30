@@ -33,6 +33,8 @@
       </template>
     </UiTable>
 
+    <GroupFormerStudents :key="students.length" :group-id="groupId" />
+
     <StudentTransferModal
       :state="tx.transfer.state"
       :group-options="tx.transfer.groupOptions.value"
@@ -50,6 +52,7 @@
 import { computed } from 'vue'
 import { UiTable, UiBadge, UiButton, UiIcon, UiCheckbox } from '@/shared/components'
 import StudentTransferModal from '@/shared/components/transfer/StudentTransferModal.vue'
+import GroupFormerStudents from './GroupFormerStudents.vue'
 import { ArrowLeftRight } from '@/shared/icons'
 import { formatPhone } from '@/shared/utils/format-phone'
 import { useGroupStudentsTransfer } from '../../composables/use-group-students-transfer'

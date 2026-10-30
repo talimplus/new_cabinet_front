@@ -1,6 +1,10 @@
 export default {
   title: 'Guruhlar',
   filter: {
+    scope: "Guruhlar holati",
+    scopeActive: 'Faol guruhlar',
+    scopeFinished: 'Tugagan / yopilgan',
+    scopeAll: 'Barcha guruhlar',
     center: 'Markaz',
     teacher: 'Ustoz',
   },
@@ -217,6 +221,28 @@ export default {
     candidatesHint:
       "Belgilanganlarning guruhga qo'shilgan sanasi ham shu kunga suriladi. Belgilanmaganlar o'z sanasidan hisoblanadi. Boshqa guruhdan ko'chirilganlar bu ro'yxatda yo'q.",
     joinedAt: "qo'shilgan: {date}",
+  },
+  finish: {
+    action: 'Guruhni yakunlash',
+    title: '"{name}" guruhini yakunlash',
+    endDate: 'Oxirgi dars kuni',
+    endDateHint: "O'tgan sana ham bo'lishi mumkin. Shu kungacha darslar to'lovga kiradi.",
+    moveStudents: "O'quvchilarni boshqa guruhga o'tkazish",
+    targetGroup: "Qaysi guruhga o'tadi",
+    createGroup: 'Yangi guruh yaratish',
+    selectAll: "Barchasi ({count} ta o'quvchi)",
+    summary:
+      "{moved} ta o'quvchi yangi guruhga oxirgi darsdan keyingi kundan o'tadi, {finished} tasi guruh bilan tugallanadi.",
+    debtStays: "Shu guruhdagi qarz ({amount}) shu guruhda qoladi.",
+    confirm: 'Yakunlash',
+    done: "Guruh yakunlandi: {moved} ta o'tkazildi, {finished} ta tugallandi",
+  },
+  formerStudents: {
+    title: "Sobiq o'quvchilar ({count})",
+    hint: "Ko'chirilgan yoki to'xtagan o'quvchilar. Ularning shu guruhdagi davomati jurnalda saqlanadi.",
+    transferredTo: "{name} ga ko'chirilgan",
+    debt: 'Qarz: {amount}',
+    noDebt: "Qarz yo'q",
   },
   statusChange: {
     endDateRequired: 'Avval tugash sanasini kiriting',

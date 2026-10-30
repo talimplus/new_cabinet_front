@@ -15,6 +15,7 @@ import { useNotificationStore } from '@/stores/notification.store'
 import { usePaymentChecks } from './use-payment-checks'
 import { usePaymentExport } from './use-payment-export'
 import { PaymentStatus } from '../enums/payment-status.enum'
+import { PaymentListFilter } from '../enums/payment-list-filter.enum'
 import { toDateString } from '@/shared/utils/format-date'
 import { formatSom } from '@/shared/utils/format-money'
 import type { Payment } from '../interfaces/payment.interface'
@@ -24,10 +25,13 @@ import type { MarkAsPaidSubmit, PartialSubmit } from '../interfaces/payment-subm
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
 
+const isRowStatus = (v: PaymentStatus | PaymentListFilter): v is PaymentStatus =>
+  (Object.values(PaymentStatus) as string[]).includes(v)
+
 interface PaymentFilters {
   year: number
   month: string
-  status: PaymentStatus | 'all'
+  status: PaymentStatus | PaymentListFilter
   groupId: number | null
   teacherId: number | null
   search: string
@@ -65,7 +69,7 @@ export function usePayments() {
   const filters = reactive<PaymentFilters>({
     year: now.getFullYear(),
     month: pad(now.getMonth() + 1),
-    status: 'all',
+    status: PaymentListFilter.ALL,
     groupId: null,
     teacherId: null,
     search: '',
@@ -87,7 +91,9 @@ export function usePayments() {
   function filterParams(withMonth = true): PaymentsParams {
     return {
       forMonth: withMonth ? `${filters.year}-${filters.month}` : undefined,
-      status: filters.status === 'all' ? undefined : filters.status,
+      // "Tasdiqlash kutilmoqda" is not a row status — a separate flag.
+      status: isRowStatus(filters.status) ? filters.status : undefined,
+      pendingOnly: filters.status === PaymentListFilter.PENDING || undefined,
       groupId: filters.groupId ?? undefined,
       teacherId: filters.teacherId ?? undefined,
       search: filters.search || undefined,
@@ -157,7 +163,7 @@ export function usePayments() {
     filters.month = month
     applyFilters()
   }
-  function setStatus(status: PaymentStatus | 'all'): void {
+  function setStatus(status: PaymentStatus | PaymentListFilter): void {
     filters.status = status
     applyFilters()
   }

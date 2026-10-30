@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchGroups, fetchGroupById, createGroup, updateGroup, deleteGroup, changeGroupStatus, previewGroupStartDate } from '../groups.api'
+import { fetchGroups, fetchGroupById, createGroup, updateGroup, deleteGroup, changeGroupStatus, previewGroupStartDate, fetchGroupMembers } from '../groups.api'
 import { http } from '@/shared/api/http'
 import { GroupStatus } from '../../enums/group-status.enum'
 import { WeekDay } from '../../enums/week-day.enum'
@@ -112,5 +112,12 @@ describe('groups.api', () => {
       backdateStudentIds: [],
     })
     expect(result).toEqual(preview)
+  })
+
+  it('fetchGroupMembers GETs /groups/{id}/members and returns the list', async () => {
+    mockedHttp.get.mockResolvedValueOnce({ data: [{ studentId: 1 }] })
+    const result = await fetchGroupMembers(4)
+    expect(mockedHttp.get).toHaveBeenCalledWith('/groups/4/members')
+    expect(result).toEqual([{ studentId: 1 }])
   })
 })

@@ -17,12 +17,13 @@ import StudentStatsCards from '../components/card/StudentStatsCards.vue'
 import StudentMonthsTable from '../components/card/StudentMonthsTable.vue'
 import StudentCardModals from '../components/card/StudentCardModals.vue'
 import StudentTimeline from '../components/card/StudentTimeline.vue'
+import StudentAttendanceHistory from '../components/card/StudentAttendanceHistory.vue'
 import type { StudentSummaryGroup } from '../interfaces/student-summary.interface'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { canEditStudent, canTakePayment, canTransferStudents, canViewStudents } = usePermissions()
+const { canEditStudent, canTakePayment, canTransferStudents, canViewStudents, canViewAttendance } = usePermissions()
 
 const studentId = computed(() => {
   const raw = route.params.id
@@ -86,6 +87,7 @@ const payable = computed(() => card.payableNow.value > 0)
       </div>
 
       <StudentMonthsTable :months="card.months.value" :loading="card.loading.value" />
+      <StudentAttendanceHistory v-if="canViewAttendance" :student-id="studentId" :refresh-key="card.summary.value" />
       <StudentTimeline v-if="canViewStudents" :student-id="studentId" :refresh-key="card.summary.value" />
     </template>
 

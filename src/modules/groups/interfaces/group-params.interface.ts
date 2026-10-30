@@ -6,4 +6,6 @@ export interface GroupsParams {
   teacherId?: number
   page?: number
   perPage?: number
+  /** Comma list of `GroupStatus` (`new,started`, `finished`); omitted — all. */
+  status?: string
 }

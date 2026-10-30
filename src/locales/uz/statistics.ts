@@ -41,6 +41,8 @@ export default {
     charged: 'Hisoblangan',
     paid: "To'langan",
     remaining: 'Qolgan',
+    pending: 'Tasdiqlash kutilmoqda ({count} ta)',
+    collectable: "O'quvchilardan olinishi kerak",
     totalAmount: 'Jami summa',
     totalCount: 'Jami soni',
     paidWithAmount: "To'langan: {amount}",

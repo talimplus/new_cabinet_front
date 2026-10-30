@@ -8,6 +8,7 @@ import { optionalRequest } from '@/shared/permissions/optional-request'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString } from '@/shared/utils/format-date'
 import { GroupStatus } from '../enums/group-status.enum'
+import { GroupListScope, GROUP_LIST_SCOPE_STATUSES } from '../enums/group-list-scope.enum'
 import { GroupStartMode } from '../enums/group-start-mode.enum'
 import { useGroupStart, type GroupStartConfirm } from './use-group-start'
 import type { GroupStartForm } from '../interfaces/group-start.interface'
@@ -22,6 +23,8 @@ const STATUS_FIELDS = ['endDate', 'roomId']
 export interface UseGroupsOptions {
   /** A 422 from saving the edit form after the start-date dialog — map it onto the form. */
   onEditError?: (error: unknown) => void
+  /** STARTED → FINISHED opens the "finish group" dialog (date + moving students). */
+  onFinish?: (group: Group) => void
 }
 
 export function useGroups(options: UseGroupsOptions = {}) {
@@ -32,10 +35,12 @@ export function useGroups(options: UseGroupsOptions = {}) {
   const rows = ref<Group[]>([])
   const totalPages = ref(1)
   const loading = ref(false)
-  const filters = reactive<{ page: number; perPage: number; teacherId: number | null }>({
+  const filters = reactive<{ page: number; perPage: number; teacherId: number | null; scope: GroupListScope }>({
     page: 1,
     perPage: 10,
     teacherId: null,
+    // Finished groups live under their own filter, with history intact.
+    scope: GroupListScope.ACTIVE,
   })
 
   // A teacher user never picks a teacher — the backend already scopes them.
@@ -61,6 +66,7 @@ export function useGroups(options: UseGroupsOptions = {}) {
         page: filters.page,
         perPage: filters.perPage,
         teacherId: filters.teacherId ?? undefined,
+        status: GROUP_LIST_SCOPE_STATUSES[filters.scope],
       })
       rows.value = data
       totalPages.value = meta.totalPages ?? 1
@@ -88,6 +94,11 @@ export function useGroups(options: UseGroupsOptions = {}) {
 
   function setTeacher(id: number | null): void {
     filters.teacherId = id
+    filters.page = 1
+    load()
+  }
+  function setScope(scope: GroupListScope): void {
+    filters.scope = scope
     filters.page = 1
     load()
   }
@@ -164,6 +175,10 @@ export function useGroups(options: UseGroupsOptions = {}) {
       start.openForStart(group)
       return
     }
+    if (status === GroupStatus.FINISHED && group.status === GroupStatus.STARTED && options.onFinish) {
+      options.onFinish(group)
+      return
+    }
     const endDate = group.endDate?.slice(0, 10)
     if (status === GroupStatus.FINISHED && endDate && endDate > toDateString(new Date())!) {
       pendingFinish.value = group
@@ -207,7 +222,7 @@ export function useGroups(options: UseGroupsOptions = {}) {
     showTeacherFilter, teacherOptions,
     modalOpen, editing, statusErrors,
     pendingDelete, deleting, pendingFinish,
-    init, setPage, setTeacher,
+    init, setPage, setTeacher, setScope,
     openCreate, openEdit, submit,
     askDelete, confirmDelete, setStatus, confirmFinish, start,
   }

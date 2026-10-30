@@ -39,6 +39,7 @@ import { computed } from 'vue'
 import { UiSelect } from '@/shared/components'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { PaymentStatus, PAYMENT_STATUS_LABEL_KEYS } from '../enums/payment-status.enum'
+import { PaymentListFilter } from '../enums/payment-list-filter.enum'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { useI18n } from 'vue-i18n'
 
@@ -48,7 +49,7 @@ const { canViewGroups, canViewTeachers } = usePermissions()
 defineProps<{ groupOptions: SelectOption[]; teacherOptions: SelectOption[] }>()
 
 const year = defineModel<number>('year', { required: true })
-const status = defineModel<PaymentStatus | 'all'>('status', { default: 'all' })
+const status = defineModel<PaymentStatus | PaymentListFilter>('status', { default: PaymentListFilter.ALL })
 const groupId = defineModel<number | null>('groupId', { default: null })
 const teacherId = defineModel<number | null>('teacherId', { default: null })
 const emit = defineEmits<{ change: []; teacher: [id: number | null] }>()
@@ -59,8 +60,9 @@ const yearOptions: SelectOption[] = [currentYear - 1, currentYear, currentYear +
   value: y,
 }))
 const statusOptions = computed<SelectOption[]>(() => [
-  { label: t('common.all'), value: 'all' },
+  { label: t('common.all'), value: PaymentListFilter.ALL },
   ...Object.values(PaymentStatus).map((v) => ({ label: t(PAYMENT_STATUS_LABEL_KEYS[v]), value: v })),
+  { label: t('payments.table.pendingConfirmation'), value: PaymentListFilter.PENDING },
 ])
 
 const toNum = (v: unknown): number | null => (typeof v === 'number' ? v : null)

@@ -9,6 +9,8 @@ import GroupFilters from '../components/GroupFilters.vue'
 import GroupsTable from '../components/GroupsTable.vue'
 import GroupFormModal from '../components/GroupFormModal.vue'
 import GroupStartDialog from '../components/GroupStartDialog.vue'
+import GroupFinishDialog from '../components/GroupFinishDialog.vue'
+import type { Group } from '../interfaces/group.interface'
 import { useGroups } from '../composables/use-groups'
 import type { GroupForm } from '../interfaces/group-form.interface'
 
@@ -18,9 +20,13 @@ const { canCreateGroup, canEditGroup, canDeleteGroup, canChangeGroupStatus } = u
 
 const {
   scope, rows, totalPages, loading, filters, showTeacherFilter, teacherOptions,
-  modalOpen, editing, statusErrors, pendingDelete, deleting, pendingFinish,
-  init, setPage, setTeacher, openCreate, openEdit, submit, askDelete, confirmDelete, setStatus, confirmFinish, start,
-} = useGroups({ onEditError: (e) => modalRef.value?.setBackendErrors(e) })
+  modalOpen, editing, statusErrors, pendingDelete, deleting,
+  init, setPage, setTeacher, setScope, openCreate, openEdit, submit, askDelete, confirmDelete, setStatus, start,
+} = useGroups({
+  onEditError: (e) => modalRef.value?.setBackendErrors(e),
+  onFinish: (g) => finishRef.value?.open(g),
+})
+const finishRef = ref<{ open: (g: Group) => void } | null>(null)
 onMounted(init)
 
 const modalRef = ref<{ setBackendErrors: (e: unknown) => void } | null>(null)
@@ -45,10 +51,8 @@ async function onSubmit(payload: GroupForm) {
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
       <GroupFilters
-        v-if="showTeacherFilter"
-        :teacher-id="filters.teacherId"
-        :options="teacherOptions"
-        @update:teacher-id="setTeacher"
+        :scope="filters.scope" :show-teacher="showTeacherFilter" :teacher-id="filters.teacherId"
+        :options="teacherOptions" @update:scope="setScope" @update:teacher-id="setTeacher"
       />
       <UiButton v-if="canCreateGroup" class="ml-auto" @click="openCreate">
         <UiIcon :icon="Plus" :size="16" /> {{ t('common.create') }}
@@ -88,12 +92,7 @@ async function onSubmit(payload: GroupForm) {
       @confirm="confirmDelete"
       @cancel="pendingDelete = null"
     />
-    <UiConfirmDialog
-      :model-value="!!pendingFinish"
-      :title="t('groups.statusChange.finishTitle')"
-      :message="t('groups.statusChange.finishText')" :confirm-label="t('groups.statusChange.confirm')"
-      @confirm="confirmFinish" @cancel="pendingFinish = null"
-    />
+    <GroupFinishDialog ref="finishRef" @done="init" />
     <GroupStartDialog v-bind="start.dialogProps.value" @close="start.close" @update:date="start.setDate" @toggle="start.toggle" @confirm="start.confirm" />
   </div>
 </template>

@@ -78,6 +78,9 @@ export default {
     sure: 'Qaytish ehtimoli 100%',
   },
   dialog: {
+    stopDate: "O'qishni qachon to'xtatgan?",
+    stopDateHint:
+      "O'tgan sana bo'lishi mumkin. Shu kundan boshlab darslar to'lovga kirmaydi (ortiqcha to'langan pul qaytariladigan bo'ladi).",
     returnTitle: 'Qaytish ehtimoli',
     reasonTitle: 'Sababi',
     comment: 'Izoh',
@@ -94,6 +97,18 @@ export default {
     dateHint:
       "O'tgan sanani ham tanlash mumkin (sistemaga kech kiritilgan bo'lsa). To'lov shu kundan hisoblanadi; guruh boshlanishidan oldingi kunlar hisobga kirmaydi.",
     joinText: "Yangi guruh(lar)ga qo'shilgan sana: {date}. To'lov shu kundan hisoblanadi.",
+  },
+  attendanceHistory: {
+    heading: 'Davomat tarixi (barcha guruhlar)',
+    subtitle:
+      "Ko'chirilgan va tugagan guruhlardagi davomat ham shu yerda. Guruhni bosib, faqat o'sha guruh belgilarini ko'ring.",
+    loadError: "Davomatni yuklab bo'lmadi",
+    empty: "Hali birorta guruhda o'qimagan",
+    noMarks: "Davomat belgilari yo'q",
+    current: 'Hozirgi',
+    former: 'Sobiq',
+    now: 'hozirgacha',
+    transferredTo: "{name} ga ko'chirilgan",
   },
   messages: {
     groupRequired: 'Guruh tanlanishi kerak',
