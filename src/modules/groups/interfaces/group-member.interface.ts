@@ -16,6 +16,8 @@ export interface GroupMember {
   transferredToGroupName: string | null
   /** In the group right now. */
   isCurrent: boolean
-  /** Unpaid in THIS group; null without `payments.view`. */
+  /** Still to collect in THIS group (pending receipts already taken off); null without `payments.view`. */
   debt: number | null
+  /** Taken by reception, not yet confirmed by an admin; null without `payments.view`. */
+  pending: number | null
 }

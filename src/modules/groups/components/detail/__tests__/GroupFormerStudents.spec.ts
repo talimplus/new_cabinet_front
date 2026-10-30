@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import { mount, flushPromises, RouterLinkStub } from '@vue/test-utils'
 import GroupFormerStudents from '../GroupFormerStudents.vue'
 import { fetchGroupMembers } from '../../../api/groups.api'
@@ -11,13 +12,16 @@ const mockedFetch = vi.mocked(fetchGroupMembers)
 const member = (over: Record<string, unknown>) => ({
   studentId: 1, firstName: 'Ali', lastName: 'Valiyev', phone: null, studentStatus: StudentStatus.ACTIVE,
   joinedAt: '2026-09-01', leftAt: null, leftReason: null, transferredToGroupId: null,
-  transferredToGroupName: null, isCurrent: true, debt: 0, ...over,
+  transferredToGroupName: null, isCurrent: true, debt: 0, pending: 0, ...over,
 })
 
-const mountIt = () => mount(GroupFormerStudents, { props: { groupId: 4 }, global: { stubs: { RouterLink: RouterLinkStub } } })
+const mountIt = () => mount(GroupFormerStudents, { props: { groupId: 4, groupName: 'A1' }, global: { stubs: { RouterLink: RouterLinkStub } } })
 
 describe('GroupFormerStudents', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setActivePinia(createPinia())
+  })
 
   it('lists only former members with period, transfer target and debt', async () => {
     mockedFetch.mockResolvedValue([

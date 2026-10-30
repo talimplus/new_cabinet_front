@@ -10,6 +10,8 @@ export interface PayDebtForm {
   paymentMethod?: PaymentMethod
   /** `YYYY-MM-DD`, only meaningful for a CARD payment. */
   paidAt?: string
+  /** Only this group's open months (e.g. a former group's debt). */
+  groupId?: number
 }
 
 /** One row of the client-side "how will this amount be split" preview. */

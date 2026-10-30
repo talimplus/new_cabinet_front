@@ -731,6 +731,9 @@ start = day after `endDate`).
 #### Former groups & members *(2026-10-30, verified live)*
 - `GET /groups?status=new,started` (default in the list) / `status=finished` —
   closed groups live under "Tugagan / yopilgan" (`GroupListScope`).
+- Former students show `debt` (to collect, pending taken off) and `pending`;
+  "To'lov qabul qilish" (`payments.create`) opens `GroupMemberPayModal` →
+  `PUT /payments/pay-debt/student/{id}` with `groupId` (only this group's months).
 - `GET /groups/{id}/members` → `GroupMember[]` (everyone who ever studied there:
   `joinedAt`, `leftAt`, `transferredToGroupName`, `isCurrent`, `debt` — null
   without `payments.view`). The Students tab lists the former ones below the table.

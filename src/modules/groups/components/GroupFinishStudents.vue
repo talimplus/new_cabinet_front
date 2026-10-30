@@ -8,7 +8,10 @@
         <UiCheckbox :model-value="selected.includes(m.studentId)" @update:model-value="emit('toggle', m.studentId, !!$event)">
           {{ m.lastName }} {{ m.firstName }}
         </UiCheckbox>
-        <span v-if="m.debt" class="shrink-0 font-mono text-xs text-danger">{{ t('groups.formerStudents.debt', { amount: formatSom(m.debt) }) }}</span>
+        <span class="shrink-0 text-right font-mono text-xs">
+          <span v-if="m.debt" class="block text-danger">{{ t('groups.formerStudents.debt', { amount: formatSom(m.debt) }) }}</span>
+          <span v-if="m.pending" class="block text-warning">{{ t('groups.formerStudents.pending', { amount: formatSom(m.pending) }) }}</span>
+        </span>
       </li>
     </ul>
   </div>

@@ -5,7 +5,7 @@
     </h4>
     <p class="text-xs text-muted-foreground">{{ t('groups.formerStudents.hint') }}</p>
     <ul class="divide-y divide-border rounded-md border border-border text-sm">
-      <li v-for="m in former" :key="m.studentId" class="flex flex-col gap-1 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <li v-for="m in former" :key="m.studentId" class="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
           <RouterLink :to="{ name: 'student-card', params: { id: m.studentId } }" class="font-medium text-primary hover:underline">
             {{ m.lastName }} {{ m.firstName }}
@@ -16,11 +16,10 @@
             <span v-else-if="m.leftReason"> · {{ m.leftReason }}</span>
           </p>
         </div>
-        <span v-if="m.debt != null" :class="m.debt > 0 ? 'font-mono font-semibold text-danger' : 'font-mono text-muted-foreground'">
-          {{ m.debt > 0 ? t('groups.formerStudents.debt', { amount: formatSom(m.debt) }) : t('groups.formerStudents.noDebt') }}
-        </span>
+        <GroupMemberMoney v-if="m.debt != null" :member="m" :can-pay="canTakePayment" @pay="paying = m" />
       </li>
     </ul>
+    <GroupMemberPayModal :member="paying" :group-id="groupId" :group-name="groupName" @close="paying = null" @paid="onPaid" />
   </section>
 </template>
 
@@ -29,16 +28,20 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { fetchGroupMembers } from '../../api/groups.api'
+import { usePermissions } from '@/shared/composables/use-permissions'
 import { formatDate } from '@/shared/utils/format-date'
-import { formatSom } from '@/shared/utils/format-money'
+import GroupMemberMoney from './GroupMemberMoney.vue'
+import GroupMemberPayModal from './GroupMemberPayModal.vue'
 import type { GroupMember } from '../../interfaces/group-member.interface'
 
 const { t } = useI18n()
+const { canTakePayment } = usePermissions()
 
 /** The parent re-keys this on a transfer, so it reloads with the list. */
-const props = defineProps<{ groupId: number }>()
+const props = defineProps<{ groupId: number; groupName: string }>()
 
 const members = ref<GroupMember[]>([])
+const paying = ref<GroupMember | null>(null)
 /** Left the group (transferred, stopped) — their marks stay in the journal. */
 const former = computed(() => members.value.filter((m) => !m.isCurrent && m.leftAt))
 
@@ -48,6 +51,10 @@ async function load(): Promise<void> {
   } catch {
     members.value = []
   }
+}
+function onPaid(): void {
+  paying.value = null
+  void load()
 }
 onMounted(load)
 </script>

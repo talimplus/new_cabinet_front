@@ -33,7 +33,7 @@
       </template>
     </UiTable>
 
-    <GroupFormerStudents :key="students.length" :group-id="groupId" />
+    <GroupFormerStudents :key="students.length" :group-id="groupId" :group-name="groupName" />
 
     <StudentTransferModal
       :state="tx.transfer.state"

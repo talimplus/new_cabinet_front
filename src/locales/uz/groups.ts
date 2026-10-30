@@ -238,6 +238,11 @@ export default {
     done: "Guruh yakunlandi: {moved} ta o'tkazildi, {finished} ta tugallandi",
   },
   formerStudents: {
+    pending: 'Tasdiqlash kutilmoqda: {amount}',
+    pay: "To'lov qabul qilish",
+    payTitle: "{name} — to'lov qabul qilish",
+    payHint: '"{group}" guruhidagi qarzga yoziladi (eng eski oydan boshlab).',
+    toCollect: 'Olinishi kerak',
     title: "Sobiq o'quvchilar ({count})",
     hint: "Ko'chirilgan yoki to'xtagan o'quvchilar. Ularning shu guruhdagi davomati jurnalda saqlanadi.",
     transferredTo: "{name} ga ko'chirilgan",
