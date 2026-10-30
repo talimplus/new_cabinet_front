@@ -16,6 +16,13 @@ export interface GroupForm {
   monthlyFee: number | null
   /** Lesson length in minutes (defaults to 90 in the form). */
   lessonDurationMinutes?: number | null
+  /**
+   * `YYYY-MM-DD` — first lesson day; may be in the past. Omitted on create
+   * when empty (backend: today) and on edit when unchanged.
+   */
+  startDate?: string
+  /** Edit-only, with a changed `startDate`: members whose join date moves too. */
+  backdateStudentIds?: number[]
   /** `YYYY-MM-DD`; `null` clears the term (open-ended). Omitted on create when empty. */
   endDate?: string | null
   /** Edit-only: when the price changed, whether it applies this month or next. */
@@ -25,4 +32,6 @@ export interface GroupForm {
   scheduleEffectiveFrom?: string
   /** Edit-only, `YYYY-MM-DD`: the new teacher takes over from this day (default today). */
   teacherEffectiveFrom?: string
+  /** Save even though the room/teacher is busy — sent only after the user ticks the warning. */
+  allowScheduleConflicts?: boolean
 }

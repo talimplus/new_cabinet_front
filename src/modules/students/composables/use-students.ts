@@ -5,6 +5,9 @@ import { optionalRequest, emptyPage } from '@/shared/permissions/optional-reques
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
 import { StudentStatus } from '../enums/student-status.enum'
+import { StudentStartMode } from '../enums/student-start-mode.enum'
+import { useStudentStart, type StudentStartConfirm } from './use-student-start'
+import type { StudentStatusChangeForm } from '../interfaces/student-start.interface'
 import type { Student } from '../interfaces/student.interface'
 import type { StudentForm } from '../interfaces/student-form.interface'
 import type { StudentsParams } from '../interfaces/student-params.interface'
@@ -32,7 +35,11 @@ interface ReturnDialogState {
 
 /** List/state logic for one student page. `getStatus` is read live so the same
  *  view instance can be reused across student routes (Vue Router reuses it). */
-export function useStudents(getStatus: () => StudentStatus) {
+export function useStudents(
+  getStatus: () => StudentStatus,
+  /** A 422 from saving the edit form after the start-date dialog — map it onto the form. */
+  onEditError?: (error: unknown) => void,
+) {
   const scope = useScopeStore()
   const notify = useNotificationStore()
 
@@ -115,8 +122,36 @@ export function useStudents(getStatus: () => StudentStatus) {
     modalOpen.value = true
   }
 
+  /** The start-date dialog confirmed: activate from that day, or save the waiting edit. */
+  async function onStartConfirm(p: StudentStartConfirm): Promise<boolean> {
+    if (p.mode === StudentStartMode.ACTIVATE) {
+      return applyStatus(p.student, StudentStatus.ACTIVE, { startDate: p.startDate })
+    }
+    try {
+      await updateStudent(p.student.id, p.form!)
+    } catch (error) {
+      // Field errors (e.g. `groupJoinedAt`) belong under the edit form's inputs.
+      start.close()
+      onEditError?.(error)
+      return false
+    }
+    notify.success(t('common.saved'))
+    modalOpen.value = false
+    await load()
+    return true
+  }
+  const start = useStudentStart(onStartConfirm)
+
   /** Rethrows on failure so the view can map field errors onto the form. */
   async function submit(form: StudentForm): Promise<void> {
+    if (editing.value && form.groupJoinedAt) {
+      // Added groups with a past join date — re-bills from it; preview first.
+      const { status: _omit, ...body } = form
+      const before = editing.value.groupIds ?? []
+      const added = (form.groupIds ?? []).filter((id) => !before.includes(id))
+      start.openForJoin(editing.value, body, added)
+      return
+    }
     saving.value = true
     try {
       if (editing.value) {
@@ -133,12 +168,16 @@ export function useStudents(getStatus: () => StudentStatus) {
     }
   }
 
-  async function applyStatus(student: Student, next: StudentStatus, extra?: { returnLikelihood?: ReturnLikelihood; comment?: string }): Promise<void> {
+  /** Resolves `false` on failure (the interceptor already toasted it). */
+  async function applyStatus(student: Student, next: StudentStatus, extra?: StudentStatusChangeForm): Promise<boolean> {
     student.statusLoading = true
     try {
       await changeStudentStatus(student.id, next, extra)
       notify.success(t('leads.statusChanged'))
       await load()
+      return true
+    } catch {
+      return false
     } finally {
       student.statusLoading = false
     }
@@ -148,6 +187,12 @@ export function useStudents(getStatus: () => StudentStatus) {
   function requestStatus(student: Student, next: StudentStatus): void {
     if (next === StudentStatus.ACTIVE && !(student.groupIds && student.groupIds.length)) {
       notify.error(t('students.messages.groupRequired'))
+      return
+    }
+    // First activation asks since when the student really studies (may be past).
+    const first = student.status === StudentStatus.NEW || student.status === StudentStatus.IGNORED
+    if (next === StudentStatus.ACTIVE && first) {
+      start.openForActivate(student)
       return
     }
     if (next === StudentStatus.STOPPED || next === StudentStatus.IGNORED) {
@@ -160,7 +205,8 @@ export function useStudents(getStatus: () => StudentStatus) {
   }
   async function confirmReturn(payload: { returnLikelihood?: ReturnLikelihood; comment?: string }): Promise<void> {
     if (returnDialog.student && returnDialog.status) {
-      await applyStatus(returnDialog.student, returnDialog.status, payload)
+      // A failed change keeps the dialog open (the interceptor toasted why).
+      if (!(await applyStatus(returnDialog.student, returnDialog.status, payload))) return
     }
     returnDialog.open = false
   }
@@ -172,6 +218,6 @@ export function useStudents(getStatus: () => StudentStatus) {
     scope, rows, rowOffset, totalPages, loading, filters, subjectOptions,
     modalOpen, editing, saving, returnDialog,
     load, init, search, applyFilters, setPage,
-    openCreate, openEdit, submit, requestStatus, confirmReturn,
+    openCreate, openEdit, submit, requestStatus, confirmReturn, start,
   }
 }

@@ -20,7 +20,8 @@ export function useStudentOptions() {
       optionalRequest(fetchAllStudents(centerId), []),
     ])
     subjects.value = s.data.map((x) => ({ label: x.name, value: x.id }))
-    groups.value = g.map((x) => ({ label: x.name, value: x.id }))
+    // `status` rides along: the form locks the student's ongoing groups.
+    groups.value = g.map((x) => ({ label: x.name, value: x.id, status: x.status }))
     referrers.value = r.map((x) => ({
       label: `${x.firstName ?? ''} ${x.lastName ?? ''}`.trim() || `#${x.id}`,
       value: x.id,

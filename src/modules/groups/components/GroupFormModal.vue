@@ -13,7 +13,7 @@
         <UiSelect :model-value="form.teacherId" :options="teachers" :label="t('groups.form.teacher')" :error="errors.teacherId" :disabled="!form.centerId" @update:model-value="setSelect('teacherId', $event)" />
         <UiMoneyInput v-model="form.monthlyFee" :label="t('groups.form.monthlyFee')" :error="errors.monthlyFee" />
         <UiInput v-model="form.lessonDurationMinutes" type="number" :label="t('groups.form.lessonDuration')" :hint="t('groups.form.minutesShort')" />
-        <UiDatepicker :model-value="form.endDate" :enable-time="false" :label="t('groups.form.endDate')" :hint="t('groups.form.endDateHint')" :error="errors.endDate" @update:model-value="form.endDate = Array.isArray($event) ? ($event[0] ?? null) : $event" />
+        <GroupDatesFields v-model:start-date="form.startDate" v-model:end-date="form.endDate" :errors="errors" />
       </div>
       <GroupTeacherFromDate v-if="teacherChanged" :model-value="form.teacherEffectiveFrom" :error="errors.teacherEffectiveFrom" @update:model-value="setTeacherFrom" />
       <p v-if="!form.endDate" class="rounded-md bg-warning-soft px-3 py-2 text-xs text-warning">
@@ -21,13 +21,13 @@
       </p>
       <GroupFeeHint :fee-changed="feeChanged" :apply-fee-now="form.applyFeeNow" :current-fee="currentFee" :next-month-label="nextMonthLabel" @update:apply-fee-now="form.applyFeeNow = $event" />
       <GroupScheduleEditor v-model:days="days" v-model:all-time="allTime" v-model:times="times" v-model:different-time="differentTime" :day-options="dayOptions" />
-      <GroupScheduleConflicts :checking="conflictChecking" :messages="conflictMessages" :free="conflictChecked && !conflicts.length" />
+      <GroupScheduleConflicts v-model:accepted="conflictsAccepted" :checking="conflictChecking" :messages="conflictMessages" :free="conflictChecked && !conflicts.length" />
       <GroupChangeDates v-model:schedule-from="form.scheduleEffectiveFrom" :schedule-changed="scheduleChanged" :error="errors.scheduleEffectiveFrom" />
     </div>
 
     <template #footer>
       <UiButton variant="outline" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</UiButton>
-      <UiButton :loading="loading" :disabled="conflicts.length > 0" @click="onSave">{{ t('common.save') }}</UiButton>
+      <UiButton :loading="loading" :disabled="conflictBlocks" @click="onSave">{{ t('common.save') }}</UiButton>
     </template>
   </UiModal>
 
@@ -44,12 +44,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiInput, UiMoneyInput, UiSelect, UiDatepicker, UiButton, UiConfirmDialog } from '@/shared/components'
+import { UiModal, UiInput, UiMoneyInput, UiSelect, UiButton, UiConfirmDialog } from '@/shared/components'
 import GroupScheduleEditor from './GroupScheduleEditor.vue'
 import GroupFeeHint from './GroupFeeHint.vue'
 import GroupScheduleConflicts from './GroupScheduleConflicts.vue'
 import GroupChangeDates from './GroupChangeDates.vue'
 import GroupTeacherFromDate from './GroupTeacherFromDate.vue'
+import GroupDatesFields from './GroupDatesFields.vue'
 import { useGroupForm } from '../composables/use-group-form'
 import type { Group } from '../interfaces/group.interface'
 import type { GroupForm } from '../interfaces/group-form.interface'
@@ -69,7 +70,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean]; submit: [paylo
 const {
   form, errors, days, allTime, times, differentTime, dayOptions,
   subjects, rooms, teachers, feeChanged, isShortening, nextMonthLabel, currentFee,
-  scheduleChanged, teacherChanged, conflicts, conflictChecking, conflictChecked, conflictMessages,
+  scheduleChanged, teacherChanged, conflicts, conflictChecking, conflictChecked, conflictMessages, conflictsAccepted, conflictBlocks,
   reset, validate, toPayload, setBackendErrors, setFieldErrors, setSelect, setTeacherFrom,
 } = useGroupForm(() => props.defaultCenterId, () => props.modelValue)
 
@@ -84,7 +85,7 @@ watch(
 )
 
 function onSave() {
-  if (conflicts.value.length || !validate()) return
+  if (conflictBlocks.value || !validate()) return
   if (isShortening.value) shortenOpen.value = true
   else doSubmit()
 }

@@ -12,6 +12,7 @@ import StudentsTable from '../components/StudentsTable.vue'
 import StudentFilters from '../components/StudentFilters.vue'
 import StudentFormModal from '../components/StudentFormModal.vue'
 import StudentReturnDialog from '../components/StudentReturnDialog.vue'
+import StudentStartDialog from '../components/StudentStartDialog.vue'
 import StudentDeleteDialog from '../components/StudentDeleteDialog.vue'
 import { useStudentDelete } from '../composables/use-student-delete'
 import type { StudentForm } from '../interfaces/student-form.interface'
@@ -22,7 +23,7 @@ const router = useRouter()
 const props = defineProps<{ variant: string }>()
 const config = computed(() => STUDENT_PAGES[props.variant] ?? STUDENT_PAGES.reception!)
 
-const s = useStudents(() => config.value.status)
+const s = useStudents(() => config.value.status, (e) => modalRef.value?.setBackendErrors(e))
 onMounted(s.init)
 // Re-init when navigating between student pages (same component, different route).
 watch(() => props.variant, () => s.init())
@@ -71,10 +72,8 @@ const del = useStudentDelete(() => s.load())
 
     <StudentsTable
       :columns="columns"
-      :rows="s.rows.value"
-      :loading="s.loading.value" :row-offset="s.rowOffset.value"
-      :can-edit="canEdit"
-      :deletable="del.canDelete"
+      :rows="s.rows.value" :loading="s.loading.value" :row-offset="s.rowOffset.value"
+      :can-edit="canEdit" :deletable="del.canDelete"
       @open="router.push({ name: 'student-card', params: { id: $event.id } })"
       @edit="s.openEdit"
       @delete="del.request"
@@ -92,6 +91,7 @@ const del = useStudentDelete(() => s.load())
       @submit="onSubmit"
     />
     <StudentReturnDialog v-model="s.returnDialog.open" @confirm="s.confirmReturn" />
+    <StudentStartDialog v-bind="s.start.dialogProps.value" @close="s.start.close" @update:date="s.start.setDate" @confirm="s.start.confirm" />
     <StudentDeleteDialog
       :open="!!del.target.value" :name="del.name.value" :loading="del.deleting.value"
       @confirm="del.confirm" @cancel="del.cancel"

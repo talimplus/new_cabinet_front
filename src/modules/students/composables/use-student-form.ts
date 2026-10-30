@@ -1,8 +1,9 @@
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useStudentOptions } from './use-student-options'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { StudentPreferredTime } from '../enums/student-preferred-time.enum'
 import { StudentStatus } from '../enums/student-status.enum'
+import { GroupStatus } from '@/modules/groups/enums/group-status.enum'
 import { isValidUzPhone, normalizePhone } from '@/shared/utils/format-phone'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString, parseDate } from '@/shared/utils/format-date'
@@ -37,6 +38,8 @@ interface StudentFormState extends DiscountState {
   passportNumber: string
   jshshir: string
   comment: string
+  /** Edit-only: the day the student joined the groups added now (default today). */
+  groupJoinedAt: Date | null
 }
 
 function blankState(centerId: number | null): StudentFormState {
@@ -44,7 +47,7 @@ function blankState(centerId: number | null): StudentFormState {
     firstName: '', lastName: '', phone: '', secondPhone: '', birthDate: null,
     referrerId: null, monthlyFee: '', heardAboutUs: '', preferredTime: null,
     preferredDays: [], centerId, groupIds: [], subjectIds: [],
-    passportSeries: '', passportNumber: '', jshshir: '', comment: '',
+    passportSeries: '', passportNumber: '', jshshir: '', comment: '', groupJoinedAt: new Date(),
     ...blankDiscount(),
   }
 }
@@ -66,8 +69,36 @@ export function useStudentForm(defaultCenterId: () => number | null) {
    */
   const showSubjects = ref(true)
   let isEditing = false
+  const isEditingRef = ref(false)
   /** The discount as it was on open — decides what the switch/free months send. */
   let baseline: DiscountBaseline = { enabled: false, freeMonths: 0 }
+  /** Groups the student was in when the edit opened. */
+  const originalGroupIds = ref<number[]>([])
+
+  /**
+   * Edit can only ADD a group: an ongoing group the student is already in is
+   * locked. Changing groups goes through the transfer, which splits the month
+   * and carries the overpayment over — removing it here would book the money
+   * as a cash refund and bill the new group in full (the backend 422s too).
+   * A finished group may still be dropped from the list.
+   */
+  const lockedGroupIds = computed(() =>
+    originalGroupIds.value.filter((id) => {
+      const option = groups.value.find((g) => g.value === id)
+      return option?.status !== GroupStatus.FINISHED
+    }),
+  )
+  const groupOptions = computed(() =>
+    groups.value.map((g) => ({ ...g, disabled: lockedGroupIds.value.includes(g.value as number) })),
+  )
+  /** Edit-only: groups added in this edit — they get a join date. */
+  const addedGroupIds = computed(() =>
+    isEditingRef.value ? form.groupIds.filter((id) => !originalGroupIds.value.includes(id)) : [],
+  )
+  /** Select's change, with the locked groups always kept (the clear button wipes all). */
+  function setGroupIds(ids: number[]): void {
+    form.groupIds = Array.from(new Set([...lockedGroupIds.value, ...ids]))
+  }
 
   function clearErrors(): void {
     Object.keys(errors).forEach((k) => delete errors[k])
@@ -77,7 +108,9 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     clearErrors()
     Object.assign(form, blankState(defaultCenterId()))
     isEditing = !!editing
+    isEditingRef.value = !!editing
     baseline = { enabled: false, freeMonths: 0 }
+    originalGroupIds.value = [...(editing?.groupIds ?? [])]
     showSubjects.value = !editing || editing.status === StudentStatus.NEW
     if (editing) fillFrom(editing)
     loadOptions()
@@ -154,6 +187,11 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     if (form.centerId != null) payload.centerId = form.centerId
     applySubjects(payload)
     if (form.groupIds.length) payload.groupIds = [...form.groupIds]
+    // A past join date for the added groups — the list confirms its impact first.
+    const joined = toDateString(form.groupJoinedAt)
+    if (addedGroupIds.value.length && joined && joined < toDateString(new Date())) {
+      payload.groupJoinedAt = joined
+    }
     const fee = num(form.monthlyFee)
     if (fee !== undefined) payload.monthlyFee = fee
 
@@ -184,7 +222,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
   }
 
   return {
-    form, errors, subjects, groups, referrers, showSubjects,
-    reset, validate, toPayload, setBackendErrors,
+    form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects,
+    reset, validate, toPayload, setBackendErrors, setGroupIds,
   }
 }

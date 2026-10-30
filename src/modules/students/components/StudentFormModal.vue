@@ -16,7 +16,8 @@
         <UiSelect :model-value="form.preferredTime" :options="timeOptions" :label="t('students.form.preferredTime')" :searchable="false" @update:model-value="form.preferredTime = ($event as StudentPreferredTime | null)" />
         <UiSelect :model-value="form.preferredDays" :options="dayOptions" mode="multiple" :label="t('students.form.preferredDays')" @update:model-value="form.preferredDays = ($event as WeekDay[])" />
         <UiSelect v-if="showSubjects" :model-value="form.subjectIds" :options="subjects" mode="multiple" :label="t('students.form.subject')" :disabled="!form.centerId" @update:model-value="form.subjectIds = ($event as number[])" />
-        <UiSelect :model-value="form.groupIds" :options="groups" mode="multiple" :label="t('students.form.groups')" :disabled="!form.centerId" @update:model-value="form.groupIds = ($event as number[])" />
+        <UiSelect :model-value="form.groupIds" :options="groupOptions" mode="multiple" :label="t('students.form.groups')" :hint="lockedGroupIds.length ? t('students.form.groupsLockedHint') : undefined" :error="errors.groupIds" :clearable="!lockedGroupIds.length" :disabled="!form.centerId" @update:model-value="setGroupIds(($event as number[] | null) ?? [])" />
+        <UiDatepicker v-if="addedGroupIds.length" v-model="form.groupJoinedAt" :clearable="false" :max-date="new Date()" :min-date="branding.openedOn" :label="t('students.form.groupJoinedAt')" :hint="t('students.form.groupJoinedAtHint')" :error="errors.groupJoinedAt" />
         <UiSelect :model-value="form.referrerId" :options="referrers" :label="t('students.form.referrer')" :disabled="!form.centerId" @update:model-value="form.referrerId = toNum($event)" />
         <UiInput v-model="form.heardAboutUs" :label="t('students.form.heardAboutUs')" />
       </div>
@@ -39,6 +40,7 @@ import { UiModal, UiInput, UiMoneyInput, UiPhoneInput, UiSelect, UiDatepicker, U
 import StudentIdentityFields from './StudentIdentityFields.vue'
 import StudentDiscountSection from './StudentDiscountSection.vue'
 import { useStudentForm } from '../composables/use-student-form'
+import { useBrandingStore } from '@/stores/branding.store'
 import { StudentPreferredTime, PREFERRED_TIME_LABEL_KEYS } from '../enums/student-preferred-time.enum'
 import { WeekDay, WEEK_DAY_LABEL_KEYS } from '@/modules/groups/enums/week-day.enum'
 import type { Student } from '../interfaces/student.interface'
@@ -54,7 +56,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; submit: [payload: StudentForm] }>()
 
-const { form, errors, subjects, groups, referrers, showSubjects, reset, validate, toPayload, setBackendErrors } =
+const { form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, reset, validate, toPayload, setBackendErrors, setGroupIds } =
   useStudentForm(() => props.defaultCenterId)
 
 const timeOptions = computed(() =>
@@ -64,6 +66,7 @@ const dayOptions = computed(() =>
   Object.values(WeekDay).map((v) => ({ label: t(WEEK_DAY_LABEL_KEYS[v]), value: v })),
 )
 
+const branding = useBrandingStore() // join date: not before the organization opened
 const toNum = (v: unknown): number | null => (typeof v === 'number' ? v : null)
 // A discount period can be limited to one of the groups picked above (e.g. the cheaper subject).
 const selectedGroups = computed(() => groups.value.filter((g) => form.groupIds.includes(g.value as number)))

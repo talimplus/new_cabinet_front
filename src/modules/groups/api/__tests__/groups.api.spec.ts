@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchGroups, fetchGroupById, createGroup, updateGroup, deleteGroup, changeGroupStatus } from '../groups.api'
+import { fetchGroups, fetchGroupById, createGroup, updateGroup, deleteGroup, changeGroupStatus, previewGroupStartDate } from '../groups.api'
 import { http } from '@/shared/api/http'
 import { GroupStatus } from '../../enums/group-status.enum'
 import { WeekDay } from '../../enums/week-day.enum'
@@ -84,5 +84,33 @@ describe('groups.api', () => {
     expect(mockedHttp.put).toHaveBeenCalledWith('/groups/change-status/3', {
       status: GroupStatus.STARTED,
     })
+  })
+
+  it('changeGroupStatus spreads the start date and ticked students into the body', async () => {
+    mockedHttp.put.mockResolvedValueOnce({ data: undefined })
+
+    await changeGroupStatus(3, GroupStatus.STARTED, { startDate: '2026-10-05', backdateStudentIds: [1, 2] })
+
+    expect(mockedHttp.put).toHaveBeenCalledWith('/groups/change-status/3', {
+      status: GroupStatus.STARTED,
+      startDate: '2026-10-05',
+      backdateStudentIds: [1, 2],
+    })
+  })
+
+  it('previewGroupStartDate POSTs /groups/{id}/start-date/preview and returns the body', async () => {
+    const preview = {
+      startDate: '2026-10-05', prevStartDate: '2026-10-30', attendanceBefore: 0, candidates: [],
+      rows: [], totals: { debtIncrease: 0, debtDecrease: 0, refund: 0 }, paidSalaryMonths: [],
+    }
+    mockedHttp.post.mockResolvedValueOnce({ data: preview })
+
+    const result = await previewGroupStartDate(4, { startDate: '2026-10-05', backdateStudentIds: [] })
+
+    expect(mockedHttp.post).toHaveBeenCalledWith('/groups/4/start-date/preview', {
+      startDate: '2026-10-05',
+      backdateStudentIds: [],
+    })
+    expect(result).toEqual(preview)
   })
 })

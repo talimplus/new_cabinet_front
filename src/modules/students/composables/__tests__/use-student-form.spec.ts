@@ -5,18 +5,26 @@ import { StudentStatus } from '../../enums/student-status.enum'
 import { StudentPreferredTime } from '../../enums/student-preferred-time.enum'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { DiscountType } from '../../enums/discount-type.enum'
+import { GroupStatus } from '@/modules/groups/enums/group-status.enum'
 import type { Student } from '../../interfaces/student.interface'
 import { t } from '@/locales'
 
 // Stub the select-options composable so reset()'s loadFor() resolves without
 // touching the network.
-const options = vi.hoisted(() => ({ loadFor: vi.fn(), clear: vi.fn() }))
+const options = vi.hoisted(() => ({
+  loadFor: vi.fn(),
+  clear: vi.fn(),
+  /** Shared group options, so a test can seed them (with `status`). */
+  groups: { value: [] as Array<Record<string, unknown>> },
+}))
 vi.mock('../use-student-options', async () => {
   const { ref } = await import('vue')
+  const groups = ref<Array<Record<string, unknown>>>([])
+  options.groups = groups
   return {
     useStudentOptions: () => ({
       subjects: ref([]),
-      groups: ref([]),
+      groups,
       referrers: ref([]),
       loadFor: options.loadFor,
       clear: options.clear,
@@ -28,6 +36,52 @@ describe('useStudentForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     options.loadFor.mockResolvedValue(undefined)
+    options.groups.value = []
+  })
+
+  describe('current groups are locked on edit', () => {
+    const student: Student = {
+      id: 5, firstName: 'Ali', lastName: 'Valiyev', phone: '998901112233',
+      centerId: 7, groupIds: [1, 2], status: StudentStatus.ACTIVE,
+    }
+    beforeEach(() => {
+      options.groups.value = [
+        { label: 'A', value: 1, status: GroupStatus.STARTED },
+        { label: 'B', value: 2, status: GroupStatus.FINISHED },
+        { label: 'C', value: 3, status: GroupStatus.NEW },
+      ]
+    })
+
+    it('disables only the ongoing groups the student is already in', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(student)
+      await flushPromises()
+
+      expect(f.lockedGroupIds.value).toEqual([1])
+      expect(f.groupOptions.value.map((o) => o.disabled)).toEqual([true, false, false])
+    })
+
+    it('keeps a locked group when the select drops it, but lets a new one be added', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(student)
+      await flushPromises()
+
+      f.setGroupIds([3])
+      expect(f.form.groupIds).toEqual([1, 3])
+      f.setGroupIds([])
+      expect(f.form.groupIds).toEqual([1])
+    })
+
+    it('locks nothing on create', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(null)
+      await flushPromises()
+
+      expect(f.lockedGroupIds.value).toEqual([])
+      f.setGroupIds([1])
+      f.setGroupIds([])
+      expect(f.form.groupIds).toEqual([])
+    })
   })
 
   describe('validate()', () => {
@@ -416,6 +470,51 @@ describe('useStudentForm', () => {
       expect(f.form.birthDate).toBeNull()
       expect(f.form.groupIds).toEqual([])
       expect(f.form.centerId).toBe(4) // defaultCenterId getter
+    })
+  })
+
+  describe('groupJoinedAt (groups added on edit)', () => {
+    const student: Student = {
+      id: 5, firstName: 'Ali', lastName: 'Valiyev', phone: '998901112233',
+      centerId: 7, groupIds: [1], status: StudentStatus.ACTIVE,
+    }
+
+    it('lists only the groups added in this edit', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(student)
+      await flushPromises()
+      expect(f.addedGroupIds.value).toEqual([])
+      f.setGroupIds([1, 3])
+      expect(f.addedGroupIds.value).toEqual([3])
+    })
+
+    it('sends a past join date only when a group was added', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(student)
+      await flushPromises()
+      f.form.groupJoinedAt = new Date('2026-01-15T00:00:00')
+      expect('groupJoinedAt' in f.toPayload()).toBe(false)
+
+      f.setGroupIds([1, 3])
+      expect(f.toPayload().groupJoinedAt).toBe('2026-01-15')
+    })
+
+    it('does not send today (the backend default)', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(student)
+      await flushPromises()
+      f.setGroupIds([1, 3])
+      expect('groupJoinedAt' in f.toPayload()).toBe(false)
+    })
+
+    it('never sends it on create', async () => {
+      const f = useStudentForm(() => 7)
+      f.reset(null)
+      await flushPromises()
+      f.setGroupIds([3])
+      f.form.groupJoinedAt = new Date('2026-01-15T00:00:00')
+      expect(f.addedGroupIds.value).toEqual([])
+      expect('groupJoinedAt' in f.toPayload()).toBe(false)
     })
   })
 })

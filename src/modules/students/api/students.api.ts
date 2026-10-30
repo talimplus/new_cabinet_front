@@ -5,7 +5,11 @@ import type { StudentsParams } from '../interfaces/student-params.interface'
 import type { DeleteStudentResponse } from '../interfaces/student-delete.interface'
 import type { PaginatedResponse } from '@/shared/interfaces/paginated.interface'
 import type { StudentStatus } from '../enums/student-status.enum'
-import type { ReturnLikelihood } from '../enums/return-likelihood.enum'
+import type {
+  StudentStartPreview,
+  StudentStartPreviewForm,
+  StudentStatusChangeForm,
+} from '../interfaces/student-start.interface'
 
 export async function fetchStudents(params: StudentsParams): Promise<PaginatedResponse<Student>> {
   const { data } = await http.get<PaginatedResponse<Student>>('/students', { params })
@@ -48,11 +52,24 @@ export async function deleteStudent(id: number): Promise<DeleteStudentResponse> 
   return data
 }
 
-/** PUT /students/change-status/:id?status=X — status is a required query param. */
+/**
+ * PUT /students/change-status/:id?status=X — status is a required query param.
+ * `startDate` only on the FIRST activation (new/ignored → ACTIVE): the day the
+ * student really started; billing begins on it.
+ */
 export async function changeStudentStatus(
   id: number,
   status: StudentStatus,
-  body?: { returnLikelihood?: ReturnLikelihood; comment?: string },
+  body?: StudentStatusChangeForm,
 ): Promise<void> {
   await http.put(`/students/change-status/${id}`, body ?? {}, { params: { status } })
+}
+
+/** POST /students/:id/start-date/preview — the payment impact of a past start/join date; writes nothing. */
+export async function previewStudentStartDate(
+  id: number,
+  form: StudentStartPreviewForm,
+): Promise<StudentStartPreview> {
+  const { data } = await http.post<StudentStartPreview>(`/students/${id}/start-date/preview`, form)
+  return data
 }

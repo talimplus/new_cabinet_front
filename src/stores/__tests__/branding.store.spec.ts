@@ -154,4 +154,19 @@ describe('branding store', () => {
       expect(links[0]!.getAttribute('href')).toBe('data:image/png;base64,two')
     })
   })
+
+  describe('openedOn', () => {
+    it('is the organization opening day as a local-midnight Date', () => {
+      const store = useBrandingStore()
+      store.set(makeBranding({ openedOn: '2026-09-05' }))
+      expect(store.openedOn?.getTime()).toBe(new Date(2026, 8, 5).getTime())
+    })
+
+    it('is undefined when the backend does not send it (no limit)', () => {
+      const store = useBrandingStore()
+      expect(store.openedOn).toBeUndefined()
+      store.set(makeBranding())
+      expect(store.openedOn).toBeUndefined()
+    })
+  })
 })

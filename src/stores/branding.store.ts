@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { fetchOrganizationBranding } from '@/modules/organization/api/organization.api'
+import { parseDate } from '@/shared/utils/format-date'
 import type { OrganizationBranding } from '@/modules/organization/interfaces/organization.interface'
 
 /** A center with no brand set stays on the default TalimPlus look. */
@@ -21,6 +22,8 @@ export const useBrandingStore = defineStore('branding', () => {
   const name = computed(() => branding.value?.name?.trim() || DEFAULT_BRAND_NAME)
   const logoUrl = computed(() => branding.value?.logoUrl || DEFAULT_LOGO)
   const faviconUrl = computed(() => branding.value?.faviconUrl || DEFAULT_FAVICON)
+  /** Earliest day a past date may be picked for (org opening); `undefined` = no limit known. */
+  const openedOn = computed(() => parseDate(branding.value?.openedOn) ?? undefined)
 
   /** Apply to the browser tab: title + favicon link. */
   function applyToDocument(): void {
@@ -55,5 +58,5 @@ export const useBrandingStore = defineStore('branding', () => {
     applyToDocument()
   }
 
-  return { branding, loaded, name, logoUrl, faviconUrl, set, load, reset, applyToDocument }
+  return { branding, loaded, name, logoUrl, faviconUrl, openedOn, set, load, reset, applyToDocument }
 })

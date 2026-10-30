@@ -99,6 +99,20 @@ export default {
     expand: "Ro'yxatni ochish ({count})",
     collapse: 'Yopish',
   },
+  backdate: {
+    noChanges: "To'lovlar o'zgarmaydi.",
+    debtIncrease: "Qo'shiladigan qarz",
+    debtDecrease: 'Kamayadigan qarz',
+    refund: 'Qaytariladigan pul',
+    newRow: 'yangi',
+    rowRefund: 'qaytariladi: {amount}',
+    paidSalaryTitle: "Bu oylar uchun o'qituvchi oyligi allaqachon berilgan:",
+    paidSalaryText:
+      "Berilgan oylik o'zgarmaydi. Shu oylar uchun keyin tushgan pulning o'qituvchi ulushi keyingi oylikka qo'shiladi.",
+    warning:
+      "Diqqat: to'lovlar shu sana bo'yicha qayta hisoblanadi (to'langan oylar ham). Pastdagi o'zgarishlarni tekshirib, keyin tasdiqlang.",
+    confirm: 'Tushundim, davom etish',
+  },
   update: {
     title: 'Yangi versiya chiqdi',
     message: "Kabinet yangilandi. Yangi imkoniyatlar va tuzatishlar uchun sahifani yangilang.",

@@ -204,6 +204,20 @@ export default {
   // Tugash sanasi guruh tahrirlash formasi orqali o'zgaradi
   noEndDate: 'Muddat belgilanmagan',
   noEndDateHint: "Guruhga tugash sanasi belgilanmagan — to'lov cheksiz hisoblanaveradi",
+  start: {
+    title: 'Guruhni boshlash',
+    editTitle: "Boshlanish sanasi o'zgarmoqda",
+    date: 'Darslar qachon boshlangan?',
+    dateHint:
+      "O'tgan sanani ham tanlash mumkin (guruh sistemaga kech kiritilgan bo'lsa). To'lovlar shu kundan hisoblanadi.",
+    editText: "Boshlanish sanasi {from} → {to}. To'lovlar yangi sana bo'yicha qayta hisoblanadi.",
+    attendanceBlock:
+      "Yangi sanadan oldingi darslarga {count} ta davomat yozilgan. Avval davomatni o'chiring, keyin sanani o'zgartiring.",
+    candidatesTitle: "Bu o'quvchilar ham shu sanadan o'qigan",
+    candidatesHint:
+      "Belgilanganlarning guruhga qo'shilgan sanasi ham shu kunga suriladi. Belgilanmaganlar o'z sanasidan hisoblanadi. Boshqa guruhdan ko'chirilganlar bu ro'yxatda yo'q.",
+    joinedAt: "qo'shilgan: {date}",
+  },
   statusChange: {
     endDateRequired: 'Avval tugash sanasini kiriting',
     finishTitle: 'Guruhni yakunlash',
@@ -252,6 +266,8 @@ export default {
     feeApplyNowWarning:
       "Narx SHU OYDAN qo'llanadi: joriy oyning to'lanmagan va qisman to'langan " +
       "to'lovlari qayta hisoblanadi (eski narx: {fee}). To'liq to'langanlar o'zgarmaydi.",
+    startDate: 'Darslar boshlanish sanasi',
+    startDateHint: "O'tgan sana bo'lishi mumkin. Bo'sh qoldirilsa — bugun.",
     endDate: 'Darslar tugash sanasi',
     endDateHint:
       "Ixtiyoriy, lekin kiritish tavsiya etiladi. Bo'sh qoldirilsa guruh muddatsiz bo'ladi va to'lov cheksiz hisoblanaveradi.",

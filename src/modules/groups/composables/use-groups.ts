@@ -8,6 +8,9 @@ import { optionalRequest } from '@/shared/permissions/optional-request'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString } from '@/shared/utils/format-date'
 import { GroupStatus } from '../enums/group-status.enum'
+import { GroupStartMode } from '../enums/group-start-mode.enum'
+import { useGroupStart, type GroupStartConfirm } from './use-group-start'
+import type { GroupStartForm } from '../interfaces/group-start.interface'
 import type { Group } from '../interfaces/group.interface'
 import type { GroupForm } from '../interfaces/group-form.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
@@ -16,7 +19,12 @@ import { t } from '@/locales'
 /** A status-change 422 only re-opens the form when one of these is missing. */
 const STATUS_FIELDS = ['endDate', 'roomId']
 
-export function useGroups() {
+export interface UseGroupsOptions {
+  /** A 422 from saving the edit form after the start-date dialog — map it onto the form. */
+  onEditError?: (error: unknown) => void
+}
+
+export function useGroups(options: UseGroupsOptions = {}) {
   const scope = useScopeStore()
   const notify = useNotificationStore()
   const perms = usePermissions()
@@ -99,7 +107,31 @@ export function useGroups() {
     modalOpen.value = true
   }
 
+  /** The start-date dialog confirmed: start the group, or save the waiting edit. */
+  async function onStartConfirm(p: GroupStartConfirm): Promise<boolean> {
+    const extra: GroupStartForm = { startDate: p.startDate, backdateStudentIds: p.backdateStudentIds }
+    if (p.mode === GroupStartMode.START) return applyStatus(p.group, GroupStatus.STARTED, extra)
+    try {
+      await updateGroup(p.group.id, { ...p.form!, backdateStudentIds: p.backdateStudentIds })
+    } catch (error) {
+      // Field errors (e.g. `startDate`) belong under the edit form's inputs.
+      start.close()
+      options.onEditError?.(error)
+      return false
+    }
+    notify.success(t('common.saved'))
+    modalOpen.value = false
+    await load()
+    return true
+  }
+  const start = useGroupStart(onStartConfirm)
+
   async function submit(form: GroupForm): Promise<void> {
+    // A changed start date re-bills the group — show the impact first.
+    if (editing.value && form.startDate) {
+      start.openForEdit(editing.value, form)
+      return
+    }
     if (editing.value) await updateGroup(editing.value.id, form)
     else await createGroup(form)
     notify.success(t('common.saved'))
@@ -123,8 +155,15 @@ export function useGroups() {
     }
   }
 
-  /** Finishing a group whose end date is still in the future asks first. */
+  /**
+   * Starting a NEW group asks when lessons really began (may be in the past);
+   * finishing a group whose end date is still in the future asks first.
+   */
   function setStatus(group: Group, status: GroupStatus): void {
+    if (status === GroupStatus.STARTED && group.status === GroupStatus.NEW) {
+      start.openForStart(group)
+      return
+    }
     const endDate = group.endDate?.slice(0, 10)
     if (status === GroupStatus.FINISHED && endDate && endDate > toDateString(new Date())!) {
       pendingFinish.value = group
@@ -139,11 +178,13 @@ export function useGroups() {
     applyStatus(group, GroupStatus.FINISHED)
   }
 
-  async function applyStatus(group: Group, status: GroupStatus): Promise<void> {
+  /** Resolves `true` when the change went through or the edit form took over. */
+  async function applyStatus(group: Group, status: GroupStatus, extra?: GroupStartForm): Promise<boolean> {
     try {
-      await changeGroupStatus(group.id, status)
+      await changeGroupStatus(group.id, status, extra)
       notify.success(t('groups.statusChange.success'))
       await load()
+      return true
     } catch (error) {
       // A missing endDate/roomId comes back as a 422 — re-open the edit form
       // with the error under that field so the user can fix it in place.
@@ -154,8 +195,10 @@ export function useGroups() {
       if (Object.keys(fields).length) {
         notify.error(Object.values(fields).join(' · ') || t('groups.statusChange.endDateRequired'))
         openEdit(group, fields)
+        return true
       }
       // Otherwise the http interceptor already showed the error toast.
+      return false
     }
   }
 
@@ -166,6 +209,6 @@ export function useGroups() {
     pendingDelete, deleting, pendingFinish,
     init, setPage, setTeacher,
     openCreate, openEdit, submit,
-    askDelete, confirmDelete, setStatus, confirmFinish,
+    askDelete, confirmDelete, setStatus, confirmFinish, start,
   }
 }

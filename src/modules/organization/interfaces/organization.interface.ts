@@ -11,6 +11,12 @@ export interface OrganizationBranding {
   logoUrl: string | null
   faviconUrl: string | null
   brandingUpdatedAt: string | null
+  /**
+   * `YYYY-MM-DD` — the day the organization joined (Tashkent). Backdating
+   * (group start, student start/join) can't go before it — pickers use it as
+   * `minDate`, the backend answers 422 otherwise. Absent on an older backend.
+   */
+  openedOn?: string | null
 }
 
 /** `PUT /organizations/branding` body. Empty string on a url removes that image. */

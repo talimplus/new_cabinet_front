@@ -8,6 +8,7 @@ import { usePermissions } from '@/shared/composables/use-permissions'
 import GroupFilters from '../components/GroupFilters.vue'
 import GroupsTable from '../components/GroupsTable.vue'
 import GroupFormModal from '../components/GroupFormModal.vue'
+import GroupStartDialog from '../components/GroupStartDialog.vue'
 import { useGroups } from '../composables/use-groups'
 import type { GroupForm } from '../interfaces/group-form.interface'
 
@@ -18,8 +19,8 @@ const { canCreateGroup, canEditGroup, canDeleteGroup, canChangeGroupStatus } = u
 const {
   scope, rows, totalPages, loading, filters, showTeacherFilter, teacherOptions,
   modalOpen, editing, statusErrors, pendingDelete, deleting, pendingFinish,
-  init, setPage, setTeacher, openCreate, openEdit, submit, askDelete, confirmDelete, setStatus, confirmFinish,
-} = useGroups()
+  init, setPage, setTeacher, openCreate, openEdit, submit, askDelete, confirmDelete, setStatus, confirmFinish, start,
+} = useGroups({ onEditError: (e) => modalRef.value?.setBackendErrors(e) })
 onMounted(init)
 
 const modalRef = ref<{ setBackendErrors: (e: unknown) => void } | null>(null)
@@ -90,10 +91,9 @@ async function onSubmit(payload: GroupForm) {
     <UiConfirmDialog
       :model-value="!!pendingFinish"
       :title="t('groups.statusChange.finishTitle')"
-      :message="t('groups.statusChange.finishText')"
-      :confirm-label="t('groups.statusChange.confirm')"
-      @confirm="confirmFinish"
-      @cancel="pendingFinish = null"
+      :message="t('groups.statusChange.finishText')" :confirm-label="t('groups.statusChange.confirm')"
+      @confirm="confirmFinish" @cancel="pendingFinish = null"
     />
+    <GroupStartDialog v-bind="start.dialogProps.value" @close="start.close" @update:date="start.setDate" @toggle="start.toggle" @confirm="start.confirm" />
   </div>
 </template>

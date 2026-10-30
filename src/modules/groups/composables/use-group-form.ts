@@ -19,6 +19,8 @@ interface GroupFormState {
   teacherId: number | null
   monthlyFee: string | number
   lessonDurationMinutes: string | number
+  /** First lesson day — may be in the past (a group entered into the system late). */
+  startDate: Date | null
   endDate: Date | null
   applyFeeNow: boolean
   /** Edit-only: the day the new schedule takes effect (earlier lessons keep the old one). */
@@ -50,7 +52,7 @@ export function useGroupForm(
 
   const form = reactive<GroupFormState>({
     name: '', centerId: null, subjectId: null, roomId: null, teacherId: null,
-    monthlyFee: '', lessonDurationMinutes: DEFAULT_LESSON_DURATION, endDate: null, applyFeeNow: false,
+    monthlyFee: '', lessonDurationMinutes: DEFAULT_LESSON_DURATION, startDate: null, endDate: null, applyFeeNow: false,
     scheduleEffectiveFrom: null, teacherEffectiveFrom: null,
   })
   const errors = reactive<Record<string, string>>({})
@@ -61,6 +63,8 @@ export function useGroupForm(
   const currentFee = ref<number | null>(null)
   /** The previous end date (YYYY-MM-DD) — to detect a shortening on submit. */
   const previousEndDate = ref<string | null>(null)
+  /** The stored start date (YYYY-MM-DD) — sent on edit only when it changed. */
+  const previousStartDate = ref<string | null>(null)
   /** Baselines to detect a real schedule / teacher change on edit. */
   const originalScheduleKey = ref('')
   const originalTeacherId = ref<number | null>(null)
@@ -113,6 +117,7 @@ export function useGroupForm(
 
   function reset(editing: Group | null): void {
     clearErrors()
+    conflictsAccepted.value = false
     isEditing.value = !!editing
     editingId.value = editing?.id ?? null
     if (editing) {
@@ -124,8 +129,10 @@ export function useGroupForm(
       // Pre-fill with the already-queued next-month price when there is one.
       form.monthlyFee = editing.upcomingMonthlyFee ?? editing.monthlyFee ?? ''
       form.lessonDurationMinutes = editing.lessonDurationMinutes ?? DEFAULT_LESSON_DURATION
+      form.startDate = parseDate(editing.startDate)
       form.endDate = parseDate(editing.endDate)
       form.applyFeeNow = false
+      previousStartDate.value = editing.startDate?.slice(0, 10) ?? null
       currentFee.value = editing.monthlyFee == null ? null : Number(editing.monthlyFee)
       previousEndDate.value = editing.endDate ?? null
       const sch = editing.schedules ?? []
@@ -151,8 +158,10 @@ export function useGroupForm(
       form.teacherId = null
       form.monthlyFee = ''
       form.lessonDurationMinutes = DEFAULT_LESSON_DURATION
+      form.startDate = null
       form.endDate = null
       form.applyFeeNow = false
+      previousStartDate.value = null
       currentFee.value = null
       previousEndDate.value = null
       originalScheduleKey.value = ''
@@ -195,6 +204,15 @@ export function useGroupForm(
     duration: lessonDuration,
     excludeGroupId: () => editingId.value,
   })
+  /**
+   * The user saw the busy warning and chose to save anyway (e.g. two teachers
+   * swapping groups — the first save always collides). A new check result
+   * drops the consent: it was given for the conflicts shown, not for new ones.
+   */
+  const conflictsAccepted = ref(false)
+  watch(conflictCheck.conflicts, () => { conflictsAccepted.value = false })
+  /** Busy and not yet accepted — Save stays disabled. */
+  const conflictBlocks = computed(() => conflictCheck.conflicts.value.length > 0 && !conflictsAccepted.value)
 
   function validate(): boolean {
     clearErrors()
@@ -204,6 +222,9 @@ export function useGroupForm(
     if (form.roomId == null) errors.roomId = t('groups.validation.room')
     if (form.teacherId == null) errors.teacherId = t('groups.validation.teacher')
     if (form.monthlyFee === '' || Number.isNaN(Number(form.monthlyFee))) errors.monthlyFee = t('groups.validation.monthlyFee')
+    const start = toDateString(form.startDate)
+    const end = toDateString(form.endDate)
+    if (start && end && end < start) errors.endDate = t('groups.form.endDateBeforeStart')
     return Object.keys(errors).length === 0
   }
 
@@ -223,6 +244,10 @@ export function useGroupForm(
     // On edit, send `null` to clear the term; on create, only send a real date.
     if (isEditing.value) payload.endDate = endDate
     else if (endDate) payload.endDate = endDate
+    // A start date goes on create when picked, on edit only when it changed —
+    // a change there re-bills the group and is confirmed in GroupStartDialog.
+    const startDate = toDateString(form.startDate)
+    if (startDate && startDate !== previousStartDate.value) payload.startDate = startDate
     // The apply-from choice only matters when the price actually changed.
     if (feeChanged.value)
       payload.applyFeeFrom = form.applyFeeNow ? FeeApplyFrom.CURRENT_MONTH : FeeApplyFrom.NEXT_MONTH
@@ -237,6 +262,7 @@ export function useGroupForm(
       payload.scheduleEffectiveFrom = toDateString(form.scheduleEffectiveFrom) || today
     if (teacherChanged.value)
       payload.teacherEffectiveFrom = toDateString(form.teacherEffectiveFrom) || today
+    if (conflictsAccepted.value && conflictCheck.conflicts.value.length) payload.allowScheduleConflicts = true
     return payload
   }
 
@@ -268,6 +294,7 @@ export function useGroupForm(
     conflictChecking: conflictCheck.checking,
     conflictChecked: conflictCheck.checked,
     conflictMessages: conflictCheck.messages,
+    conflictsAccepted, conflictBlocks,
     reset, validate, toPayload, setBackendErrors, setFieldErrors, setSelect, setTeacherFrom,
   }
 }

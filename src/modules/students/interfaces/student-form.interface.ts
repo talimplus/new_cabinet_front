@@ -41,6 +41,12 @@ export interface StudentForm {
   status?: StudentStatus
   centerId?: number
   groupIds?: number[]
+  /**
+   * Edit-only, `YYYY-MM-DD`: the day the student joined the groups ADDED in
+   * this edit (past allowed, not before a group's start). Sent only when it is
+   * before today — billing starts on it; confirmed in StudentStartDialog.
+   */
+  groupJoinedAt?: string
   /** Any number of subjects; the first becomes `subjectId`. [] on update clears them. */
   subjectIds?: number[]
 }

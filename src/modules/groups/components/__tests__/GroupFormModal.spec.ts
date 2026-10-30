@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import { mount, flushPromises } from '@vue/test-utils'
 import GroupFormModal from '../GroupFormModal.vue'
 import { CONFLICT_CHECK_DELAY } from '../../composables/use-schedule-conflicts'
@@ -83,6 +84,7 @@ async function openModal(editing: Group) {
 }
 
 describe('GroupFormModal — live schedule-conflict check', () => {
+  beforeEach(() => setActivePinia(createPinia()))
   beforeEach(() => {
     vi.useFakeTimers()
     vi.clearAllMocks()
@@ -107,6 +109,24 @@ describe('GroupFormModal — live schedule-conflict check', () => {
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 
+  it('lets the user save anyway once the warning is accepted, flagging the payload', async () => {
+    mockedCheck.mockResolvedValueOnce([makeConflict({ reason: ScheduleConflictReason.TEACHER })])
+    const wrapper = await openModal(makeGroup())
+
+    const checkbox = document.body.querySelector<HTMLInputElement>('[role="alert"] input[type="checkbox"]')!
+    checkbox.checked = true
+    checkbox.dispatchEvent(new Event('change'))
+    await flushPromises()
+
+    const saveButton = findButton(t('common.save'))
+    expect(saveButton.disabled).toBe(false)
+    saveButton.click()
+    await flushPromises()
+
+    const payload = wrapper.emitted('submit')?.[0]?.[0] as Record<string, unknown>
+    expect(payload.allowScheduleConflicts).toBe(true)
+  })
+
   it('enables Save and lets submit through once the check comes back clean', async () => {
     mockedCheck.mockResolvedValueOnce([])
     const wrapper = await openModal(makeGroup())
@@ -119,5 +139,7 @@ describe('GroupFormModal — live schedule-conflict check', () => {
     await flushPromises()
 
     expect(wrapper.emitted('submit')).toHaveLength(1)
+    const payload = wrapper.emitted('submit')?.[0]?.[0] as Record<string, unknown>
+    expect(payload.allowScheduleConflicts).toBeUndefined()
   })
 })

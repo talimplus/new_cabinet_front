@@ -552,4 +552,38 @@ describe('useGroupForm', () => {
       )
     })
   })
+
+  describe('startDate', () => {
+    it('sends a picked start date on create (past allowed), omits it when empty', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(null)
+      await flushPromises()
+      expect('startDate' in f.toPayload()).toBe(false)
+
+      f.form.startDate = new Date('2026-10-05T00:00:00')
+      expect(f.toPayload().startDate).toBe('2026-10-05')
+    })
+
+    it('on edit sends startDate only when it changed', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup([], { startDate: '2026-10-30' }))
+      await flushPromises()
+      expect(toDateString(f.form.startDate)).toBe('2026-10-30')
+      expect('startDate' in f.toPayload()).toBe(false)
+
+      f.form.startDate = new Date('2026-10-05T00:00:00')
+      expect(f.toPayload().startDate).toBe('2026-10-05')
+    })
+
+    it('rejects an end date before the start date', async () => {
+      const f = useGroupForm(() => 1)
+      f.reset(makeGroup([], { startDate: '2026-10-30' }))
+      await flushPromises()
+      f.form.name = 'A'
+      f.form.endDate = new Date('2026-10-01T00:00:00')
+
+      f.validate()
+      expect(f.errors.endDate).toBeTruthy()
+    })
+  })
 })

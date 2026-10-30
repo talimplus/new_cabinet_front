@@ -329,6 +329,7 @@ automatically (`01-api-integration.md` §2.6).
 | POST | `/students` | `students.create` | |
 | PUT | `/students/:id` | `students.update` | |
 | PUT | `/students/change-status/:id` | `students.changeStatus` | |
+| POST | `/students/:id/start-date/preview` | `students.changeStatus` OR `students.update` | backdate preview |
 | GET/POST/PUT/DELETE | `/students/:id/discount-periods[/:periodId]` | `students.discounts` | |
 | POST | `/students/transfer` · `/students/transfer/preview` | `students.transfer` | |
 | GET | `/groups` · `/groups/all` · `/group/all` | `groups.view` | ⊕ |
@@ -337,6 +338,7 @@ automatically (`01-api-integration.md` §2.6).
 | PUT | `/groups/:id` | `groups.update` | |
 | DELETE | `/groups/:id` | `groups.delete` | |
 | PUT | `/groups/change-status/:id` | `groups.changeStatus` | |
+| POST | `/groups/:id/start-date/preview` | `groups.changeStatus` OR `groups.update` | backdate preview |
 | GET | `/groups/:id/pauses` | `groups.view` | |
 | POST/DELETE | `/groups/:id/pauses[/:pauseId]` | `groups.update` | |
 | GET | `/attendance/absences` | `attendance.view` | ⊕ |

@@ -87,6 +87,14 @@ export default {
     lastName: 'Familiya majburiy',
     phone: 'Telefon majburiy',
   },
+  start: {
+    title: "O'quvchini faollashtirish",
+    joinTitle: "Yangi guruhga o'tgan sanadan qo'shish",
+    date: "O'qishni qachon boshlagan?",
+    dateHint:
+      "O'tgan sanani ham tanlash mumkin (sistemaga kech kiritilgan bo'lsa). To'lov shu kundan hisoblanadi; guruh boshlanishidan oldingi kunlar hisobga kirmaydi.",
+    joinText: "Yangi guruh(lar)ga qo'shilgan sana: {date}. To'lov shu kundan hisoblanadi.",
+  },
   messages: {
     groupRequired: 'Guruh tanlanishi kerak',
     deleted: "O'quvchi o'chirildi",
@@ -126,6 +134,9 @@ export default {
     referrer: 'Kim tavsiya qildi',
     heardAboutUs: 'Qayerdan eshitgan',
     groups: 'Guruhlar',
+    groupJoinedAt: "Yangi guruhga qo'shilgan sana",
+    groupJoinedAtHint: "O'tgan sana bo'lishi mumkin — to'lov shu kundan hisoblanadi. Guruh boshlanishidan oldin bo'lolmaydi.",
+    groupsLockedHint: 'Hozirgi guruhni bu yerda olib tashlab bo‘lmaydi, faqat yangi guruh qo‘shiladi. Boshqa guruhga o‘tkazish — «Boshqa guruhga ko‘chirish» orqali.',
     passport: 'Passport',
     jshshir: 'JSHSHIR',
     passportSeries: 'Passport seriya',

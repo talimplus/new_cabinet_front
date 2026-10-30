@@ -30,6 +30,14 @@ describe('GroupScheduleConflicts', () => {
     expect(items[1]?.text()).toBe('O‘qituvchi band')
   })
 
+  it('offers a "save anyway" checkbox that emits update:accepted', async () => {
+    const wrapper = mountConflicts({ messages: ['x'] })
+    expect(wrapper.text()).toContain(t('schedule.conflict.accept'))
+
+    await wrapper.get('input[type="checkbox"]').setValue(true)
+    expect(wrapper.emitted('update:accepted')).toEqual([[true]])
+  })
+
   it('shows the free message when a check ran clean', () => {
     const wrapper = mountConflicts({ free: true })
     expect(wrapper.text()).toContain(t('schedule.conflict.free'))

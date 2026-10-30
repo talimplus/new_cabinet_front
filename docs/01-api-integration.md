@@ -403,6 +403,28 @@ passportNumber?, jshshir?, referrerId?, monthlyFee?, discountPercent?,
 discountAmount?, discountReason?, discountPeriods?[], status?, centerId?, groupIds?[], subjectId?,
 subjectIds?[]`
 
+**Edit only adds groups (2026-10-26).** `PUT /students/{id}` with a `groupIds`
+that drops a group the student is in and that is not `finished` → 422
+`{ errors: { groupIds: "O'quvchini guruhdan olib tashlab bo'lmaydi: \"A1\". …" } }`.
+Changing groups goes through `POST /students/transfer` (month split, overpayment
+carried over by receipt); removing it on edit booked the money as a cash refund
+and billed the new group in full. The form disables those options, keeps them on
+"clear", and shows a hint. A finished group can still be dropped.
+
+**Backdated start / join (2026-10-30, verified live).**
+- `PUT /students/change-status/{id}?status=ACTIVE` body `{ startDate? }` — first
+  activation only (new/ignored → ACTIVE): `activatedAt` = that day and each open
+  membership moves back to `max(startDate, group.startDate)`. Returns
+  (stopped/finished → ACTIVE) ignore it.
+- `PUT /students/{id}` body `groupJoinedAt?` (`YYYY-MM-DD`) — join date of the
+  groups ADDED in this edit; ≤ today, not before a group's `startDate` (422
+  `errors.groupJoinedAt`). An ACTIVE student's later `activatedAt` moves back too.
+- `POST /students/{id}/start-date/preview` `{ startDate, groupIds? }` — same
+  `rows/totals/paidSalaryMonths` shape as the group preview (+ `startDate`);
+  `groupIds` omitted = activation. Perm `students.changeStatus` OR `students.update`.
+- UI: `StudentStartDialog` — activation always asks the date (today → no
+  preview); the edit form shows "Yangi guruhga qo'shilgan sana" when a group is added.
+
 **Any number of subjects (2026-10-10, migration `…068`):** `secondSubjectId` is
 gone; subjects live in the `student_subjects` join table. Send `subjectIds: number[]`
 (all from the student's center, duplicates dropped, order kept — the first one is
@@ -638,6 +660,49 @@ The board returns the **whole week** for all unfinished groups; the client
 filters by day. Teachers see the full board too (room availability is shared).
 `conflicts` returns facts only (`reason: 'room' | 'teacher'`, the blocking group
 and its times) — the message is composed client-side for translation.
+
+**Busy is a warning, not a wall (2026-10-26).** `POST/PUT /groups` still 422s a
+room/teacher clash (`errors.roomId` / `errors.teacherId`, "… band: …") unless the
+body carries **`allowScheduleConflicts: true`**. The form shows the live
+`conflicts` result as a warning with a "save anyway" checkbox and sends the flag
+only when it is ticked (a new check result clears the tick). Needed for two
+teachers swapping groups: the first save always collides with the other teacher's
+still-unchanged group. The backend logs every overridden clash.
+
+#### Backdating — start date in the past *(2026-10-30, verified live)*
+
+Money follows **dates, not status**: `billable = [group.startDate..endDate] ∩
+membership window (joinedAt…leftAt) ∩ from activatedAt`. A group entered late
+needs its real start date AND its members' join dates moved back.
+
+| Method | Path | Body | Notes |
+|---|---|---|---|
+| `PUT` | `/groups/change-status/{id}` | `{ status: 'started', startDate?, backdateStudentIds?[] }` | `startDate` ≤ today, ≤ `endDate`, ≥ 24 months back; omitted ids → all candidates, `[]` → none |
+| `PUT` | `/groups/{id}` | `{ …, startDate, backdateStudentIds?[] }` | edit; omitted ids → **none** |
+| `POST` | `/groups/{id}/start-date/preview` | `{ startDate, backdateStudentIds?[] }` | writes nothing; perm `groups.changeStatus` OR `groups.update` |
+
+Preview response (`GroupStartPreview`):
+```json
+{ "startDate": "2026-10-05", "prevStartDate": "2026-10-30", "attendanceBefore": 0,
+  "candidates": [{ "studentId": 1120, "fullName": "Aziz Karimov", "status": "ACTIVE", "joinedAt": "2026-10-30" }],
+  "rows": [{ "studentId": 1120, "studentName": "Aziz Karimov", "groupId": 213, "groupName": "UI-Demo guruh",
+             "forMonth": "2026-10-01", "isNew": false, "currentDue": 46153.85, "newDue": 553846.15,
+             "amountPaid": 0, "refund": 0 }],
+  "totals": { "debtIncrease": 507692.3, "debtDecrease": 0, "refund": 0 },
+  "paidSalaryMonths": [{ "teacherId": 49, "teacherName": "Ustoz Test266227", "forMonth": "2026-10-01" }] }
+```
+- `candidates` — open membership starting after the new date, the only window in
+  this group, **never transferred-in** (their date came from the transfer).
+- `attendanceBefore > 0` → applying answers 422 `errors.startDate`; the dialog
+  disables Confirm.
+- No date before the organization opened: `GET /organizations/branding` now
+  returns `openedOn` (`YYYY-MM-DD`); every backdating picker uses it as `minDate`
+  (`useBrandingStore().openedOn`), the backend answers 422 on the field otherwise.
+- Applying re-bills `[min(old,new) month .. latest affected month]` with force
+  (PAID rows too: fewer lessons → `refundedAmount`, more → debt). A month whose
+  teacher salary is paid stays frozen; late money becomes carryover.
+- UI: `GroupStartDialog` (NEW → STARTED, and the edit form when `startDate`
+  changed) + shared `BackdateImpact`.
 
 **Attendance (`/groups/{groupId}/attendance`)**
 | Method | Path | Params / Body | Response |

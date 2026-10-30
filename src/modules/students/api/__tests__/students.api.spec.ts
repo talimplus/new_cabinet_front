@@ -7,6 +7,7 @@ import {
   updateStudent,
   changeStudentStatus,
   deleteStudent,
+  previewStudentStartDate,
 } from '../students.api'
 import { http } from '@/shared/api/http'
 import { StudentStatus } from '../../enums/student-status.enum'
@@ -138,5 +139,28 @@ describe('students.api', () => {
 
     expect(mockedHttp.delete).toHaveBeenCalledWith('/students/5')
     expect(result).toEqual({ success: true })
+  })
+
+  it('changeStudentStatus sends the first-activation startDate in the body', async () => {
+    mockedHttp.put.mockResolvedValueOnce({ data: undefined })
+
+    await changeStudentStatus(3, StudentStatus.ACTIVE, { startDate: '2026-10-12' })
+
+    expect(mockedHttp.put).toHaveBeenCalledWith('/students/change-status/3', { startDate: '2026-10-12' }, {
+      params: { status: StudentStatus.ACTIVE },
+    })
+  })
+
+  it('previewStudentStartDate POSTs /students/{id}/start-date/preview and returns the body', async () => {
+    const preview = { startDate: '2026-10-12', rows: [], totals: { debtIncrease: 0, debtDecrease: 0, refund: 0 }, paidSalaryMonths: [] }
+    mockedHttp.post.mockResolvedValueOnce({ data: preview })
+
+    const result = await previewStudentStartDate(6, { startDate: '2026-10-12', groupIds: [2] })
+
+    expect(mockedHttp.post).toHaveBeenCalledWith('/students/6/start-date/preview', {
+      startDate: '2026-10-12',
+      groupIds: [2],
+    })
+    expect(result).toEqual(preview)
   })
 })
