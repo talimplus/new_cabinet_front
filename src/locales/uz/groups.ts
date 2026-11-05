@@ -238,6 +238,19 @@ export default {
     confirm: 'Yakunlash',
     done: "Guruh yakunlandi: {moved} ta o'tkazildi, {finished} ta tugallandi",
   },
+  leave: {
+    action: 'Guruhdan chiqarish',
+    title: '{name} — guruhdan chiqarish',
+    hint: '"{group}" guruhida o\'qishi tugaydi, boshqa guruhlariga ta\'sir qilmaydi.',
+    date: "Qaysi kundan o'qimaydi?",
+    dateHint:
+      "O'tgan sana bo'lishi mumkin. Shu kundan boshlab darslar to'lovga kirmaydi, ortiqcha to'langan pul qaytariladigan bo'ladi.",
+    lastGroup: "Bu uning oxirgi guruhi — o'quvchi \"To'xtatgan\" holatiga o'tadi.",
+    confirm: 'Chiqarish',
+    done: '{name} guruhdan chiqarildi.',
+    doneRefund: 'Qaytariladigan pul: {amount}.',
+    doneDebt: 'Shu guruhdagi qarz: {amount}.',
+  },
   formerStudents: {
     pending: 'Tasdiqlash kutilmoqda: {amount}',
     pay: "To'lov qabul qilish",

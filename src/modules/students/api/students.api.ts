@@ -1,4 +1,8 @@
 import { http } from '@/shared/api/http'
+import type {
+  StudentLeaveGroupForm,
+  StudentLeaveGroupResponse,
+} from '../interfaces/student-leave-group.interface'
 import type { Student, StudentDetail } from '../interfaces/student.interface'
 import type { StudentForm } from '../interfaces/student-form.interface'
 import type { StudentsParams } from '../interfaces/student-params.interface'
@@ -63,6 +67,19 @@ export async function changeStudentStatus(
   body?: StudentStatusChangeForm,
 ): Promise<void> {
   await http.put(`/students/change-status/${id}`, body ?? {}, { params: { status } })
+}
+
+/**
+ * POST /students/:id/leave-group — the student stops studying in one group only:
+ * billed up to `stopDate`, other groups untouched. Their last unfinished group
+ * also stops the student (`returnLikelihood` required, else 422).
+ */
+export async function leaveStudentGroup(
+  id: number,
+  form: StudentLeaveGroupForm,
+): Promise<StudentLeaveGroupResponse> {
+  const { data } = await http.post<StudentLeaveGroupResponse>(`/students/${id}/leave-group`, form)
+  return data
 }
 
 /** POST /students/:id/start-date/preview — the payment impact of a past start/join date; writes nothing. */

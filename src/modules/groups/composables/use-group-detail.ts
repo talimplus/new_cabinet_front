@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { fetchGroupById } from '../api/groups.api'
 import { fetchStudents } from '@/modules/students/api/students.api'
 import { usePermissions } from '@/shared/composables/use-permissions'
+import { GroupStatus } from '../enums/group-status.enum'
 import { GroupTab, GROUP_TAB_LABEL_KEYS } from '../enums/group-tab.enum'
 import type { Group } from '../interfaces/group.interface'
 import type { Student } from '@/modules/students/interfaces/student.interface'
@@ -36,6 +37,10 @@ export function useGroupDetail(groupId: number) {
   // The transfer modal loads /groups/all, so it needs the groups read key too.
   const canTransfer = computed(
     () => perms.canTransferStudents.value && perms.canViewGroups.value,
+  )
+
+  const canLeave = computed(
+    () => perms.canChangeStudentStatus.value && group.value?.status !== GroupStatus.FINISHED,
   )
 
   const tabs = computed<GroupTabItem[]>(() => {
@@ -88,6 +93,7 @@ export function useGroupDetail(groupId: number) {
     isOwnGroup,
     canEditPlan,
     canTransfer,
+    canLeave,
     load,
   }
 }

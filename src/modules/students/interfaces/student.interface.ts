@@ -1,5 +1,6 @@
 import type { Subject } from '@/modules/subjects/interfaces/subject.interface'
 import type { WeekDay } from '@/modules/groups/enums/week-day.enum'
+import type { GroupStatus } from '@/modules/groups/enums/group-status.enum'
 import type { StudentStatus } from '../enums/student-status.enum'
 import type { StudentPreferredTime } from '../enums/student-preferred-time.enum'
 import type { ReturnLikelihood } from '../enums/return-likelihood.enum'
@@ -71,7 +72,7 @@ export interface Student {
  * the full entity. Verified against the dev backend.
  */
 export interface StudentDetail extends Student {
-  groups?: Array<{ id: number; name: string; monthlyFee?: string | null }>
+  groups?: Array<{ id: number; name: string; monthlyFee?: string | null; status?: GroupStatus }>
   center?: { id: number; name: string } | null
 }
 

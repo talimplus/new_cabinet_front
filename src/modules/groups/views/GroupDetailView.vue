@@ -38,6 +38,7 @@
         :group-id="groupId"
         :group-name="group?.name ?? ''"
         :can-transfer="canTransfer"
+        :can-leave="canLeave"
         @reload="load"
       />
       <GroupTimelineTab v-else-if="activeTab === GroupTab.TIMELINE" :group-id="groupId" />
@@ -72,7 +73,7 @@ const { t } = useI18n()
 const route = useRoute()
 const groupId = Number(route.params.id)
 
-const { group, students, loading, loadingStudents, activeTab, tabs, canEditPlan, canTransfer, load } =
+const { group, students, loading, loadingStudents, activeTab, tabs, canEditPlan, canTransfer, canLeave, load } =
   useGroupDetail(groupId)
 
 const { canEditGroup, canChangeGroupStatus } = usePermissions()

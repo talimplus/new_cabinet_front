@@ -333,6 +333,7 @@ automatically (`01-api-integration.md` §2.6).
 | GET | `/students/:id/attendance` | `attendance.view` | all groups, former too |
 | GET/POST/PUT/DELETE | `/students/:id/discount-periods[/:periodId]` | `students.discounts` | |
 | POST | `/students/transfer` · `/students/transfer/preview` | `students.transfer` | |
+| POST | `/students/:id/leave-group` | `students.changeStatus` | |
 | GET | `/groups` · `/groups/all` · `/group/all` | `groups.view` | ⊕ |
 | GET | `/groups/:id` | `groups.view` | |
 | POST | `/groups` | `groups.create` | |

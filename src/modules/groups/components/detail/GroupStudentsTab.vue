@@ -1,35 +1,31 @@
 <template>
   <div class="space-y-3">
-    <div v-if="canTransfer" class="flex flex-wrap items-center justify-between gap-3">
-      <UiCheckbox
-        :model-value="tx.allSelected.value"
-        :indeterminate="tx.someSelected.value"
-        :label="t('groups.studentTable.selectAll')"
-        @update:model-value="tx.toggleAll"
-      />
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-muted-foreground">
-          {{ tx.selectedCount.value
-            ? t('students.transfer.subtitle', { count: tx.selectedCount.value })
-            : t('students.transfer.selectStudents') }}
-        </span>
-        <UiButton size="sm" :disabled="!tx.selectedCount.value" @click="tx.openTransfer">
-          <UiIcon :icon="ArrowLeftRight" :size="16" />{{ t('students.transfer.action') }}
-        </UiButton>
-      </div>
-    </div>
+    <GroupStudentsTransferBar
+      v-if="canTransfer"
+      :all-selected="tx.allSelected.value"
+      :some-selected="tx.someSelected.value"
+      :selected-count="tx.selectedCount.value"
+      @toggle-all="tx.toggleAll"
+      @transfer="tx.openTransfer"
+    />
 
     <UiTable :columns="columns" :rows="rows" :loading="loading" :empty-text="t('groups.studentTable.empty')">
       <template v-if="canTransfer" #cell-select="{ row }">
-        <UiCheckbox
-          :model-value="tx.isSelected((row as Student).id)"
-          @update:model-value="() => tx.toggle((row as Student).id)"
-        />
+        <UiCheckbox :model-value="tx.isSelected((row as Student).id)" @update:model-value="() => tx.toggle((row as Student).id)" />
       </template>
       <template #cell-fullName="{ row }">{{ (row as Student).lastName }} {{ (row as Student).firstName }}</template>
       <template #cell-phone="{ row }"><span class="whitespace-nowrap font-mono">{{ formatPhone((row as Student).phone) || '—' }}</span></template>
       <template #cell-status="{ row }">
         <UiBadge :variant="variants[(row as Student).status]">{{ t(labelKeys[(row as Student).status]) }}</UiBadge>
+      </template>
+      <template v-if="canLeave" #actions="{ row }">
+        <UiIconButton
+          v-if="(row as Student).status === StudentStatus.ACTIVE"
+          :icon="DoorOpen"
+          tone="danger"
+          :label="t('groups.leave.action')"
+          @click="leaveRef?.open(row as Student)"
+        />
       </template>
     </UiTable>
 
@@ -45,18 +41,22 @@
       @close="tx.transfer.close"
       @confirm="tx.transfer.submit"
     />
+    <GroupStudentLeaveModal ref="leaveRef" :group-id="groupId" :group-name="groupName" @done="emit('reload')" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { UiTable, UiBadge, UiButton, UiIcon, UiCheckbox } from '@/shared/components'
+import { computed, ref } from 'vue'
+import { UiTable, UiBadge, UiCheckbox, UiIconButton } from '@/shared/components'
 import StudentTransferModal from '@/shared/components/transfer/StudentTransferModal.vue'
 import GroupFormerStudents from './GroupFormerStudents.vue'
-import { ArrowLeftRight } from '@/shared/icons'
+import GroupStudentLeaveModal from './GroupStudentLeaveModal.vue'
+import GroupStudentsTransferBar from './GroupStudentsTransferBar.vue'
+import { DoorOpen } from '@/shared/icons'
 import { formatPhone } from '@/shared/utils/format-phone'
 import { useGroupStudentsTransfer } from '../../composables/use-group-students-transfer'
 import {
+  StudentStatus,
   STUDENT_STATUS_LABEL_KEYS,
   STUDENT_STATUS_VARIANTS,
 } from '@/modules/students/enums/student-status.enum'
@@ -72,7 +72,9 @@ const props = defineProps<{
   groupId: number
   groupName: string
   canTransfer?: boolean
+  canLeave?: boolean
 }>()
+const leaveRef = ref<InstanceType<typeof GroupStudentLeaveModal> | null>(null)
 const emit = defineEmits<{ reload: [] }>()
 
 const labelKeys = STUDENT_STATUS_LABEL_KEYS
