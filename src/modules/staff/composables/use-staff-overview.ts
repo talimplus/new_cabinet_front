@@ -13,6 +13,8 @@ import { StaffTab, STAFF_TAB_LABEL_KEYS } from '../enums/staff-tab.enum'
 import type { StaffOverview, StaffDeductionRow } from '../interfaces/staff-overview.interface'
 import type { TabItem } from '@/shared/interfaces/tab-item.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 interface DeductionFormState {
   open: boolean
@@ -37,7 +39,12 @@ const currentMonth = (): string => {
  * and the month's salary. `userId === null` means "my own page"
  * (`/staff/me/overview`), which every employee may open.
  */
-export function useStaffOverview(userId: () => number | null, initialMonth?: () => string) {
+export function useStaffOverview(
+  userId: () => number | null,
+  initialMonth?: () => string,
+  /** On the employee page (not the payroll modal) month + tab live in the URL. */
+  syncQuery = false,
+) {
   const notify = useNotificationStore()
 
   const data = ref<StaffOverview | null>(null)
@@ -45,6 +52,13 @@ export function useStaffOverview(userId: () => number | null, initialMonth?: () 
   const submitting = ref(false)
   const month = ref(initialMonth?.() || currentMonth())
   const tab = ref<string>(StaffTab.LATE)
+  if (syncQuery) {
+    useQueryState(reactive({ month, tab }), {
+      kinds: { month: QueryParam.DATE_STRING },
+      oneOf: { tab: Object.values(StaffTab) },
+      onExternalChange: () => void load(),
+    })
+  }
 
   const deduction = reactive<DeductionFormState>({
     open: false,

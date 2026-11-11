@@ -1,7 +1,8 @@
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { fetchScheduleBoard } from '../api/schedule.api'
 import { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
 import type { ScheduleBoard, ScheduleLesson } from '../interfaces/schedule-board.interface'
 
 /** Vertical scale of the board — a 90-min lesson is ≈ 108px tall. */
@@ -92,6 +93,8 @@ export function useSchedule() {
   const board = ref<ScheduleBoard | null>(null)
   const loading = ref(false)
   const selectedDay = ref<WeekDay>(DAY_ORDER[(new Date().getDay() + 6) % 7]!)
+  // The board is loaded once; only the picked day goes to the URL (`?day=`).
+  useQueryState(reactive({ day: selectedDay }), { oneOf: { day: Object.values(WeekDay) } })
 
   async function load(): Promise<void> {
     loading.value = true

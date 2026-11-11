@@ -9,6 +9,8 @@ import { optionalRequest } from '@/shared/permissions/optional-request'
 import { toDateString } from '@/shared/utils/format-date'
 import { debounce } from '@/shared/utils/debounce'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import type { Absence, AbsenceSummary } from '../interfaces/absence.interface'
 import type { AbsencesParams } from '../interfaces/absence-params.interface'
@@ -56,6 +58,19 @@ export function useAbsences() {
     search: '',
     page: 1,
     perPage: 20,
+  })
+  useQueryState(filters, {
+    kinds: {
+      from: QueryParam.DATE_STRING, to: QueryParam.DATE_STRING,
+      groupId: QueryParam.NUMBER, teacherId: QueryParam.NUMBER, status: QueryParam.STRING,
+    },
+    oneOf: {
+      status: [AttendanceStatus.ABSENT, AttendanceStatus.EXCUSED],
+      followUp: Object.values(FollowUpFilter),
+    },
+    // Search is typed letter by letter — the URL follows once typing stops.
+    debounce: ['search'],
+    onExternalChange: () => init(),
   })
 
   const rows = ref<Absence[]>([])

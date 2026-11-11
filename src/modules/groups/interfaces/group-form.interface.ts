@@ -35,3 +35,15 @@ export interface GroupForm {
   /** Save even though the room/teacher is busy — sent only after the user ticks the warning. */
   allowScheduleConflicts?: boolean
 }
+
+/**
+ * Partial PUT /groups/:id that only hands the group to another teacher. The
+ * backend reads `teacherEffectiveFrom` only when `teacherId` really changed;
+ * lessons before that day (and their commission) stay with the old teacher.
+ */
+export interface GroupTeacherChangeForm {
+  teacherId: number
+  /** `YYYY-MM-DD`, not in the future; the month the old teacher was paid for is a 422. */
+  teacherEffectiveFrom: string
+  allowScheduleConflicts?: boolean
+}

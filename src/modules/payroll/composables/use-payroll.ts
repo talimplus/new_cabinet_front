@@ -10,6 +10,7 @@ import type { StaffSalary } from '../interfaces/staff-salary.interface'
 import type { StaffSalariesParams } from '../interfaces/staff-salaries-params.interface'
 import type { PayStaffSalaryForm } from '../interfaces/pay-staff-salary-form.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
 
 interface PayrollFilters {
   year: number
@@ -45,6 +46,11 @@ export function usePayroll() {
   const filters = reactive<PayrollFilters>({
     year: now.getFullYear(),
     month: String(now.getMonth() + 1).padStart(2, '0'),
+  })
+  // Out-of-range months are clamped by `clampMonth()` in init.
+  useQueryState(filters, {
+    oneOf: { month: Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')) },
+    onExternalChange: () => init(),
   })
 
   const pay = reactive<PayModalState>({

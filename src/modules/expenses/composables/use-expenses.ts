@@ -7,6 +7,8 @@ import type { Expense } from '../interfaces/expense.interface'
 import type { ExpenseForm } from '../interfaces/expense-form.interface'
 import type { ExpensesParams } from '../interfaces/expense-params.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 interface ExpenseFilters {
   search: string
@@ -26,6 +28,7 @@ export function useExpenses() {
   const filters = reactive<ExpenseFilters>({
     search: '', forMonth: currentMonth(), page: 1, perPage: 10,
   })
+  useQueryState(filters, { kinds: { forMonth: QueryParam.DATE_STRING }, onExternalChange: () => load() })
 
   const modalOpen = ref(false)
   const editing = ref<Expense | null>(null)

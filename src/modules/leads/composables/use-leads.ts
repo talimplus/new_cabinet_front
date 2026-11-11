@@ -4,13 +4,16 @@ import {
 } from '../api/leads.api'
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
-import { LeadStatus } from '../enums/lead-status.enum'
+import { LeadStatus, LEAD_STATUS_LABEL_KEYS } from '../enums/lead-status.enum'
+import { useStatusConfirm } from '@/shared/composables/use-status-confirm'
 import { toDateString } from '@/shared/utils/format-date'
 import type { Lead } from '../interfaces/lead.interface'
 import type { LeadForm } from '../interfaces/lead-form.interface'
 import type { LeadsParams } from '../interfaces/lead-params.interface'
 import type { LeadTransferForm } from '../interfaces/lead-transfer-form.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 export interface LeadFiltersState {
   name: string
@@ -30,12 +33,18 @@ interface DiscardDialogState {
 export function useLeads() {
   const scope = useScopeStore()
   const notify = useNotificationStore()
+  const askStatus = useStatusConfirm()
 
   const rows = ref<Lead[]>([])
   const totalPages = ref(1)
   const loading = ref(false)
   const filters = reactive<LeadFiltersState>({
     name: '', phone: '', status: null, followUpDate: null, page: 1, perPage: 10,
+  })
+  const query = useQueryState(filters, {
+    kinds: { status: QueryParam.STRING, followUpDate: QueryParam.DATE },
+    oneOf: { status: Object.values(LeadStatus) },
+    onExternalChange: () => load(),
   })
 
   const modalOpen = ref(false)
@@ -61,16 +70,9 @@ export function useLeads() {
     }
   }
 
-  function resetFilters(): void {
-    filters.name = ''
-    filters.phone = ''
-    filters.status = null
-    filters.followUpDate = null
-    filters.page = 1
-  }
-
   async function init(): Promise<void> {
-    resetFilters()
+    // Filters come from the URL (defaults when it has none).
+    query.restore()
     await load()
   }
 
@@ -132,7 +134,9 @@ export function useLeads() {
       discardDialog.lead = lead
       return
     }
-    applyStatus(lead, next)
+    const name = `${lead.firstName ?? ''} ${lead.lastName ?? ''}`.trim()
+    const from = lead.status ? t(LEAD_STATUS_LABEL_KEYS[lead.status]) : '—'
+    void askStatus(name, from, t(LEAD_STATUS_LABEL_KEYS[next])).then((ok) => { if (ok) void applyStatus(lead, next) })
   }
 
   async function confirmDiscard(reason: string): Promise<void> {

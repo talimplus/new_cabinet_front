@@ -6,6 +6,7 @@ import type { Center } from '../interfaces/center.interface'
 import type { CenterForm } from '../interfaces/center-form.interface'
 import type { CentersParams } from '../interfaces/center-params.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
 
 export function useCenters() {
   const notify = useNotificationStore()
@@ -15,6 +16,7 @@ export function useCenters() {
   const totalPages = ref(1)
   const loading = ref(false)
   const params = reactive<CentersParams>({ name: '', page: 1, perPage: 10 })
+  useQueryState(params, { onExternalChange: () => load() })
 
   const modalOpen = ref(false)
   const editing = ref<Center | null>(null)

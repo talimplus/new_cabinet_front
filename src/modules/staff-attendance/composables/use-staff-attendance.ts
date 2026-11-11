@@ -15,6 +15,8 @@ import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import type { StaffAttendanceReport } from '../interfaces/staff-attendance-report.interface'
 import type { ManualAttendanceForm } from '../interfaces/manual-attendance-form.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 function firstOfMonth(): string {
   const d = new Date()
@@ -44,6 +46,11 @@ export function useStaffAttendance() {
     page: 1,
     perPage: 20,
   })
+  useQueryState(filters, {
+    kinds: { from: QueryParam.DATE_STRING, to: QueryParam.DATE_STRING, userId: QueryParam.NUMBER },
+    onExternalChange: () => void init(),
+  })
+  useQueryState(reactive({ tab }), { oneOf: { tab: ['log', 'report'] } })
 
   const rows = ref<StaffAttendance[]>([])
   const total = ref(0)

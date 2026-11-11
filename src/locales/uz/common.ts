@@ -1,4 +1,8 @@
 export default {
+  statusConfirm: {
+    title: "Holatni o'zgartirish",
+    message: "{name}: «{from}» → «{to}». Holatni o'zgartirishni tasdiqlaysizmi?",
+  },
   save: 'Saqlash',
   cancel: 'Bekor qilish',
   delete: "O'chirish",

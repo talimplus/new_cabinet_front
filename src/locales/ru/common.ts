@@ -1,4 +1,8 @@
 export default {
+  statusConfirm: {
+    title: 'Смена статуса',
+    message: '{name}: «{from}» → «{to}». Подтвердите смену статуса.',
+  },
   save: 'Сохранить',
   cancel: 'Отмена',
   delete: 'Удалить',

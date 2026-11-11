@@ -25,6 +25,10 @@
           {{ formatSom(student?.monthlyFee ?? 0) }}
         </p>
       </div>
+      <UiButton v-if="canReactivate" variant="outline" @click="student && reactivateRef?.open(student.id, fullName, student.centerId)">
+        <UiIcon :icon="RotateCcw" :size="16" />
+        {{ t('students.reactivate.action') }}
+      </UiButton>
       <UiButton v-if="canEdit" variant="outline" :loading="editLoading" @click="emit('edit')">
         <UiIcon :icon="Pencil" :size="16" />
         {{ t('common.edit') }}
@@ -34,20 +38,24 @@
         {{ t('common.delete') }}
       </UiButton>
     </div>
+    <StudentReactivateDialog ref="reactivateRef" @done="emit('reactivated')" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiBadge, UiButton, UiIcon, UiBackButton } from '@/shared/components'
-import { Pencil, Trash2 } from '@/shared/icons'
+import { Pencil, Trash2, RotateCcw } from '@/shared/icons'
+import { usePermissions } from '@/shared/composables/use-permissions'
+import StudentReactivateDialog from './StudentReactivateDialog.vue'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatPhone } from '@/shared/utils/format-phone'
 import {
   STUDENT_STATUS_LABEL_KEYS,
   STUDENT_STATUS_VARIANTS,
   STUDENT_STATUS_LIST_ROUTES,
+  StudentStatus,
 } from '../../enums/student-status.enum'
 import type { StudentSummaryProfile } from '../../interfaces/student-summary.interface'
 
@@ -60,7 +68,14 @@ const props = defineProps<{
   /** Permission + NEW status — decided by `useStudentDelete().canDelete`. */
   canDelete?: boolean
 }>()
-const emit = defineEmits<{ edit: []; delete: [] }>()
+const emit = defineEmits<{ edit: []; delete: []; reactivated: [] }>()
+
+/** Stopped / finished — e.g. a status set by mistake — goes back to active from a date. */
+const { canChangeStudentStatus } = usePermissions()
+const reactivateRef = ref<InstanceType<typeof StudentReactivateDialog> | null>(null)
+const canReactivate = computed(
+  () => canChangeStudentStatus.value && [StudentStatus.STOPPED, StudentStatus.FINISHED].includes(props.student?.status as StudentStatus),
+)
 
 const fullName = computed(() =>
   props.student ? `${props.student.firstName} ${props.student.lastName}`.trim() : '',

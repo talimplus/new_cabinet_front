@@ -16,6 +16,7 @@ const {
   scope,
   rows,
   loading,
+  name,
   modalOpen,
   editing,
   init,
@@ -53,7 +54,7 @@ async function onDelete(room: Room) {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-1 flex-wrap gap-3">
         <div class="w-full max-w-xs">
-          <UiInput :placeholder="t('common.searchPlaceholder')" @input="onSearch" />
+          <UiInput :model-value="name" :placeholder="t('common.searchPlaceholder')" @input="onSearch" />
         </div>
       </div>
       <UiButton v-if="canManageRooms" @click="openCreate"

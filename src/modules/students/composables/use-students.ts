@@ -4,16 +4,19 @@ import { fetchSubjects } from '@/modules/subjects/api/subjects.api'
 import { optionalRequest, emptyPage } from '@/shared/permissions/optional-request'
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
-import { StudentStatus } from '../enums/student-status.enum'
+import { StudentStatus, STUDENT_STATUS_LABEL_KEYS } from '../enums/student-status.enum'
+import { useStatusConfirm } from '@/shared/composables/use-status-confirm'
 import { StudentStartMode } from '../enums/student-start-mode.enum'
 import { useStudentStart, type StudentStartConfirm } from './use-student-start'
 import type { StudentStatusChangeForm } from '../interfaces/student-start.interface'
 import type { Student } from '../interfaces/student.interface'
 import type { StudentForm } from '../interfaces/student-form.interface'
 import type { StudentsParams } from '../interfaces/student-params.interface'
-import type { ReturnLikelihood } from '../enums/return-likelihood.enum'
-import type { StudentPreferredTime } from '../enums/student-preferred-time.enum'
-import type { WeekDay } from '@/modules/groups/enums/week-day.enum'
+import { ReturnLikelihood } from '../enums/return-likelihood.enum'
+import { StudentPreferredTime } from '../enums/student-preferred-time.enum'
+import { WeekDay } from '@/modules/groups/enums/week-day.enum'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
 
@@ -42,6 +45,8 @@ export function useStudents(
 ) {
   const scope = useScopeStore()
   const notify = useNotificationStore()
+  const askStatus = useStatusConfirm()
+  const fullName = (x: Student): string => `${x.lastName ?? ''} ${x.firstName ?? ''}`.trim()
 
   const rows = ref<Student[]>([])
   const totalPages = ref(1)
@@ -50,6 +55,16 @@ export function useStudents(
   const filters = reactive<StudentFilters>({
     search: '', subjectId: null, preferredTime: null,
     preferredDays: [], returnLikelihood: null, page: 1, perPage: 10,
+  })
+  // Filters + page live in the URL: a reload or Back from the card keeps them.
+  const query = useQueryState(filters, {
+    kinds: { subjectId: QueryParam.NUMBER },
+    oneOf: {
+      preferredTime: Object.values(StudentPreferredTime),
+      preferredDays: Object.values(WeekDay),
+      returnLikelihood: Object.values(ReturnLikelihood),
+    },
+    onExternalChange: () => load(),
   })
 
   const modalOpen = ref(false)
@@ -86,17 +101,9 @@ export function useStudents(
     subjectOptions.value = data.map((s) => ({ label: s.name, value: s.id }))
   }
 
-  function resetFilters(): void {
-    filters.search = ''
-    filters.subjectId = null
-    filters.preferredTime = null
-    filters.preferredDays = []
-    filters.returnLikelihood = null
-    filters.page = 1
-  }
-
   async function init(): Promise<void> {
-    resetFilters()
+    // Filters come from the URL (defaults when it has none).
+    query.restore()
     await Promise.all([load(), loadSubjects()])
   }
 
@@ -201,7 +208,9 @@ export function useStudents(
       returnDialog.status = next
       return
     }
-    applyStatus(student, next)
+    // The other moves had no dialog — a misclick applied at once.
+    void askStatus(fullName(student), t(STUDENT_STATUS_LABEL_KEYS[student.status]), t(STUDENT_STATUS_LABEL_KEYS[next]))
+      .then((ok) => ok && applyStatus(student, next))
   }
   async function confirmReturn(payload: StudentStatusChangeForm): Promise<void> {
     if (returnDialog.student && returnDialog.status) {

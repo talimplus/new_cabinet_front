@@ -383,7 +383,8 @@ to clear coordinates.
 | POST | `/students` | `CreateStudentDto` | Student |
 | PUT | `/students/{id}` | `UpdateStudentDto` | Student |
 | DELETE | `/students/{id}` | — | `{ success: true }` (only `new`, no history — see below) |
-| PUT | `/students/change-status/{id}?status=` | `{ status*, comment?, returnLikelihood? }` | Student |
+| PUT | `/students/change-status/{id}?status=` | `{ status*, comment?, returnLikelihood?, startDate?, stopDate?, returnDate?, groupId? }` | Student — `returnDate`/`groupId` only on a return (stopped/finished → ACTIVE), see below |
+| GET | `/students/{id}/reactivation` | — | `{ status, statusChangedOn: 'YYYY-MM-DD' \| null, today, groups: { id, name, finished }[] }` — only for a `stopped`/`finished` student (else 400). Perm `students.changeStatus` |
 | POST | `/students/transfer/preview` | `{ studentIds*[], fromGroupId*, transferDate? }` | per-student `{ debt, overpaid, attendanceAfterDate }` — the last is the count of source-group marks on/after `transferDate` (0 without it) |
 | POST | `/students/transfer` | `{ studentIds*[], fromGroupId*, toGroupId*, transferDate?, reason?, closeSourceGroup? }` | `{ …, sourceGroupClosed, results[].deletedAttendance }` — **deletes** the student's source-group attendance on/after `transferDate` (attendance lives in one group only). A past date moves the held lessons' fee and teacher commission to the new group; the modal warns (`backdate`) |
 | POST | `/students/{id}/leave-group` | `{ groupId*, stopDate?, returnLikelihood?, reason? }` | `{ studentId, groupId, stopDate, studentStopped, refundedAmount, remainingDebt }` — the student stops in **this group only** (`ACTIVE` student, unfinished group). `stopDate` is exclusive, ≤ today, default today; a `present/late` mark in this group on/after it → 422 `stopDate`. Their last unfinished group → `stopped`, `returnLikelihood` required (else 422). `remainingDebt` = all months of this group |
@@ -432,6 +433,21 @@ The status cell shows "Tasdiqlash kutilmoqda" instead of "To'lanmagan"; the
   activation only (new/ignored → ACTIVE): `activatedAt` = that day and each open
   membership moves back to `max(startDate, group.startDate)`. Returns
   (stopped/finished → ACTIVE) ignore it.
+- **Return date (2026-11-11).** A return (stopped/finished → ACTIVE) takes
+  `returnDate` (`YYYY-MM-DD`, default today): not before `statusChangedOn` from
+  `GET /students/{id}/reactivation`, not after today (422 `returnDate`). Picking
+  `statusChangedOn` undoes a mistaken status with no gap; a later day leaves the
+  days between unbilled (a `present/late` mark there → 422). `groupId` also adds
+  the student to that running group from `returnDate`; it is **required** (422
+  `groupId`) when no unfinished group is left. Front: student card header →
+  "Qayta faollashtirish" (`StudentReactivateDialog`). The card no longer offers
+  "Boshqa guruhga ko'chirish" to a stopped student, and its transfer modal hides
+  `closeSourceGroup` (it closes the whole group — group page only).
+- **Teacher change (2026-11-11).** Group page → "O'qituvchini almashtirish"
+  (`GroupTeacherChangeDialog`) sends a partial `PUT /groups/{id}`
+  `{ teacherId, teacherEffectiveFrom, allowScheduleConflicts? }`
+  (`GroupTeacherChangeForm`). Date ≤ today; the old teacher's paid month → 422
+  `teacherEffectiveFrom`; the new teacher's busy week only warns.
 - `PUT /students/{id}` body `groupJoinedAt?` (`YYYY-MM-DD`) — join date of the
   groups ADDED in this edit; ≤ today, not before a group's `startDate` (422
   `errors.groupJoinedAt`). An ACTIVE student's later `activatedAt` moves back too.

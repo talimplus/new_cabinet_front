@@ -22,6 +22,10 @@ import { GroupStatus } from '../../enums/group-status.enum'
 import type { Group } from '../../interfaces/group.interface'
 import type { Employee } from '@/modules/users/interfaces/employee.interface'
 
+// Status changes ask "are you sure?" first — these specs confirm right away.
+vi.mock('@/shared/composables/use-status-confirm', () => ({
+  useStatusConfirm: () => () => Promise.resolve(true),
+}))
 vi.mock('../../api/groups.api', () => ({
   fetchGroups: vi.fn(),
   createGroup: vi.fn(),

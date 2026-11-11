@@ -8,6 +8,8 @@ import type { Candidate } from '../interfaces/candidate.interface'
 import type { CandidateForm } from '../interfaces/candidate-form.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 interface CandidateFilters {
   search: string
@@ -26,6 +28,7 @@ export function useCandidates() {
   const totalPages = ref(1)
   const loading = ref(false)
   const filters = reactive<CandidateFilters>({ search: '', subjectId: null, page: 1, perPage: 20 })
+  useQueryState(filters, { kinds: { subjectId: QueryParam.NUMBER }, onExternalChange: () => load() })
   const subjects = ref<SelectOption[]>([])
 
   const modalOpen = ref(false)

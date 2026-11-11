@@ -8,6 +8,8 @@ import type { SyllabusListItem } from '../interfaces/syllabus.interface'
 import type { SyllabusesParams } from '../interfaces/syllabus-params.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 interface SyllabusFilters {
   subjectId: number | null
@@ -26,6 +28,7 @@ export function useSyllabuses() {
   const loading = ref(false)
   const subjectOptions = ref<SelectOption[]>([])
   const filters = reactive<SyllabusFilters>({ subjectId: null, name: '', page: 1, perPage: 10 })
+  useQueryState(filters, { kinds: { subjectId: QueryParam.NUMBER }, onExternalChange: () => load() })
 
   const modalOpen = ref(false)
   const aiModalOpen = ref(false)

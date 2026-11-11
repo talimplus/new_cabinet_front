@@ -7,7 +7,8 @@ import { usePermissions } from '@/shared/composables/use-permissions'
 import { optionalRequest } from '@/shared/permissions/optional-request'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString } from '@/shared/utils/format-date'
-import { GroupStatus } from '../enums/group-status.enum'
+import { GroupStatus, GROUP_STATUS_LABEL_KEYS } from '../enums/group-status.enum'
+import { useStatusConfirm } from '@/shared/composables/use-status-confirm'
 import { GroupListScope, GROUP_LIST_SCOPE_STATUSES } from '../enums/group-list-scope.enum'
 import { GroupStartMode } from '../enums/group-start-mode.enum'
 import { useGroupStart, type GroupStartConfirm } from './use-group-start'
@@ -16,6 +17,8 @@ import type { Group } from '../interfaces/group.interface'
 import type { GroupForm } from '../interfaces/group-form.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 /** A status-change 422 only re-opens the form when one of these is missing. */
 const STATUS_FIELDS = ['endDate', 'roomId']
@@ -30,6 +33,7 @@ export interface UseGroupsOptions {
 export function useGroups(options: UseGroupsOptions = {}) {
   const scope = useScopeStore()
   const notify = useNotificationStore()
+  const askStatus = useStatusConfirm()
   const perms = usePermissions()
 
   const rows = ref<Group[]>([])
@@ -41,6 +45,11 @@ export function useGroups(options: UseGroupsOptions = {}) {
     teacherId: null,
     // Finished groups live under their own filter, with history intact.
     scope: GroupListScope.ACTIVE,
+  })
+  useQueryState(filters, {
+    kinds: { teacherId: QueryParam.NUMBER },
+    oneOf: { scope: Object.values(GroupListScope) },
+    onExternalChange: () => load(),
   })
 
   // A teacher user never picks a teacher — the backend already scopes them.
@@ -184,7 +193,8 @@ export function useGroups(options: UseGroupsOptions = {}) {
       pendingFinish.value = group
       return
     }
-    applyStatus(group, status)
+    const from = group.status ? t(GROUP_STATUS_LABEL_KEYS[group.status]) : '—'
+    void askStatus(group.name, from, t(GROUP_STATUS_LABEL_KEYS[status])).then((ok) => ok && applyStatus(group, status))
   }
   function confirmFinish(): void {
     if (!pendingFinish.value) return

@@ -72,15 +72,14 @@ const props = withDefaults(
     month?: string
     /** Show the pay / fine buttons — off on a read-only page. */
     showActions?: boolean
+    /** Keep month + tab in the URL — the page, not the payroll modal. */
+    syncQuery?: boolean
   }>(),
-  { userId: null, month: '', showActions: false },
+  { userId: null, month: '', showActions: false, syncQuery: false },
 )
 const emit = defineEmits<{ changed: [] }>()
 
-const s = useStaffOverview(
-  () => props.userId,
-  () => props.month,
-)
+const s = useStaffOverview(() => props.userId, () => props.month, props.syncQuery)
 onMounted(s.load)
 
 /** The payroll table behind the modal has to reflect the new numbers. */

@@ -48,7 +48,7 @@ async function onSubmit(values: GenericObject) {
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
       <div class="min-w-0 flex-1 sm:max-w-xs">
-        <UiInput type="search" :placeholder="t('expenses.searchPlaceholder')" @input="onSearch">
+        <UiInput type="search" :model-value="e.filters.search" :placeholder="t('expenses.searchPlaceholder')" @input="onSearch">
           <template #prefix><UiIcon :icon="Search" :size="16" /></template>
         </UiInput>
       </div>

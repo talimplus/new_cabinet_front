@@ -1,6 +1,8 @@
 import { reactive, ref } from 'vue'
 import { useScopeStore } from '@/stores/scope.store'
 import { fetchDashboard } from '../api/statistics.api'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 import type { DashboardResponse } from '../interfaces/dashboard.interface'
 
 function ym(date: Date): string {
@@ -21,6 +23,10 @@ export function useDashboard() {
   const data = ref<DashboardResponse | null>(null)
   const loading = ref(false)
   const range = reactive(defaultRange())
+  useQueryState(range, {
+    kinds: { fromMonth: QueryParam.DATE_STRING, toMonth: QueryParam.DATE_STRING },
+    onExternalChange: () => void load(),
+  })
 
   async function load(): Promise<void> {
     loading.value = true

@@ -15,6 +15,10 @@ import { NotificationType } from '@/shared/enums/notification-type.enum'
 import { LeadStatus } from '../../enums/lead-status.enum'
 import type { Lead } from '../../interfaces/lead.interface'
 
+// Status changes ask "are you sure?" first — these specs confirm right away.
+vi.mock('@/shared/composables/use-status-confirm', () => ({
+  useStatusConfirm: () => () => Promise.resolve(true),
+}))
 vi.mock('../../api/leads.api', () => ({
   fetchLeads: vi.fn(),
   createLead: vi.fn(),

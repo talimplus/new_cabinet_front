@@ -7,7 +7,7 @@
           <th v-for="date in a.lessonDates.value" :key="date" class="min-w-24 px-2 py-2 text-center" :class="{ 'bg-primary-soft/50': a.isToday(date) }" :data-today="a.isToday(date) || undefined">
             <div class="flex items-center justify-center gap-1 font-mono text-xs">
               {{ header(date) }}
-              <button v-if="a.canRescheduleDate(date)" type="button" class="rounded p-0.5 text-primary hover:bg-surface" @click="a.openReschedule(date)">
+              <button v-if="!readonly && a.canRescheduleDate(date)" type="button" class="rounded p-0.5 text-primary hover:bg-surface" @click="a.openReschedule(date)">
                 <UiIcon :icon="RefreshCw" :size="14" />
               </button>
             </div>
@@ -28,7 +28,7 @@
             v-for="date in a.lessonDates.value"
             :key="`${s.id}-${date}`"
             :status="a.statusOf(s.id, date)"
-            :editable="a.canEditCell(date) && !a.isOutsideEnrollment(s.id, date)"
+            :editable="!readonly && a.canEditCell(date) && !a.isOutsideEnrollment(s.id, date)"
             :today="a.isToday(date)"
             :past="a.isPast(date)"
             :future="a.isFuture(date)"
@@ -36,7 +36,7 @@
             :outside="a.isOutsideEnrollment(s.id, date)"
             :note="a.enrollmentReason(s.id, date)"
             :comment="a.commentOf(s.id, date)"
-            @click="a.openCell(s.id, date)"
+            @click="!readonly && a.openCell(s.id, date)"
           />
         </tr>
       </tbody>
@@ -55,7 +55,8 @@ import type { AttendanceRow } from '../../interfaces/attendance.interface'
 
 const { t } = useI18n()
 
-defineProps<{ a: ReturnType<typeof useAttendance>; students: AttendanceRow[] }>()
+/** `readonly` — former members: marks are shown, never edited (the backend refuses too). */
+defineProps<{ a: ReturnType<typeof useAttendance>; students: AttendanceRow[]; readonly?: boolean }>()
 
 const scroller = ref<HTMLElement | null>(null)
 const nameHead = ref<HTMLElement | null>(null)

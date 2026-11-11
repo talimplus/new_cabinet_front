@@ -47,7 +47,7 @@ async function onDelete(subject: Subject) {
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-1 flex-wrap gap-3">
         <div class="w-full max-w-xs">
-          <UiInput :placeholder="t('common.searchPlaceholder')" @input="onSearch" />
+          <UiInput :model-value="filters.name" :placeholder="t('common.searchPlaceholder')" @input="onSearch" />
         </div>
       </div>
       <UiButton v-if="canManageSubjects" @click="openCreate"

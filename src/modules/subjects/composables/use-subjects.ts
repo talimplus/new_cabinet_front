@@ -5,6 +5,7 @@ import { useNotificationStore } from '@/stores/notification.store'
 import type { Subject } from '../interfaces/subject.interface'
 import type { SubjectForm } from '../interfaces/subject-form.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
 
 export function useSubjects() {
   const scope = useScopeStore()
@@ -14,6 +15,7 @@ export function useSubjects() {
   const totalPages = ref(1)
   const loading = ref(false)
   const filters = reactive({ name: '', page: 1, perPage: 10 })
+  useQueryState(filters, { onExternalChange: () => load() })
 
   const modalOpen = ref(false)
   const editing = ref<Subject | null>(null)

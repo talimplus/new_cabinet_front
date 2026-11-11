@@ -24,6 +24,6 @@ const staffId = computed(() => {
       <h1 class="text-lg font-bold text-foreground">{{ t('staff.title') }}</h1>
     </div>
     <!-- Own page never shows pay/fine actions (an owner never fines themself). -->
-    <StaffOverviewCard :key="staffId ?? 'me'" :user-id="staffId" :show-actions="!!staffId" />
+    <StaffOverviewCard :key="staffId ?? 'me'" :user-id="staffId" :show-actions="!!staffId" sync-query />
   </div>
 </template>

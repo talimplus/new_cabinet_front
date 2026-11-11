@@ -104,6 +104,7 @@ export default {
     },
   },
   attendance: {
+    readonlyClosed: "Guruh faol emas (yopilgan yoki hali boshlanmagan) — davomat faqat ko'rish uchun.",
     formerTitle: "Sobiq o'quvchilar davomati ({count})",
     fromDate: 'Boshlanish sanasi',
     toDate: 'Tugash sanasi (ixtiyoriy)',
@@ -237,6 +238,17 @@ export default {
     debtStays: "Shu guruhdagi qarz ({amount}) shu guruhda qoladi.",
     confirm: 'Yakunlash',
     done: "Guruh yakunlandi: {moved} ta o'tkazildi, {finished} ta tugallandi",
+  },
+  teacherChange: {
+    action: "O'qituvchini almashtirish",
+    title: "{name} — o'qituvchini almashtirish",
+    current: "Hozirgi o'qituvchi: {name}",
+    newTeacher: "Yangi o'qituvchi",
+    date: "Yangi o'qituvchi qaysi kundan dars beradi?",
+    dateHint:
+      "O'tgan sana bo'lishi mumkin. Shu kundan oldingi darslar va ularning foizi eski o'qituvchida qoladi.",
+    confirm: 'Almashtirish',
+    done: "O'qituvchi almashtirildi",
   },
   leave: {
     action: 'Guruhdan chiqarish',

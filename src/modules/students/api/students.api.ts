@@ -13,6 +13,7 @@ import type {
   StudentStartPreview,
   StudentStartPreviewForm,
   StudentStatusChangeForm,
+  StudentReactivation,
 } from '../interfaces/student-start.interface'
 
 export async function fetchStudents(params: StudentsParams): Promise<PaginatedResponse<Student>> {
@@ -67,6 +68,12 @@ export async function changeStudentStatus(
   body?: StudentStatusChangeForm,
 ): Promise<void> {
   await http.put(`/students/change-status/${id}`, body ?? {}, { params: { status } })
+}
+
+/** GET /students/:id/reactivation — when the status was set, today, and the groups. */
+export async function fetchStudentReactivation(id: number): Promise<StudentReactivation> {
+  const { data } = await http.get<StudentReactivation>(`/students/${id}/reactivation`)
+  return data
 }
 
 /**

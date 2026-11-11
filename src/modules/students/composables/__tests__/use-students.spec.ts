@@ -18,6 +18,10 @@ import { StudentStatus } from '../../enums/student-status.enum'
 import { ReturnLikelihood } from '../../enums/return-likelihood.enum'
 import type { Student } from '../../interfaces/student.interface'
 
+// Status changes ask "are you sure?" first — these specs confirm right away.
+vi.mock('@/shared/composables/use-status-confirm', () => ({
+  useStatusConfirm: () => () => Promise.resolve(true),
+}))
 vi.mock('../../api/students.api', () => ({
   fetchStudents: vi.fn(),
   createStudent: vi.fn(),

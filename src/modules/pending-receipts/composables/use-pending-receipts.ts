@@ -18,6 +18,8 @@ import type { PendingReceipt } from '../interfaces/pending-receipt.interface'
 import type { PendingReceiptsParams } from '../interfaces/pending-receipts-params.interface'
 import type { ConfirmReceiptsForm } from '../interfaces/confirm-receipts.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 interface ReceiptFilters {
   dateFrom: Date | null
@@ -56,6 +58,10 @@ export function usePendingReceipts() {
     dateTo: null,
     page: 1,
     perPage: 10,
+  })
+  const query = useQueryState(filters, {
+    kinds: { dateFrom: QueryParam.DATE, dateTo: QueryParam.DATE },
+    onExternalChange: () => { selection.clear(); void reload() },
   })
 
   const selection = useReceiptSelection(() => rows.value)
@@ -113,7 +119,8 @@ export function usePendingReceipts() {
   }
 
   async function init(): Promise<void> {
-    filters.page = 1
+    // Dates + page come from the URL (page 1 when it has none); `load()` clamps a stale page.
+    query.restore()
     await reload()
   }
 

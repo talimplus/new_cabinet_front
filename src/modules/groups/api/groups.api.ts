@@ -1,6 +1,6 @@
 import { http } from '@/shared/api/http'
 import type { Group } from '../interfaces/group.interface'
-import type { GroupForm } from '../interfaces/group-form.interface'
+import type { GroupForm, GroupTeacherChangeForm } from '../interfaces/group-form.interface'
 import type { GroupsParams } from '../interfaces/group-params.interface'
 import type { GroupStatus } from '../enums/group-status.enum'
 import type { GroupMember } from '../interfaces/group-member.interface'
@@ -38,6 +38,12 @@ export async function createGroup(form: GroupForm): Promise<Group> {
 }
 
 export async function updateGroup(id: number, form: GroupForm): Promise<Group> {
+  const { data } = await http.put<Group>(`/groups/${id}`, form)
+  return data
+}
+
+/** Hands the group to another teacher from a date (same PUT, only these fields). */
+export async function changeGroupTeacher(id: number, form: GroupTeacherChangeForm): Promise<Group> {
   const { data } = await http.put<Group>(`/groups/${id}`, form)
   return data
 }

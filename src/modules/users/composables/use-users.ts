@@ -7,6 +7,7 @@ import type { UserForm } from '../interfaces/user-form.interface'
 import type { UsersParams } from '../interfaces/user-params.interface'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
 
 interface UsersFilters {
   name: string
@@ -24,6 +25,7 @@ export function useUsers() {
   const totalPages = ref(1)
   const loading = ref(false)
   const filters = reactive<UsersFilters>({ name: '', phone: '', page: 1, perPage: 10 })
+  useQueryState(filters, { onExternalChange: () => load() })
 
   const modalOpen = ref(false)
   const editing = ref<User | null>(null)

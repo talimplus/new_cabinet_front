@@ -7,11 +7,12 @@
     <p v-else-if="!a.lessonDates.value.length" class="p-8 text-center text-sm text-muted-foreground">{{ t('groups.attendance.noLessonDates') }}</p>
     <template v-else>
       <p v-if="!current.length" class="p-4 text-center text-sm text-muted-foreground">{{ t('groups.attendance.noStudents') }}</p>
-      <AttendanceMatrix v-else :a="a" :students="current" />
-      <!-- Former members (transferred, stopped), folded away. Only their own
-           membership days are editable (fixing a mark before they left). -->
+      <!-- Only a STARTED group takes marks (backend 400s otherwise) — no picker to open. -->
+      <p v-if="readonly && current.length" class="rounded-md bg-info-soft px-3 py-2 text-xs text-info">{{ t('groups.attendance.readonlyClosed') }}</p>
+      <AttendanceMatrix v-if="current.length" :a="a" :students="current" :readonly="readonly" />
+      <!-- Former members (transferred, stopped), folded away and read-only. -->
       <UiCollapse v-if="former.length" :title="t('groups.attendance.formerTitle', { count: former.length })">
-        <AttendanceMatrix :a="a" :students="former" />
+        <AttendanceMatrix :a="a" :students="former" readonly />
       </UiCollapse>
     </template>
 
@@ -49,7 +50,8 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 /** `finished` — the group is closed: its students are no longer ACTIVE, so rows come from the journal. */
-const props = defineProps<{ groupId: number; students: Student[]; finished?: boolean; endDate?: string | null }>()
+/** `readonly` — the group is not running (new or closed): marks are shown, never edited. */
+const props = defineProps<{ groupId: number; students: Student[]; finished?: boolean; readonly?: boolean; endDate?: string | null }>()
 const a = useAttendance(props.groupId, toRef(props, 'students'), props.endDate)
 
 /** Still in the group. A closed group's members are "finished", not ACTIVE — take the journal's list. */

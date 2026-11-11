@@ -46,7 +46,7 @@ async function confirmDelete() {
         />
       </div>
       <div class="min-w-0 flex-1 sm:max-w-xs">
-        <UiInput type="search" :placeholder="t('common.searchPlaceholder')" @input="onSearch">
+        <UiInput type="search" :model-value="s.filters.name" :placeholder="t('common.searchPlaceholder')" @input="onSearch">
           <template #prefix><UiIcon :icon="Search" :size="16" /></template>
         </UiInput>
       </div>

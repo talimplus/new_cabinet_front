@@ -54,12 +54,12 @@ async function onConfirmDelete() {
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
       <div class="min-w-0 flex-1 sm:max-w-xs">
-        <UiInput type="search" :placeholder="t('users.filter.namePlaceholder')" @input="onSearch">
+        <UiInput type="search" :model-value="u.filters.name" :placeholder="t('users.filter.namePlaceholder')" @input="onSearch">
           <template #prefix><UiIcon :icon="Search" :size="16" /></template>
         </UiInput>
       </div>
       <div class="min-w-0 flex-1 sm:max-w-xs">
-        <UiInput type="search" :placeholder="t('users.filter.phonePlaceholder')" @input="onSearchPhone" />
+        <UiInput type="search" :model-value="u.filters.phone" :placeholder="t('users.filter.phonePlaceholder')" @input="onSearchPhone" />
       </div>
       <UiButton v-if="canCreateUser" class="ml-auto" @click="u.openCreate">
         <UiIcon :icon="Plus" :size="16" /> {{ t('common.add') }}

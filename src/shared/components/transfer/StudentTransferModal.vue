@@ -30,7 +30,9 @@
         :rows="2"
         :disabled="state.loading"
       />
+      <!-- Closes the WHOLE source group — only on the group page, never from one student's card. -->
       <UiCheckbox
+        v-if="allowCloseSource"
         v-model="state.closeSourceGroup"
         :label="t('students.transfer.closeSourceGroup')"
         :disabled="state.loading"
@@ -87,6 +89,8 @@ defineProps<{
   /** Set when the date is past or source-group marks will be deleted. */
   impact?: TransferImpact | null
   valid?: boolean
+  /** Offer "close the old group afterwards" (group page only). */
+  allowCloseSource?: boolean
 }>()
 const emit = defineEmits<{ close: []; confirm: [] }>()
 </script>

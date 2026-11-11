@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import StudentCardHeader from '../StudentCardHeader.vue'
 import { StudentStatus, STUDENT_STATUS_LABEL_KEYS, STUDENT_STATUS_LIST_ROUTES } from '../../../enums/student-status.enum'
 import { formatSom } from '@/shared/utils/format-money'
@@ -26,7 +27,7 @@ function mountHeader(props: Record<string, unknown> = {}) {
   // The back button is covered by its own spec; stubbed so button counts stay about the actions.
   return mount(StudentCardHeader, {
     props: { student: makeStudent(), ...props },
-    global: { stubs: { UiBackButton: true } },
+    global: { plugins: [createPinia()], stubs: { UiBackButton: true, StudentReactivateDialog: true } },
   })
 }
 

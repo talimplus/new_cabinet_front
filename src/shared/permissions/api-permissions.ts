@@ -92,6 +92,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: POST, path: '/students/transfer', permissions: [Permission.STUDENTS_TRANSFER] },
   { method: PUT, path: '/students/change-status/:id', permissions: [Permission.STUDENTS_CHANGE_STATUS] },
   { method: GET, path: '/students/:id/attendance', permissions: [Permission.ATTENDANCE_VIEW] },
+  { method: GET, path: '/students/:id/reactivation', permissions: [Permission.STUDENTS_CHANGE_STATUS] },
   { method: POST, path: '/students/:id/leave-group', permissions: [Permission.STUDENTS_CHANGE_STATUS] },
   { method: POST, path: '/students/:id/start-date/preview', permissions: [Permission.STUDENTS_CHANGE_STATUS, Permission.STUDENTS_UPDATE] },
   { method: GET, path: '/students/:id/discount-periods', permissions: [Permission.STUDENTS_DISCOUNTS] },

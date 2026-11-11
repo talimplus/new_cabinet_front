@@ -5,6 +5,7 @@ import { useScopeStore } from '@/stores/scope.store'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { toDateString } from '@/shared/utils/format-date'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
 import type { Holiday } from '../interfaces/holiday.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 
@@ -36,6 +37,11 @@ export function useHolidays() {
   const yearOptions = computed<SelectOption[]>(() => {
     const now = new Date().getFullYear()
     return [now - 1, now, now + 1].map((y) => ({ label: String(y), value: y }))
+  })
+  // After `yearOptions` — the restore validates `?year=` against it.
+  useQueryState(reactive({ year }), {
+    oneOf: { year: () => yearOptions.value.map((o) => o.value) },
+    onExternalChange: () => void load(),
   })
   /** An admin with a concrete center picked may scope a holiday to it. */
   const canScopeToCenter = computed(() => scope.canSwitch && scope.activeCenter !== null)

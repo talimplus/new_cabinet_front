@@ -1,7 +1,8 @@
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { fetchGroupById } from '../api/groups.api'
 import { fetchStudents } from '@/modules/students/api/students.api'
 import { usePermissions } from '@/shared/composables/use-permissions'
+import { useQueryState } from '@/shared/composables/use-query-state'
 import { GroupStatus } from '../enums/group-status.enum'
 import { GroupTab, GROUP_TAB_LABEL_KEYS } from '../enums/group-tab.enum'
 import type { Group } from '../interfaces/group.interface'
@@ -57,6 +58,8 @@ export function useGroupDetail(groupId: number) {
       list.push({ key: GroupTab.TIMELINE, labelKey: GROUP_TAB_LABEL_KEYS[GroupTab.TIMELINE] })
     return list
   })
+  // `?tab=` keeps the open tab across a reload / Back; only tabs this user sees.
+  useQueryState(reactive({ tab: activeTab }), { oneOf: { tab: () => tabs.value.map((x) => x.key) } })
 
   async function loadStudents(): Promise<void> {
     loadingStudents.value = true

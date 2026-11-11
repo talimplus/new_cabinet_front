@@ -25,7 +25,7 @@
           v-for="group in student.groups"
           :key="group.id"
           :group="group"
-          :can-transfer="canTransfer"
+          :can-transfer="canTransfer && student?.status !== StudentStatus.STOPPED"
           @transfer="emit('transfer', $event)"
         />
       </div>
@@ -42,6 +42,8 @@ import { formatDate } from '@/shared/utils/format-date'
 import { WEEK_DAY_LABEL_KEYS } from '@/modules/groups/enums/week-day.enum'
 import { PREFERRED_TIME_LABEL_KEYS } from '../../enums/student-preferred-time.enum'
 import StudentGroupRow from './StudentGroupRow.vue'
+// A stopped student is returned (header) first — a transfer would leave them stopped and unbilled.
+import { StudentStatus } from '../../enums/student-status.enum'
 import { formatDiscount } from '../../utils/format-discount'
 import type {
   StudentSummaryGroup,

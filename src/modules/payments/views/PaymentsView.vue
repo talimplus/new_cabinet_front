@@ -31,7 +31,7 @@ const onSearch = debounce((e: Event) => p.search((e.target as HTMLInputElement).
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
       <div class="min-w-0 flex-1 sm:max-w-xs">
-        <UiInput type="search" :placeholder="t('common.searchPlaceholder')" @input="onSearch">
+        <UiInput type="search" :model-value="p.filters.search" :placeholder="t('common.searchPlaceholder')" @input="onSearch">
           <template #prefix><UiIcon :icon="Search" :size="16" /></template>
         </UiInput>
       </div>

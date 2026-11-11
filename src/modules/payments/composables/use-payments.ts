@@ -24,6 +24,8 @@ import type { PaymentCalculationResponse } from '../interfaces/payment-calculati
 import type { MarkAsPaidSubmit, PartialSubmit } from '../interfaces/payment-submit.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
+import { useQueryState } from '@/shared/composables/use-query-state'
+import { QueryParam } from '@/shared/enums/query-param.enum'
 
 const isRowStatus = (v: PaymentStatus | PaymentListFilter): v is PaymentStatus =>
   (Object.values(PaymentStatus) as string[]).includes(v)
@@ -75,6 +77,14 @@ export function usePayments() {
     search: '',
     page: 1,
     perPage: 10,
+  })
+  useQueryState(filters, {
+    kinds: { groupId: QueryParam.NUMBER, teacherId: QueryParam.NUMBER },
+    oneOf: {
+      status: [...Object.values(PaymentStatus), ...Object.values(PaymentListFilter)],
+      month: Array.from({ length: 12 }, (_, i) => pad(i + 1)),
+    },
+    onExternalChange: () => init(),
   })
 
   const markDialog = reactive<DialogState>({ open: false, payment: null, loading: false })
