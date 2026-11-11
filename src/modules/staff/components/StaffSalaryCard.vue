@@ -15,7 +15,10 @@
     <div v-if="salary.appliedDeductions.length" class="space-y-0.5 border-t border-border pt-2">
       <p class="text-xs text-muted-foreground">{{ t('staff.salary.appliedTitle') }}</p>
       <p v-for="applied in salary.appliedDeductions" :key="applied.id" class="text-xs text-foreground">
-        − {{ formatSom(applied.amount) }} · {{ applied.reason }}
+        − {{ formatSom(applied.amount) }} ·
+        <!-- An advance with no comment carries the backend's default reason "Avans". -->
+        <span v-if="applied.type === StaffDeductionType.ADVANCE" class="text-warning">{{ t('staff.deductionType.advance') }}</span>
+        <template v-if="applied.type !== StaffDeductionType.ADVANCE || applied.reason !== 'Avans'">{{ applied.reason }}</template>
         <span v-if="applied.sourceForMonth && applied.sourceForMonth !== salary.forMonth" class="text-warning">
           ({{ t('staff.salary.fromMonth', { month: formatMonth(applied.sourceForMonth) }) }})
         </span>
@@ -24,6 +27,10 @@
 
     <p v-if="outstanding > 0" class="rounded-md bg-warning-soft px-3 py-2 text-xs text-warning">
       {{ t('staff.salary.outstandingHint', { amount: formatSom(outstanding) }) }}
+    </p>
+
+    <p v-if="(advanceOutstanding ?? 0) > 0" class="rounded-md bg-info-soft px-3 py-2 text-xs text-info">
+      {{ t('staff.salary.advanceOutstandingHint', { amount: formatSom(advanceOutstanding ?? 0) }) }}
     </p>
 
     <div v-if="showActions" class="flex flex-wrap gap-2">
@@ -44,6 +51,8 @@ import { UiButton } from '@/shared/components'
 import { cn } from '@/shared/utils/cn'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatMonth } from '@/shared/utils/format-month'
+import { buildSalaryFields } from '../utils/staff-salary-fields'
+import { StaffDeductionType } from '../enums/staff-deduction-type.enum'
 import type { StaffOverviewSalary } from '../interfaces/staff-overview.interface'
 
 const { t } = useI18n()
@@ -51,27 +60,13 @@ const { t } = useI18n()
 const props = defineProps<{
   salary: StaffOverviewSalary
   outstanding: number
+  /** Advances not withheld yet — they come off the following salaries. */
+  advanceOutstanding?: number
   showActions?: boolean
   canPay?: boolean
   canDeduct?: boolean
 }>()
 const emit = defineEmits<{ pay: []; deduct: [] }>()
 
-const fields = computed(() => {
-  const s = props.salary
-  return [
-    { label: t('staff.salary.base'), value: formatSom(s.baseSalary), tone: 'text-foreground' },
-    {
-      label: t('staff.salary.deduction'),
-      value: `${s.deductionAmount > 0 ? '−' : ''}${formatSom(s.deductionAmount)}`,
-      tone: s.deductionAmount > 0 ? 'text-danger' : 'text-foreground',
-    },
-    { label: t('staff.salary.net'), value: formatSom(s.netSalary), tone: 'font-semibold text-foreground' },
-    {
-      label: t('staff.salary.remaining'),
-      value: formatSom(s.remaining),
-      tone: s.remaining > 0 ? 'font-semibold text-danger' : 'text-foreground',
-    },
-  ]
-})
+const fields = computed(() => buildSalaryFields(props.salary))
 </script>

@@ -80,6 +80,8 @@ export function useStaffOverview(
       badgeAlert: true,
     },
     { key: StaffTab.DEDUCTIONS, labelKey: STAFF_TAB_LABEL_KEYS[StaffTab.DEDUCTIONS], badge: data.value?.deductions.length },
+    { key: StaffTab.ADVANCES, labelKey: STAFF_TAB_LABEL_KEYS[StaffTab.ADVANCES], badge: data.value?.advances?.length },
+    { key: StaffTab.BONUSES, labelKey: STAFF_TAB_LABEL_KEYS[StaffTab.BONUSES], badge: data.value?.bonuses?.length },
     { key: StaffTab.MONTHS, labelKey: STAFF_TAB_LABEL_KEYS[StaffTab.MONTHS] },
   ])
 

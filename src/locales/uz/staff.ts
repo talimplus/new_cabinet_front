@@ -12,18 +12,28 @@ export default {
     unsettledHint: '{count} ta chek',
     deduction: 'Shu oy jarima',
     deductionHint: "qoldiq: {amount}",
+    advance: 'Shu oy avans',
+    advanceHint: 'keyingi oyliklarga: {amount}',
+    bonus: 'Shu oy mukofot',
+    bonusHint: "oylikka qo'shiladi",
   },
 
   salary: {
     title: '{month} oyligi',
     base: 'Hisoblangan',
+    bonus: '+ Mukofot',
+    fine: '− Jarima',
+    advance: '− Avans',
     deduction: 'Ushlab qolindi',
-    net: "Qo'lga tegadi",
+    net: 'Beriladigan',
+    paid: "To'langan",
     remaining: 'Qolgan',
     appliedTitle: 'Ushlab qolinganlar:',
     fromMonth: '{month} dan qolgan',
     outstandingHint:
       "Hali ushlanmagan jarima: {amount}. Bu summa keyingi oyliklardan ushlab qolinadi.",
+    advanceOutstandingHint:
+      "Hali ushlanmagan avans: {amount}. Keyingi oyliklardan ushlanadi.",
     payButton: "Oylikni to'lash",
     payTitle: "Oylik to'lash",
     payAmount: "To'lanadigan summa",
@@ -51,6 +61,20 @@ export default {
     late: 'Kechikish / kelmaslik',
     unsettled_payment: "Topshirilmagan pul",
     other: 'Boshqa',
+    advance: 'Avans',
+  },
+
+  advance: {
+    confirmTitle: "Avansni o'chirish",
+    confirmDelete: "{amount} avansni o'chirmoqchimisiz? Oyliklar qayta hisoblanadi.",
+    deleted: "Avans o'chirildi",
+    settled: "To'liq ushlangan",
+  },
+
+  bonus: {
+    confirmTitle: "Mukofotni o'chirish",
+    confirmDelete: "{amount} mukofotni o'chirmoqchimisiz? Oylik qayta hisoblanadi.",
+    deleted: "Mukofot o'chirildi",
   },
 
   receipts: {
@@ -69,6 +93,8 @@ export default {
     late: 'Kechikishlar',
     receipts: 'Topshirilmagan pullar',
     deductions: 'Jarimalar',
+    advances: 'Avanslar',
+    bonuses: 'Mukofotlar',
     months: 'Oyma-oy davomat',
   },
 
@@ -85,6 +111,11 @@ export default {
     remainingDeduction: 'Qolgan qarz',
     reasonType: 'Turi',
     reason: 'Sabab',
+    deducted: 'Ushlangan',
+    leftToDeduct: 'Ushlanadi',
+    comment: 'Izoh',
+    author: 'Kim yozgan',
+    createdAt: 'Yozilgan',
   },
 
   groups: {
@@ -103,6 +134,8 @@ export default {
     late: "Bu oyda kechikish yo'q",
     receipts: "Topshirilmagan pul yo'q",
     deductions: "Jarima yozilmagan",
+    advances: 'Avans berilmagan',
+    bonuses: 'Mukofot yozilmagan',
     months: "Ma'lumot yo'q",
     groups: "Hozircha guruh biriktirilmagan",
   },

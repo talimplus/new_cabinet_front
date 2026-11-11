@@ -4,6 +4,7 @@ import type { PayrollStatus } from '@/modules/payroll/enums/payroll-status.enum'
 import type { StaffDeductionType } from '../enums/staff-deduction-type.enum'
 import type { GroupStatus } from '@/modules/groups/enums/group-status.enum'
 import type { WeekDay } from '@/modules/groups/enums/week-day.enum'
+import type { StaffBonusRow } from './staff-pay-extras.interface'
 
 export interface StaffOverviewUser {
   id: number
@@ -34,8 +35,13 @@ export interface StaffOverviewSummary {
   rejectedCount: number
   rejectedAmount: number
   deductionThisMonth: number
-  /** Not withheld yet — it comes off the following months' salaries. */
+  /** FINES not withheld yet — they come off the following months' salaries. */
   deductionOutstanding: number
+  /** Advances written for this month. */
+  advanceThisMonth?: number
+  /** Advances not withheld yet — carried to the following salaries. */
+  advanceOutstanding?: number
+  bonusThisMonth?: number
 }
 
 export interface StaffOverviewMonth {
@@ -86,10 +92,18 @@ export interface AppliedDeduction {
 export interface StaffOverviewSalary {
   id: number
   forMonth: string
-  /** Earned before deductions. */
+  /** Earned before bonuses and deductions. */
   baseSalary: number
+  bonusAmount?: number
+  /** Everything withheld this month: fines + advances. */
   deductionAmount: number
-  /** What actually reaches the employee: baseSalary − deductionAmount. */
+  /** The part of `deductionAmount` that is advances. */
+  advanceAmount?: number
+  /** deductionAmount − advanceAmount. */
+  fineAmount?: number
+  /** base + bonus − fines. */
+  earnedAmount?: number
+  /** What is still handed over in total: base + bonus − deductionAmount. */
   netSalary: number
   paidAmount: number
   remaining: number
@@ -97,7 +111,10 @@ export interface StaffOverviewSalary {
   appliedDeductions: AppliedDeduction[]
 }
 
-/** GET /staff/{userId}/overview and GET /staff/me/overview. */
+/**
+ * GET /staff/{userId}/overview and GET /staff/me/overview. The advance/bonus
+ * fields are optional only so older fixtures/responses still type-check.
+ */
 export interface StaffOverview {
   user: StaffOverviewUser
   forMonth: string
@@ -106,7 +123,11 @@ export interface StaffOverview {
   lateRecords: StaffLateRecord[]
   attendanceRecords: StaffLateRecord[]
   unsettledReceipts: UnsettledReceipt[]
+  /** Fines only (all months, newest first). */
   deductions: StaffDeductionRow[]
+  /** Advances (`type: 'advance'`), all months, newest first. */
+  advances?: StaffDeductionRow[]
+  bonuses?: StaffBonusRow[]
   /** Null when no salary row exists for that month yet. */
   salary: StaffOverviewSalary | null
   /** Teachers only: groups that are not finished (started first). Empty for other roles. */
@@ -132,7 +153,7 @@ export interface StaffTeacherGroup {
   schedules: StaffTeacherGroupSchedule[]
 }
 
-/** GET /staff/{userId}/deductions, and each row of `overview.deductions`. */
+/** GET /staff/{userId}/deductions, each row of `overview.deductions` and `overview.advances`. */
 export interface StaffDeductionRow {
   id: number
   userId: number
@@ -141,6 +162,7 @@ export interface StaffDeductionRow {
   /** Still to be withheld from future salaries. */
   remainingAmount: number
   type: StaffDeductionType
+  /** For an advance: the comment, or 'Avans'. */
   reason: string
   sourceForMonth: string | null
   settledAt: string | null

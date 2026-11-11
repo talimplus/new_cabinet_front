@@ -13,12 +13,22 @@ export function getBaseSalary(s: StaffSalary): number {
 }
 
 /**
- * What is still owed. The backend sends `remaining` with the fines already
- * subtracted; the fallback reproduces that for older responses.
+ * What is still owed. The backend sends `remaining` with bonuses, fines and
+ * advances already netted; the fallback reproduces that for older responses.
  */
 export function getRemaining(s: StaffSalary): number {
   if (s.remaining !== undefined) return s.remaining
-  return getTotalSalary(s) - (s.deductionAmount ?? 0) - s.paidAmount
+  return getTotalSalary(s) + (s.bonusAmount ?? 0) - (s.deductionAmount ?? 0) - s.paidAmount
+}
+
+/** The advance part of this month's withholding. */
+export function getAdvance(s: StaffSalary): number {
+  return s.advanceAmount ?? 0
+}
+
+/** The fine part of this month's withholding (older responses: all of it). */
+export function getFine(s: StaffSalary): number {
+  return s.fineAmount ?? (s.deductionAmount ?? 0) - getAdvance(s)
 }
 
 /** Whether any row is a teacher (drives the commission column's visibility). */

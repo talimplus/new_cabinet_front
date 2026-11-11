@@ -6,11 +6,15 @@ import { usePayroll } from '../composables/use-payroll'
 import PayrollMonthTabs from '../components/PayrollMonthTabs.vue'
 import PayrollTable from '../components/PayrollTable.vue'
 import PayStaffModal from '../components/PayStaffModal.vue'
+import PayrollExtraDialog from '../components/PayrollExtraDialog.vue'
+import { usePayrollExtras } from '../composables/use-payroll-extras'
+import { PayrollExtraKind } from '../enums/payroll-extra-kind.enum'
 import StaffOverviewModal from '@/modules/staff/components/StaffOverviewModal.vue'
 
 const { canPaySalary, canDeductSalary, canViewStaffPerformance } = usePermissions()
 const p = usePayroll()
 onMounted(p.init)
+const extras = usePayrollExtras(p.load)
 
 const yearOptions = computed(() => p.yearOptions.value.map((y) => ({ label: String(y), value: y })))
 const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined)
@@ -43,6 +47,15 @@ const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined
       :can-view-staff="canViewStaffPerformance"
       @pay="p.openPay"
       @open-staff="p.openStaff"
+      @advance="extras.open(PayrollExtraKind.ADVANCE, $event)"
+      @bonus="extras.open(PayrollExtraKind.BONUS, $event)"
+    />
+
+    <PayrollExtraDialog
+      :form="extras.form"
+      @change="extras.setField"
+      @close="extras.close"
+      @submit="extras.submit"
     />
 
     <PayStaffModal

@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+  <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
     <UiStatCard
       v-for="card in cards"
       :key="card.label"
@@ -17,7 +17,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiStatCard } from '@/shared/components'
-import { Clock, Ban, ReceiptText, Coins } from '@/shared/icons'
+import { Clock, Ban, ReceiptText, Coins, HandCoins, Gift } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import type { StaffOverviewSummary } from '../interfaces/staff-overview.interface'
 
@@ -56,6 +56,21 @@ const cards = computed(() => {
       hint: t('staff.stats.deductionHint', { amount: formatSom(s.deductionOutstanding) }),
       icon: Coins,
       tone: 'primary' as const,
+    },
+    {
+      // An advance is not a fine: money already handed over, withheld later.
+      label: t('staff.stats.advance'),
+      value: formatSom(s.advanceThisMonth ?? 0),
+      hint: t('staff.stats.advanceHint', { amount: formatSom(s.advanceOutstanding ?? 0) }),
+      icon: HandCoins,
+      tone: 'neutral' as const,
+    },
+    {
+      label: t('staff.stats.bonus'),
+      value: formatSom(s.bonusThisMonth ?? 0),
+      hint: t('staff.stats.bonusHint'),
+      icon: Gift,
+      tone: 'success' as const,
     },
   ]
 })

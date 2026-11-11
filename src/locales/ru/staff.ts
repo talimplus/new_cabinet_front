@@ -12,18 +12,28 @@ export default {
     unsettledHint: '{count} чек(ов)',
     deduction: 'Штраф за месяц',
     deductionHint: 'остаток: {amount}',
+    advance: 'Аванс за месяц',
+    advanceHint: 'на следующие зарплаты: {amount}',
+    bonus: 'Премия за месяц',
+    bonusHint: 'добавляется к зарплате',
   },
 
   salary: {
     title: 'Зарплата за {month}',
     base: 'Начислено',
+    bonus: '+ Премия',
+    fine: '− Штраф',
+    advance: '− Аванс',
     deduction: 'Удержано',
     net: 'К выдаче',
+    paid: 'Выплачено',
     remaining: 'Остаток',
     appliedTitle: 'Удержания:',
     fromMonth: 'перенос с {month}',
     outstandingHint:
       'Неудержанный штраф: {amount}. Эта сумма будет удержана из следующих зарплат.',
+    advanceOutstandingHint:
+      'Неудержанный аванс: {amount}. Будет удержан из следующих зарплат.',
     payButton: 'Выплатить зарплату',
     payTitle: 'Выплата зарплаты',
     payAmount: 'Сумма к выплате',
@@ -51,6 +61,20 @@ export default {
     late: 'Опоздание / неявка',
     unsettled_payment: 'Не сдана выручка',
     other: 'Другое',
+    advance: 'Аванс',
+  },
+
+  advance: {
+    confirmTitle: 'Удаление аванса',
+    confirmDelete: 'Удалить аванс {amount}? Зарплаты будут пересчитаны.',
+    deleted: 'Аванс удалён',
+    settled: 'Удержан полностью',
+  },
+
+  bonus: {
+    confirmTitle: 'Удаление премии',
+    confirmDelete: 'Удалить премию {amount}? Зарплата будет пересчитана.',
+    deleted: 'Премия удалена',
   },
 
   receipts: {
@@ -69,6 +93,8 @@ export default {
     late: 'Опоздания',
     receipts: 'Не сдано в кассу',
     deductions: 'Штрафы',
+    advances: 'Авансы',
+    bonuses: 'Премии',
     months: 'Посещаемость по месяцам',
   },
 
@@ -85,6 +111,11 @@ export default {
     remainingDeduction: 'Остаток долга',
     reasonType: 'Тип',
     reason: 'Причина',
+    deducted: 'Удержано',
+    leftToDeduct: 'Осталось удержать',
+    comment: 'Комментарий',
+    author: 'Кто записал',
+    createdAt: 'Записано',
   },
 
   groups: {
@@ -103,6 +134,8 @@ export default {
     late: 'В этом месяце опозданий нет',
     receipts: 'Нет несданных денег',
     deductions: 'Штрафов нет',
+    advances: 'Авансов нет',
+    bonuses: 'Премий нет',
     months: 'Нет данных',
     groups: 'Группы пока не назначены',
   },

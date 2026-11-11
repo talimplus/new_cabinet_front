@@ -1011,6 +1011,15 @@ StaffSalary *(old-project verified)*:
 ```
 `remaining` already accounts for the deduction — prefer it over recomputing.
 
+**Advances & bonuses (2026-11-11, backend contract):** rows also carry
+`bonusAmount`, `advanceAmount` (the advance part of `deductionAmount`),
+`fineAmount` (= deductionAmount − advanceAmount), `earnedAmount`
+(base + bonus − fines), `advanceOutstanding` (advances not yet withheld).
+`netSalary` = base + bonus − deductionAmount; `remaining` = netSalary − paidAmount;
+`deductionOutstanding` now counts **fines only**. The table shows bonus (+) under
+the total and fine / advance (−) separately in the deduction cell
+(`PayrollDeductionCell`, `utils/payroll-salary.ts → getFine/getAdvance`).
+
 ### 5.11 Staff performance (5)
 | Method | Path | Params / Body |
 |---|---|---|
@@ -1018,7 +1027,21 @@ StaffSalary *(old-project verified)*:
 | GET | `/staff/{userId}/overview` | `forMonth?` |
 | GET | `/staff/{userId}/deductions` | — → **bare array** |
 | POST | `/staff/deductions` | `{ userId*, amount*, reason*, forMonth?, type? }` |
-| DELETE | `/staff/deductions/{id}` | — |
+| DELETE | `/staff/deductions/{id}` | — (404 for an advance) |
+| POST | `/staff/advances` | `{ userId*, amount*, forMonth?(YYYY-MM, ≤ next month), comment? }` → deduction row, `type:'advance'` · `payroll.pay` |
+| DELETE | `/staff/advances/{id}` | — → `{ success: true }` · `payroll.pay` |
+| POST | `/staff/bonuses` | `{ userId*, amount*, forMonth?(YYYY-MM, ≤ current), reason* }` → `{ id,userId,amount,reason,forMonth:'YYYY-MM-01',createdAt,createdBy }` · `payroll.pay` |
+| DELETE | `/staff/bonuses/{id}` | — → `{ success: true }`; 400 once paid out · `payroll.pay` |
+| GET | `/staff/{userId}/bonuses` | — → **bare array** · `staffPerformance.view` |
+
+`POST /staff/deductions` rejects `type:'advance'` (400) — fines and advances are
+separate. An advance is money handed out now and withheld (FIFO, like a fine) from
+the chosen work month's salary and the following ones; a bonus is added to the
+chosen month's salary. Front: `staff/api/staff-pay-extras.api.ts`.
+Overview (2026-11-11): `deductions` holds **fines only**; new `advances` (deduction
+rows, `type:'advance'`) and `bonuses` arrays (all months, newest first);
+`summary` gains `advanceThisMonth`, `advanceOutstanding`, `bonusThisMonth`;
+`salary` gains `bonusAmount`, `advanceAmount`, `fineAmount`, `earnedAmount`.
 
 ```jsonc
 // overview (verified, top level)
@@ -1227,6 +1250,13 @@ current groups that are unfinished or still open in that month.
              "totalDebt",                               // all months ≤ month (= Σ debtors)
              "attendance":{"present","late","absent","excused","rate"} }, // rate % or null
   "earning":{"baseSalary","commission","carryOver","total"} | null,
+  "salary":{ "row":{ "baseSalary","bonusAmount","deductionAmount","advanceAmount","fineAmount",
+                     "earnedAmount","netSalary","paidAmount","remaining",
+                     "status":"paid|partial|unpaid" } | null,
+             // earned = base + bonus − fines; net = earned − advances; remaining = net − paid
+             "bonuses":[{ "id","amount","reason","createdAt" }],          // this month
+             "advances":[{ "id","amount","appliedAmount","comment","createdAt" }], // from this month
+             "advanceOutstanding" },                                      // not withheld yet
   "groups":[{ "id","name","status","studentsCount", …payment fields, "attendance":{…} }],
   "trend":[{ "month":"2026-06","amountDue","amountPaid","attendanceRate" }], // 6, oldest first
   "debtors":[{ "studentId","groupId","firstName","lastName","phone","groupName",

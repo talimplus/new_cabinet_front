@@ -206,6 +206,12 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: PUT, path: '/staff-salaries/pay/:id', permissions: [Permission.PAYROLL_PAY] },
   { method: POST, path: '/staff/deductions', permissions: [Permission.PAYROLL_DEDUCT] },
   { method: DELETE, path: '/staff/deductions/:id', permissions: [Permission.PAYROLL_DEDUCT] },
+  // Advances / bonuses — listed before the `/staff/:userId/...` rules so a
+  // param segment can never swallow the literal `advances` / `bonuses`.
+  { method: POST, path: '/staff/advances', permissions: [Permission.PAYROLL_PAY] },
+  { method: DELETE, path: '/staff/advances/:id', permissions: [Permission.PAYROLL_PAY] },
+  { method: POST, path: '/staff/bonuses', permissions: [Permission.PAYROLL_PAY] },
+  { method: DELETE, path: '/staff/bonuses/:id', permissions: [Permission.PAYROLL_PAY] },
   { method: GET, path: '/staff/me/overview', permissions: [Permission.STAFF_ATTENDANCE_VIEW_OWN] },
   {
     method: GET,
@@ -213,6 +219,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
     permissions: [Permission.STAFF_PERFORMANCE_VIEW, Permission.STAFF_ATTENDANCE_VIEW_OWN],
   },
   { method: GET, path: '/staff/:userId/deductions', permissions: [Permission.STAFF_PERFORMANCE_VIEW] },
+  { method: GET, path: '/staff/:userId/bonuses', permissions: [Permission.STAFF_PERFORMANCE_VIEW] },
 
   // ---- staff attendance ----
   { method: POST, path: '/staff-attendance/check-in', permissions: [Permission.STAFF_ATTENDANCE_CHECK_IN] },

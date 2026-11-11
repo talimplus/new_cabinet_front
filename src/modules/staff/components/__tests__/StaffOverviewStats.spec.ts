@@ -28,8 +28,8 @@ function mountStats(summary: Partial<StaffOverviewSummary> = {}) {
 }
 
 describe('StaffOverviewStats', () => {
-  it('renders exactly four stat cards', () => {
-    expect(mountStats().findAllComponents({ name: 'UiStatCard' })).toHaveLength(4)
+  it('renders the six stat cards (incl. advance and bonus)', () => {
+    expect(mountStats().findAllComponents({ name: 'UiStatCard' })).toHaveLength(6)
   })
 
   it('shows the late-days card', () => {

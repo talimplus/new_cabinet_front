@@ -25,10 +25,11 @@
         <TeacherPaymentsCard :totals="d.data.value.totals" />
         <TeacherAttendanceCard :attendance="d.data.value.totals.attendance" />
       </div>
-      <div class="grid gap-4 xl:grid-cols-[1fr_22rem]">
-        <TeacherGroupsTable :groups="d.data.value.groups" :can-open="canViewGroups" @open="(g) => router.push(`/groups/${g.id}`)" />
+      <div class="grid gap-4 lg:grid-cols-2">
+        <TeacherSalaryCard :salary="d.data.value.salary" />
         <TeacherTrendCard :trend="d.data.value.trend" />
       </div>
+      <TeacherGroupsTable :groups="d.data.value.groups" :can-open="canViewGroups" @open="(g) => router.push(`/groups/${g.id}`)" />
       <TeacherDebtorsTable
         :debtors="d.debtors.value"
         :filter="d.filters.debtors"
@@ -54,6 +55,7 @@ import TeacherPaymentsCard from '../components/TeacherPaymentsCard.vue'
 import TeacherAttendanceCard from '../components/TeacherAttendanceCard.vue'
 import TeacherGroupsTable from '../components/TeacherGroupsTable.vue'
 import TeacherTrendCard from '../components/TeacherTrendCard.vue'
+import TeacherSalaryCard from '../components/TeacherSalaryCard.vue'
 import TeacherDebtorsTable from '../components/TeacherDebtorsTable.vue'
 
 const { t } = useI18n()

@@ -10,7 +10,7 @@
       <template #cell-studentsCount="{ row }"><span class="font-mono">{{ (row as TeacherDashboardGroup).studentsCount }}</span></template>
       <template #cell-payments="{ row }">
         <div class="min-w-40">
-          <UiStackedBar :segments="segments(row as TeacherDashboardGroup)" :legend="false" />
+          <UiStackedBar :segments="segments(row as TeacherDashboardGroup)" :legend="false" :title="(row as TeacherDashboardGroup).name" />
           <p class="mt-1 font-mono text-xs text-muted-foreground">
             <span class="text-success">{{ (row as TeacherDashboardGroup).paidCount }}</span> /
             <span class="text-warning">{{ (row as TeacherDashboardGroup).partialCount }}</span> /

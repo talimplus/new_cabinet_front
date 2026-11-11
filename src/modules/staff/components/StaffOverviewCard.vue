@@ -18,6 +18,7 @@
       v-if="s.salary.value"
       :salary="s.salary.value"
       :outstanding="s.data.value.summary.deductionOutstanding"
+      :advance-outstanding="s.data.value.summary.advanceOutstanding"
       :show-actions="showActions"
       :can-pay="canPaySalary"
       :can-deduct="canDeductSalary"
@@ -25,12 +26,7 @@
       @deduct="s.openDeduction"
     />
     <!-- No salary row for that month yet — a fine can still be written. -->
-    <UiButton
-      v-else-if="showActions && canDeductSalary"
-      size="sm"
-      variant="outline"
-      @click="s.openDeduction"
-    >
+    <UiButton v-else-if="showActions && canDeductSalary" size="sm" variant="outline" @click="s.openDeduction">
       {{ t('staff.deduction.addButton') }}
     </UiButton>
 
@@ -40,8 +36,11 @@
       :data="s.data.value"
       :tab="s.tab.value"
       :can-deduct="showActions && canDeductSalary"
-      :busy="s.submitting.value"
+      :can-manage-pay="showActions && canPaySalary"
+      :busy="s.submitting.value || extras.busy.value"
       @remove="s.removeDeduction"
+      @remove-advance="onRemoved(extras.removeAdvance($event))"
+      @remove-bonus="onRemoved(extras.removeBonus($event))"
     />
   </div>
 
@@ -55,6 +54,7 @@ import { UiSpinner, UiTabs, UiButton } from '@/shared/components'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { UserRole } from '@/shared/enums/user-role.enum'
 import { useStaffOverview } from '../composables/use-staff-overview'
+import { useStaffPayExtras } from '../composables/use-staff-pay-extras'
 import StaffOverviewHeader from './StaffOverviewHeader.vue'
 import StaffOverviewStats from './StaffOverviewStats.vue'
 import StaffGroupsCard from './StaffGroupsCard.vue'
@@ -81,6 +81,7 @@ const emit = defineEmits<{ changed: [] }>()
 
 const s = useStaffOverview(() => props.userId, () => props.month, props.syncQuery)
 onMounted(s.load)
+const extras = useStaffPayExtras(s.load)
 
 /** The payroll table behind the modal has to reflect the new numbers. */
 async function onPaid(): Promise<void> {
@@ -88,5 +89,8 @@ async function onPaid(): Promise<void> {
 }
 async function onDeducted(): Promise<void> {
   if (await s.submitDeduction()) emit('changed')
+}
+async function onRemoved(done: Promise<boolean>): Promise<void> {
+  if (await done) emit('changed')
 }
 </script>

@@ -186,7 +186,7 @@ describe('useStaffOverview', () => {
   })
 
   describe('tabs', () => {
-    it('exposes four tabs in order with the expected badges', async () => {
+    it('exposes the tabs in order with the expected badges', async () => {
       const s = useStaffOverview(() => 50, () => '2026-09')
       await s.load()
 
@@ -194,9 +194,11 @@ describe('useStaffOverview', () => {
         StaffTab.LATE,
         StaffTab.RECEIPTS,
         StaffTab.DEDUCTIONS,
+        StaffTab.ADVANCES,
+        StaffTab.BONUSES,
         StaffTab.MONTHS,
       ])
-      const [lateTab, receiptsTab, deductionsTab, monthsTab] = s.tabs.value
+      const [lateTab, receiptsTab, deductionsTab, , , monthsTab] = s.tabs.value
       expect(lateTab?.badge).toBe(1)
       expect(receiptsTab?.badge).toBe(2)
       expect(receiptsTab?.badgeAlert).toBe(true)

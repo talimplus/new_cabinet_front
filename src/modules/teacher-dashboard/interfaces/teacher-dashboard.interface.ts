@@ -1,5 +1,6 @@
 import type { GroupStatus } from '@/modules/groups/enums/group-status.enum'
 import type { PaymentStatus } from '@/modules/payments/enums/payment-status.enum'
+import type { SalaryStatus } from '../enums/salary-status.enum'
 
 /** Query for GET /teachers/me/dashboard. */
 export interface TeacherDashboardParams {
@@ -81,6 +82,52 @@ export interface TeacherDashboardEarning {
   total: number
 }
 
+/**
+ * The month's salary row. `earnedAmount = baseSalary + bonusAmount − fineAmount`;
+ * `netSalary = earnedAmount − advanceAmount` (handed over in total this month);
+ * `remaining = netSalary − paidAmount`. `deductionAmount = fineAmount + advanceAmount`.
+ */
+export interface TeacherSalaryRow {
+  /** Salary + commission. */
+  baseSalary: number
+  bonusAmount: number
+  deductionAmount: number
+  advanceAmount: number
+  fineAmount: number
+  earnedAmount: number
+  netSalary: number
+  paidAmount: number
+  remaining: number
+  status: SalaryStatus
+}
+
+/** A bonus added to the chosen month's salary. */
+export interface TeacherSalaryBonus {
+  id: number
+  amount: number
+  reason: string
+  createdAt: string
+}
+
+/** An advance taken out of the chosen month's salary (what did not fit moves on). */
+export interface TeacherSalaryAdvance {
+  id: number
+  amount: number
+  /** Already withheld from salaries so far. */
+  appliedAmount: number
+  comment: string
+  createdAt: string
+}
+
+export interface TeacherDashboardSalary {
+  /** Null before the month's salary row exists. */
+  row: TeacherSalaryRow | null
+  bonuses: TeacherSalaryBonus[]
+  advances: TeacherSalaryAdvance[]
+  /** Advances not withheld yet — taken from later salaries. */
+  advanceOutstanding: number
+}
+
 export interface TeacherDashboardTeacher {
   id: number
   fullName: string
@@ -92,6 +139,7 @@ export interface TeacherDashboardResponse {
   month: string
   totals: TeacherDashboardTotals
   earning: TeacherDashboardEarning | null
+  salary: TeacherDashboardSalary
   groups: TeacherDashboardGroup[]
   /** The 6 months ending with the chosen one, oldest first. */
   trend: TeacherDashboardTrendPoint[]

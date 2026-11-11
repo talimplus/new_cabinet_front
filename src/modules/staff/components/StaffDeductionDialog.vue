@@ -39,7 +39,11 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiMoneyInput, UiModal, UiButton, UiSelect, UiTextarea } from '@/shared/components'
-import { StaffDeductionType, DEDUCTION_TYPE_LABEL_KEYS } from '../enums/staff-deduction-type.enum'
+import {
+  StaffDeductionType,
+  DEDUCTION_TYPE_LABEL_KEYS,
+  FINE_DEDUCTION_TYPES,
+} from '../enums/staff-deduction-type.enum'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 
 const { t } = useI18n()
@@ -51,6 +55,6 @@ const type = defineModel<StaffDeductionType>('type', { required: true })
 const reason = defineModel<string>('reason', { required: true })
 
 const typeOptions = computed<SelectOption[]>(() =>
-  Object.values(StaffDeductionType).map((v) => ({ label: t(DEDUCTION_TYPE_LABEL_KEYS[v]), value: v })),
+  FINE_DEDUCTION_TYPES.map((v) => ({ label: t(DEDUCTION_TYPE_LABEL_KEYS[v]), value: v })),
 )
 </script>

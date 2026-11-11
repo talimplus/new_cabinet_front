@@ -22,6 +22,9 @@
     </template>
     <template #cell-total="{ row }">
       <span class="font-mono font-semibold">{{ formatSom(getTotalSalary(row as StaffSalary)) }}</span>
+      <div v-if="((row as StaffSalary).bonusAmount ?? 0) > 0" class="font-mono text-xs text-success">
+        {{ t('payroll.table.bonus') }} +{{ formatSom((row as StaffSalary).bonusAmount) }}
+      </div>
     </template>
     <template #cell-deduction="{ row }">
       <PayrollDeductionCell :staff="row as StaffSalary" />
@@ -43,7 +46,11 @@
       <PayrollRowActions
         :staff="row as StaffSalary"
         :can-pay="canPay"
+        :can-view-staff="canViewStaff"
         @pay="emit('pay', $event)"
+        @open-staff="emit('open-staff', $event)"
+        @advance="emit('advance', $event)"
+        @bonus="emit('bonus', $event)"
       />
     </template>
   </UiTable>
@@ -75,7 +82,9 @@ const props = defineProps<{
   canPay?: boolean
   canViewStaff?: boolean
 }>()
-const emit = defineEmits<{ pay: [staff: StaffSalary]; 'open-staff': [staff: StaffSalary] }>()
+const emit = defineEmits<{
+  pay: [staff: StaffSalary]; 'open-staff': [staff: StaffSalary]; advance: [staff: StaffSalary]; bonus: [staff: StaffSalary]
+}>()
 
 const fullName = (s: StaffSalary) => `${s.user.firstName} ${s.user.lastName}`
 

@@ -36,6 +36,7 @@ import { UiMoneyInput, UiCheckbox, UiSelect, UiTextarea } from '@/shared/compone
 import {
   StaffDeductionType,
   DEDUCTION_TYPE_LABEL_KEYS,
+  FINE_DEDUCTION_TYPES,
 } from '@/modules/staff/enums/staff-deduction-type.enum'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 
@@ -49,7 +50,7 @@ const reason = defineModel<string>('reason', { default: '' })
 const type = defineModel<StaffDeductionType>('type', { default: StaffDeductionType.OTHER })
 
 const typeOptions = computed<SelectOption[]>(() =>
-  Object.values(StaffDeductionType).map((v) => ({
+  FINE_DEDUCTION_TYPES.map((v) => ({
     label: t(DEDUCTION_TYPE_LABEL_KEYS[v]),
     value: v,
   })),
