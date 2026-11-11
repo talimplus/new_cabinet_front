@@ -75,20 +75,20 @@ describe('StudentsTable', () => {
     expect(mountTable({ canEdit: false }).findAll(EDIT_BTN)).toHaveLength(0)
   })
 
-  it('always shows a view button per row (before edit) and emits open with the row', async () => {
+  it('opens the student on a row click — there is no view button any more', async () => {
     const wrapper = mountTable({ canEdit: false })
-    const viewButtons = wrapper.findAll(
-      `tbody button[aria-label="${t('students.view.title')}"]`,
-    )
-    expect(viewButtons).toHaveLength(3)
+    expect(wrapper.findAll(`tbody button[aria-label="${t('students.view.title')}"]`)).toHaveLength(0)
 
-    await viewButtons[0]!.trigger('click')
+    await wrapper.findAll('tbody tr')[0]!.trigger('click')
     expect(last(wrapper.emitted('open'))).toEqual([rows[0]])
   })
 
-  it('renders both the view and edit buttons per row when canEdit is true', () => {
+  it('renders only the edit button per row when canEdit is true; it never opens the row', async () => {
     const wrapper = mountTable({ canEdit: true })
-    expect(wrapper.findAll('tbody td:last-child button')).toHaveLength(6)
+    const buttons = wrapper.findAll('tbody td:last-child button')
+    expect(buttons).toHaveLength(3)
+    await buttons[0]!.trigger('click')
+    expect(wrapper.emitted('open')).toBeUndefined()
   })
 
   it('bubbles status-change with the student and the new status', () => {

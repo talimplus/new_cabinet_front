@@ -13,7 +13,7 @@
       <template v-if="canTransfer" #cell-select="{ row }">
         <UiCheckbox :model-value="tx.isSelected((row as Student).id)" @update:model-value="() => tx.toggle((row as Student).id)" />
       </template>
-      <template #cell-fullName="{ row }">{{ (row as Student).lastName }} {{ (row as Student).firstName }}</template>
+      <template #cell-fullName="{ row }"><RouterLink :to="{ name: 'student-card', params: { id: (row as Student).id } }" class="font-medium text-primary hover:underline">{{ (row as Student).lastName }} {{ (row as Student).firstName }}</RouterLink></template>
       <template #cell-phone="{ row }"><span class="whitespace-nowrap font-mono">{{ formatPhone((row as Student).phone) || '—' }}</span></template>
       <template #cell-status="{ row }">
         <UiBadge :variant="variants[(row as Student).status]">{{ t(labelKeys[(row as Student).status]) }}</UiBadge>

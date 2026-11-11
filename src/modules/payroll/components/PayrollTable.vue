@@ -5,6 +5,7 @@
     :loading="loading"
     :row-class="statusTint"
     :empty-text="t('payroll.emptyState')"
+    :row-click="canViewStaff ? (row) => emit('open-staff', row as unknown as StaffSalary) : undefined"
   >
     <template #cell-worker="{ row }">
       <span class="font-medium">{{ fullName(row as StaffSalary) }}</span>
@@ -42,9 +43,7 @@
       <PayrollRowActions
         :staff="row as StaffSalary"
         :can-pay="canPay"
-        :can-view-staff="canViewStaff"
         @pay="emit('pay', $event)"
-        @open-staff="emit('open-staff', $event)"
       />
     </template>
   </UiTable>

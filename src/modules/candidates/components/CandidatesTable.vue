@@ -5,6 +5,7 @@
     :loading="loading"
     :row-offset="rowOffset"
     :empty-text="t('candidates.empty')"
+    :row-click="(row) => emit('view', row as unknown as Candidate)"
   >
     <template #cell-fullName="{ row }">{{ fullName(row as Candidate) }}</template>
     <template #cell-phone="{ row }">
@@ -20,7 +21,6 @@
     </template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
-        <UiIconButton :icon="Eye" tone="primary" :label="t('common.view')" @click="emit('view', row as Candidate)" />
         <template v-if="canManage">
           <UiIconButton :icon="Pencil" tone="primary" :label="t('common.edit')" @click="emit('edit', row as Candidate)" />
           <UiIconButton :icon="Trash2" tone="danger" :label="t('common.delete')" @click="emit('delete', row as Candidate)" />
@@ -34,7 +34,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiIconButton } from '@/shared/components'
-import { Eye, Pencil, Trash2 } from '@/shared/icons'
+import { Pencil, Trash2 } from '@/shared/icons'
 import { formatDate } from '@/shared/utils/format-date'
 import { formatPhone } from '@/shared/utils/format-phone'
 import type { Candidate } from '../interfaces/candidate.interface'

@@ -25,9 +25,11 @@ const BASE: TableColumn[] = [
   { key: 'lastName', label: 'students.table.lastName', primary: true },
   { key: 'firstName', label: 'students.table.firstName' },
   { key: 'phone', label: 'students.table.phone' },
+  { key: 'groups', label: 'students.table.groups' },
 ]
 
-const STATUS_COL: TableColumn = { key: 'status', label: 'students.table.status' }
+// The status select is worked in place — clicking that cell never opens the card.
+const STATUS_COL: TableColumn = { key: 'status', label: 'students.table.status', noRowClick: true }
 const NO_FILTERS: StudentPageFilters = {
   subject: false, preferredTime: false, preferredDays: false, returnLikelihood: false,
 }

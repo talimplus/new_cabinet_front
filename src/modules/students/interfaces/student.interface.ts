@@ -59,11 +59,25 @@ export interface Student {
   /** Every subject the student signed up for, the primary one (`subject`) first. */
   subjects?: Subject[]
   groupIds?: number[]
+  /** GET /students list: the same groups with name and status (for the table). */
+  groups?: StudentGroupRef[]
   referrerId?: number | null
   discountPeriods?: DiscountPeriod[]
   createdAt?: string
   /** UI-only: per-row status-change spinner. */
   statusLoading?: boolean
+}
+
+/** A group a student is in, as the list returns it. */
+export interface StudentGroupRef {
+  id: number
+  name: string
+  status?: GroupStatus
+}
+
+/** GET /students/{id} expands each group with its price. */
+export interface StudentDetailGroup extends StudentGroupRef {
+  monthlyFee?: string | null
 }
 
 /**
@@ -72,7 +86,7 @@ export interface Student {
  * the full entity. Verified against the dev backend.
  */
 export interface StudentDetail extends Student {
-  groups?: Array<{ id: number; name: string; monthlyFee?: string | null; status?: GroupStatus }>
+  groups?: StudentDetailGroup[]
   center?: { id: number; name: string } | null
 }
 

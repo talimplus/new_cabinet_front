@@ -111,14 +111,14 @@ describe('UsersTable', () => {
       expect(wrapper.find('tbody').find(`[aria-label="${t('common.view')}"]`).exists()).toBe(false)
     })
 
-    it('renders a view button per row and emits view with the row when canView is true', async () => {
+    it('opens the employee on a row click when canView is true; block never opens it', async () => {
       const wrapper = mount(UsersTable, {
         props: { columns, rows, canView: true, canEdit: true, canDelete: true },
       })
-      const viewButtons = wrapper.get('tbody').findAll(`[aria-label="${t('common.view')}"]`)
-      expect(viewButtons).toHaveLength(rows.length)
+      await wrapper.get('tbody').findAll(BLOCK_BTN)[0]!.trigger('click')
+      expect(wrapper.emitted('view')).toBeUndefined()
 
-      await viewButtons[0]!.trigger('click')
+      await wrapper.get('tbody').findAll('tr')[0]!.trigger('click')
       expect(last(wrapper.emitted('view'))).toEqual([rows[0]])
     })
   })

@@ -3,7 +3,9 @@ import { mount } from '@vue/test-utils'
 import SyllabusesTable from '../SyllabusesTable.vue'
 import type { SyllabusListItem } from '../../interfaces/syllabus.interface'
 
+const push = vi.fn()
 vi.mock('vue-router', () => ({
+  useRouter: () => ({ push }),
   RouterLink: {
     name: 'RouterLink',
     props: ['to'],

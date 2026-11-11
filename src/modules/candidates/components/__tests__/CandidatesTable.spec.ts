@@ -63,26 +63,26 @@ describe('CandidatesTable', () => {
     expect(wrapper.text()).toContain(t('candidates.empty'))
   })
 
-  it('shows only the view button without canManage, and it emits view', async () => {
+  it('opens the row on click — no view button without canManage', async () => {
     const candidate = makeCandidate()
     const wrapper = mount(CandidatesTable, { props: { rows: [candidate] } })
-    const buttons = wrapper.findAll('tbody button')
-    expect(buttons).toHaveLength(1)
+    expect(wrapper.findAll('tbody button')).toHaveLength(0)
 
-    await buttons[0]!.trigger('click')
+    await wrapper.get('tbody tr').trigger('click')
     expect(wrapper.emitted('view')?.[0]).toEqual([candidate])
   })
 
-  it('emits view, edit and delete with the row when canManage', async () => {
+  it('emits edit and delete with the row when canManage, without opening it', async () => {
     const candidate = makeCandidate()
     const wrapper = mount(CandidatesTable, { props: { rows: [candidate], canManage: true } })
     const buttons = wrapper.findAll('tbody button')
-    expect(buttons).toHaveLength(3)
+    expect(buttons).toHaveLength(2)
 
+    await buttons[0]!.trigger('click')
     await buttons[1]!.trigger('click')
-    await buttons[2]!.trigger('click')
 
     expect(wrapper.emitted('edit')?.[0]).toEqual([candidate])
     expect(wrapper.emitted('delete')?.[0]).toEqual([candidate])
+    expect(wrapper.emitted('view')).toBeUndefined()
   })
 })

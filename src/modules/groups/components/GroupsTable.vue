@@ -1,5 +1,5 @@
 <template>
-  <UiTable :columns="columns" :rows="rows as unknown as Row[]" :loading="loading" :empty-text="t('groups.empty')">
+  <UiTable :columns="columns" :rows="rows as unknown as Row[]" :loading="loading" :empty-text="t('groups.empty')" :row-click="(row) => emit('detail', row as unknown as Group)">
     <template #cell-subject="{ row }">{{ (row as Group).subject?.name ?? '—' }}</template>
     <template #cell-schedules="{ row }">
       <span class="text-xs text-muted-foreground">{{ scheduleText(row as Group) }}</span>
@@ -34,7 +34,6 @@
     <template #cell-teacher="{ row }">{{ teacherName(row as Group) }}</template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
-        <UiIconButton :icon="Eye" tone="primary" :label="t('common.view')" @click="emit('detail', row as Group)" />
         <UiIconButton v-if="canEdit" :icon="Pencil" tone="primary" :label="t('common.edit')" @click="emit('edit', row as Group)" />
         <UiIconButton v-if="canDelete" :icon="Trash2" tone="danger" :label="t('common.delete')" @click="emit('delete', row as Group)" />
       </div>
@@ -46,7 +45,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge, UiIconButton } from '@/shared/components'
-import { Eye, Pencil, Trash2 } from '@/shared/icons'
+import { Pencil, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import GroupStatusCell from './GroupStatusCell.vue'
@@ -77,7 +76,7 @@ const columns = computed(() => [
   { key: 'endDate', label: t('groups.table.endDate') },
   { key: 'monthlyFee', label: t('groups.table.monthlyFee'), align: 'right' as const },
   { key: 'studentsCount', label: t('groups.table.studentsCount'), align: 'right' as const },
-  { key: 'status', label: t('groups.table.status') },
+  { key: 'status', label: t('groups.table.status'), noRowClick: true },
   { key: 'room', label: t('groups.table.room') },
   { key: 'teacher', label: t('groups.table.teacher') },
 ])

@@ -56,12 +56,14 @@ describe('GroupsTable', () => {
     expect(wrapper.get('tbody').findAll('p')).toHaveLength(0)
   })
 
-  it('emits detail/edit/delete with the row when the icon buttons are clicked', async () => {
+  it('opens the group on a row click; the edit/delete buttons never do', async () => {
     const row = makeGroup({ id: 9 })
     const wrapper = mountTable([row])
     const tbody = wrapper.get('tbody')
 
-    await tbody.get(`[aria-label="${t('common.view')}"]`).trigger('click')
+    await tbody.get(`[aria-label="${t('common.edit')}"]`).trigger('click')
+    expect(wrapper.emitted('detail')).toBeUndefined()
+    await tbody.get('tr').trigger('click')
     expect(wrapper.emitted('detail')?.[0]).toEqual([row])
 
     await tbody.get(`[aria-label="${t('common.edit')}"]`).trigger('click')
@@ -76,7 +78,7 @@ describe('GroupsTable', () => {
     const tbody = wrapper.get('tbody')
     expect(tbody.find(`[aria-label="${t('common.edit')}"]`).exists()).toBe(false)
     expect(tbody.find(`[aria-label="${t('common.delete')}"]`).exists()).toBe(false)
-    // The view button always stays.
-    expect(tbody.find(`[aria-label="${t('common.view')}"]`).exists()).toBe(true)
+    // No view button any more — the row itself opens the group.
+    expect(tbody.find(`[aria-label="${t('common.view')}"]`).exists()).toBe(false)
   })
 })

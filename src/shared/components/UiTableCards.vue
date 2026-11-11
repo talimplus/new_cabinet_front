@@ -23,7 +23,10 @@
       v-for="(row, i) in rows"
       v-else
       :key="String(row[rowKey] ?? i)"
-      :class="cn('rounded-lg border border-border bg-surface p-3 shadow-card', rowClass?.(row))"
+      :class="cn('rounded-lg border border-border bg-surface p-3 shadow-card', rowClick && 'cursor-pointer', rowClass?.(row))"
+      :tabindex="rowClick ? 0 : undefined"
+      @click="click.onClick(row, $event)"
+      @keydown="click.onKeydown(row, $event)"
     >
       <div v-if="headColumn" class="min-w-0 font-medium text-foreground">
         <slot :name="`cell-${headColumn.key}`" :row="row as unknown" :value="row[headColumn.key]">
@@ -36,6 +39,7 @@
           v-for="col in bodyColumns"
           :key="col.key"
           class="flex items-start justify-between gap-3 text-sm"
+          :data-no-row-click="col.noRowClick || undefined"
         >
           <dt class="shrink-0 text-muted-foreground">{{ col.label }}</dt>
           <dd class="min-w-0 text-right text-foreground">
@@ -50,6 +54,7 @@
       <div
         v-if="$slots.actions"
         class="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3"
+        data-no-row-click
       >
         <slot name="actions" :row="row as unknown" />
       </div>
@@ -62,6 +67,7 @@ import { computed } from 'vue'
 import { cn } from '@/shared/utils/cn'
 import UiSpinner from './UiSpinner.vue'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
+import { useRowClick } from '@/shared/composables/use-row-click'
 
 interface Props {
   columns: TableColumn[]
@@ -71,9 +77,11 @@ interface Props {
   emptyLabel: string
   loading?: boolean
   rowClass?: (row: Record<string, unknown>) => string | undefined
+  rowClick?: (row: Record<string, unknown>) => void
 }
 
 const props = defineProps<Props>()
+const click = useRowClick(() => props.rowClick)
 
 const mobileColumns = computed(() => props.columns.filter((c) => !c.hideOnMobile && !c.rowNumber))
 const headColumn = computed(

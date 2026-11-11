@@ -25,13 +25,16 @@
                 {{ emptyLabel }}
               </td>
             </tr>
-            <tr v-for="(row, i) in rows" :key="String(row[rowKey] ?? i)" :class="trClass(row)">
-              <td v-for="col in columns" :key="col.key" :class="cellClass(col)">
+            <tr
+              v-for="(row, i) in rows" :key="String(row[rowKey] ?? i)" :class="trClass(row)"
+              :tabindex="rowClick ? 0 : undefined" @click="click.onClick(row, $event)" @keydown="click.onKeydown(row, $event)"
+            >
+              <td v-for="col in columns" :key="col.key" :class="cellClass(col)" :data-no-row-click="col.noRowClick || undefined">
                 <slot :name="`cell-${col.key}`" :row="row as unknown" :value="row[col.key]">{{
                   col.rowNumber ? rowOffset + i + 1 : row[col.key]
                 }}</slot>
               </td>
-              <td v-if="$slots.actions" class="px-3 py-2.5 text-right">
+              <td v-if="$slots.actions" class="px-3 py-2.5 text-right" data-no-row-click>
                 <slot name="actions" :row="row as unknown" />
               </td>
             </tr>
@@ -48,6 +51,7 @@
       :empty-label="emptyLabel"
       :loading="loading"
       :row-class="rowClass"
+      :row-click="rowClick"
     >
       <template v-for="(_, name) in $slots" #[name]="scope">
         <slot :name="name" v-bind="scope ?? {}" />
@@ -60,11 +64,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { cn } from '@/shared/utils/cn'
+import { tableHeadClass, tableRowClass, tableCellClass } from '@/shared/utils/table-classes'
 import UiSpinner from './UiSpinner.vue'
 import UiTableCards from './UiTableCards.vue'
 import UiTableRefresh from './UiTableRefresh.vue'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
+import { useRowClick } from '@/shared/composables/use-row-click'
 
 interface Props {
   columns: TableColumn[]
@@ -77,6 +82,8 @@ interface Props {
   rowClass?: (row: Record<string, unknown>) => string | undefined
   /** Rows before this page (`(page - 1) * perPage`) — continues the № column. */
   rowOffset?: number
+  /** Opens the row (its inner page); actions and interactive cells never trigger it. */
+  rowClick?: (row: Record<string, unknown>) => void
 }
 
 const props = withDefaults(defineProps<Props>(), { rowKey: 'id', rowOffset: 0 })
@@ -85,15 +92,8 @@ const { t } = useI18n()
 const emptyLabel = computed(() => props.emptyText ?? t('common.noData'))
 const colspan = computed(() => props.columns.length + 1)
 
-const alignEnd = (col: TableColumn) => col.align === 'right' && 'text-right'
-const headClass = (col: TableColumn) =>
-  cn(
-    'whitespace-nowrap px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground',
-    alignEnd(col),
-  )
-const trClass = (row: Record<string, unknown>) =>
-  cn('border-t border-border transition-colors hover:bg-surface-muted', props.rowClass?.(row))
-const cellClass = (col: TableColumn) =>
-  cn('px-3 py-2.5 align-middle text-foreground', alignEnd(col),
-    col.rowNumber && 'w-0 font-mono text-xs text-muted-foreground')
+const click = useRowClick(() => props.rowClick)
+const headClass = tableHeadClass
+const cellClass = tableCellClass
+const trClass = (row: Record<string, unknown>) => tableRowClass(!!props.rowClick, props.rowClass?.(row))
 </script>

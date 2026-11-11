@@ -4,6 +4,7 @@
     :rows="rows as unknown as Record<string, unknown>[]"
     :loading="loading"
     :empty-text="t('syllabuses.empty')"
+    :row-click="(row) => router.push(`/syllabuses/${(row as unknown as SyllabusListItem).id}`)"
   >
     <template #cell-id="{ row }">
       <span class="font-mono text-muted-foreground">{{ (row as SyllabusListItem).id }}</span>
@@ -27,12 +28,6 @@
     </template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
-        <RouterLink
-          :to="`/syllabuses/${(row as SyllabusListItem).id}`"
-          class="rounded-md p-1.5 text-muted-foreground hover:bg-surface-muted hover:text-primary"
-        >
-          <UiIcon :icon="canManage ? Pencil : Eye" :size="16" />
-        </RouterLink>
         <UiIconButton
           v-if="canManage"
           :icon="Trash2"
@@ -47,15 +42,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import { UiTable, UiBadge, UiIcon, UiIconButton } from '@/shared/components'
-import { Pencil, Eye, Trash2 } from '@/shared/icons'
+import { RouterLink, useRouter } from 'vue-router'
+import { UiTable, UiBadge, UiIconButton } from '@/shared/components'
+import { Trash2 } from '@/shared/icons'
 import { formatDate } from '@/shared/utils/format-date'
 import type { SyllabusListItem } from '../interfaces/syllabus.interface'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+const router = useRouter()
 
 defineProps<{ rows: SyllabusListItem[]; loading?: boolean; canManage?: boolean }>()
 const emit = defineEmits<{ delete: [syllabus: SyllabusListItem] }>()

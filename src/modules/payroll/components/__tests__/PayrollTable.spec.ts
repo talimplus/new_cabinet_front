@@ -140,14 +140,14 @@ describe('PayrollTable', () => {
   })
 
   describe('row actions (PayrollRowActions)', () => {
-    it('shows the eye button only with canViewStaff and emits open-staff with the row', async () => {
+    it('opens the staff page on a row click only with canViewStaff', async () => {
       const row = makeSalary({ id: 5 })
       const hidden = mountTable([row], false, { canViewStaff: false })
-      expect(hidden.get('tbody').find(`[aria-label="${t('staff.viewAction')}"]`).exists()).toBe(false)
+      await hidden.get('tbody tr').trigger('click')
+      expect(hidden.emitted('open-staff')).toBeUndefined()
 
       const shown = mountTable([row], false, { canViewStaff: true })
-      const eyeButton = shown.get('tbody').get(`[aria-label="${t('staff.viewAction')}"]`)
-      await eyeButton.trigger('click')
+      await shown.get('tbody tr').trigger('click')
       expect(shown.emitted('open-staff')?.[0]).toEqual([row])
     })
 

@@ -43,6 +43,7 @@ export default {
     firstName: 'Ism',
     lastName: 'Familiya',
     phone: 'Telefon',
+    groups: 'Guruh',
     subject: 'Fan',
     monthlyFee: "Oylik to'lov",
     preferredTime: 'Qulay vaqt',

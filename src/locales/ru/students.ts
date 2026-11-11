@@ -43,6 +43,7 @@ export default {
     firstName: 'Имя',
     lastName: 'Фамилия',
     phone: 'Телефон',
+    groups: 'Группа',
     subject: 'Предмет',
     monthlyFee: 'Ежемесячная оплата',
     preferredTime: 'Удобное время',

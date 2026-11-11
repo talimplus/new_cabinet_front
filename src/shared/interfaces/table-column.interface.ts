@@ -15,4 +15,9 @@ export interface TableColumn {
    * "№" column that replaces database IDs. Desktop only, like `hideOnMobile`.
    */
   rowNumber?: boolean
+  /**
+   * A cell the user works in (status select, inline toggle): clicking it never
+   * opens the row, even on its padding.
+   */
+  noRowClick?: boolean
 }
