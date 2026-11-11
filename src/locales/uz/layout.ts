@@ -27,6 +27,7 @@ export default {
     myPerformance: 'Mening faoliyatim',
     staffAttendance: 'Xodimlar davomati',
     todayLessons: 'Bugungi darslar',
+    teacherDashboard: 'Mening statistikam',
     roles: 'Rollar va ruxsatlar',
   },
   sections: {

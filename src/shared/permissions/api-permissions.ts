@@ -261,6 +261,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
 
   // ---- teacher cabinet ----
   { method: GET, path: '/teachers/me/today', permissions: [Permission.TEACHER_TODAY], acceptsCenterId: true },
+  { method: GET, path: '/teachers/me/dashboard', permissions: [Permission.TEACHER_DASHBOARD] },
 
   // ---- telegram ----
   { method: GET, path: '/telegram/students/:studentId/link', permissions: [Permission.STUDENTS_VIEW] },

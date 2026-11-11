@@ -376,7 +376,7 @@ to clear coordinates.
 ### 5.6 Students (14)
 | Method | Path | Params / Body | Response |
 |---|---|---|---|
-| GET | `/students` | `StudentsParams` | `{ data, meta }` |
+| GET | `/students` | `StudentsParams` | `{ data, meta }` — each row also carries `groups: { id, name, status }[]` (2026-11-11, for the table's Group column) next to `groupIds` |
 | GET | `/students/all` | `centerId?` | **bare array** |
 | GET | `/students/referrals` | — | **bare array** (referrer picker) |
 | GET | `/students/{id}` | — | Student detail |
@@ -1211,6 +1211,28 @@ deactivates the row (history is kept). The bot token is validated against
 Telegram (`getMe`) when set — the username is derived, never typed. The token is
 never returned, only `botTokenMasked`. `debtReminderDay` is **1–28**.
 `send-now` ignores the `notifyDebt` switch (the button was pressed on purpose).
+
+### 5.18a Teacher dashboard (2026-11-11)
+`GET /teachers/me/dashboard` — `month?` (`YYYY-MM`, default current), `teacherId?`
+(ignored for a `teacher`-role user, who always gets themself; anyone else must
+send it, else 422 `errors.teacherId`). Perm `teacher.dashboard` (migration
+`…072` adds it to every role that has `teacher.today`). Groups = the teacher's
+current groups that are unfinished or still open in that month.
+
+```jsonc
+{ "teacher":{"id","fullName"}, "month":"2026-11",
+  "totals":{ "groupsCount","studentsCount",          // active members, distinct
+             "paidCount","partialCount","unpaidCount", // the month's payment rows
+             "amountDue","amountPaid","debt","pendingAmount",
+             "totalDebt",                               // all months ≤ month (= Σ debtors)
+             "attendance":{"present","late","absent","excused","rate"} }, // rate % or null
+  "earning":{"baseSalary","commission","carryOver","total"} | null,
+  "groups":[{ "id","name","status","studentsCount", …payment fields, "attendance":{…} }],
+  "trend":[{ "month":"2026-06","amountDue","amountPaid","attendanceRate" }], // 6, oldest first
+  "debtors":[{ "studentId","groupId","firstName","lastName","phone","groupName",
+               "totalDebt","monthDebt","debtMonths","monthStatus","pendingAmount" }] } // ≤100
+```
+Front: `modules/teacher-dashboard` (`/my-dashboard`, menu "Mening statistikam").
 
 ### 5.18 Teacher today (1)
 `GET /teachers/me/today` — `centerId?` (admin only).

@@ -112,6 +112,7 @@ export enum Permission {
 
   // teacher cabinet
   TEACHER_TODAY = 'teacher.today',
+  TEACHER_DASHBOARD = 'teacher.dashboard',
 }
 
 /** The wildcard the locked Administrator role carries — it satisfies every key. */

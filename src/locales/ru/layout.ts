@@ -27,6 +27,7 @@ export default {
     myPerformance: 'Моя работа',
     staffAttendance: 'Посещаемость сотрудников',
     todayLessons: 'Уроки на сегодня',
+    teacherDashboard: 'Моя статистика',
     roles: 'Роли и права',
   },
   sections: {

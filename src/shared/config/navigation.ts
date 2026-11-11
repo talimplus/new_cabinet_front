@@ -1,5 +1,5 @@
 import {
-  CalendarDays, LayoutDashboard, Users, Flag, BookOpen, CreditCard, Wallet,
+  CalendarDays, ChartColumn, LayoutDashboard, Users, Flag, BookOpen, CreditCard, Wallet,
   DollarSign, ReceiptText, ClipboardList, UserPlus, GraduationCap, Pause, Ban,
   CheckCheck, Coins, Building2, DoorOpen, Settings2, ShieldCheck, CalendarRange, UserCheck,
   TrendingUp, Palette, Send, PhoneCall, CalendarOff, Briefcase,
@@ -25,6 +25,7 @@ export const navigation: NavGroup[] = [
       // Statistika har doim birinchi — ko'rish ruxsati bo'lgan har bir rolda.
       { labelKey: 'layout.menu.statistics', to: '/', icon: LayoutDashboard, permission: [Permission.STATISTICS_VIEW] },
       { labelKey: 'layout.menu.todayLessons', to: '/today', icon: CalendarDays, permission: [Permission.TEACHER_TODAY] },
+      { labelKey: 'layout.menu.teacherDashboard', to: '/my-dashboard', icon: ChartColumn, permission: [Permission.TEACHER_DASHBOARD] },
       { labelKey: 'layout.menu.users', to: '/users', icon: Users, permission: [Permission.USERS_VIEW] },
       { labelKey: 'layout.menu.roles', to: '/roles', icon: ShieldCheck, permission: [Permission.ROLES_VIEW] },
       { labelKey: 'layout.menu.staffAttendance', to: '/staff-attendance', icon: UserCheck, permission: [Permission.STAFF_ATTENDANCE_VIEW] },

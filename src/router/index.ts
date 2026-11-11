@@ -51,6 +51,12 @@ const appChildren: RouteRecordRaw[] = [
     meta: { titleKey: 'layout.menu.todayLessons', permission: [Permission.TEACHER_TODAY] },
   },
   {
+    path: 'my-dashboard',
+    name: 'teacher-dashboard',
+    component: () => import('@/modules/teacher-dashboard/views/TeacherDashboardView.vue'),
+    meta: { titleKey: 'layout.menu.teacherDashboard', permission: [Permission.TEACHER_DASHBOARD] },
+  },
+  {
     path: 'centers',
     name: 'centers',
     component: () => import('@/modules/centers/views/CentersView.vue'),

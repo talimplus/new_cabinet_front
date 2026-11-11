@@ -21,6 +21,7 @@ import uzSchedule from './uz/schedule'
 import uzStaff from './uz/staff'
 import uzStaffAttendance from './uz/staffAttendance'
 import uzStatistics from './uz/statistics'
+import uzTeacherDashboard from './uz/teacherDashboard'
 import uzStudents from './uz/students'
 import uzSubjects from './uz/subjects'
 import uzSyllabuses from './uz/syllabuses'
@@ -48,6 +49,7 @@ import ruSchedule from './ru/schedule'
 import ruStaff from './ru/staff'
 import ruStaffAttendance from './ru/staffAttendance'
 import ruStatistics from './ru/statistics'
+import ruTeacherDashboard from './ru/teacherDashboard'
 import ruStudents from './ru/students'
 import ruSubjects from './ru/subjects'
 import ruSyllabuses from './ru/syllabuses'
@@ -81,6 +83,7 @@ export const messages = {
     staff: uzStaff,
     staffAttendance: uzStaffAttendance,
     statistics: uzStatistics,
+    teacherDashboard: uzTeacherDashboard,
     students: uzStudents,
     subjects: uzSubjects,
     syllabuses: uzSyllabuses,
@@ -109,6 +112,7 @@ export const messages = {
     staff: ruStaff,
     staffAttendance: ruStaffAttendance,
     statistics: ruStatistics,
+    teacherDashboard: ruTeacherDashboard,
     students: ruStudents,
     subjects: ruSubjects,
     syllabuses: ruSyllabuses,

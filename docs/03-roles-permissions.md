@@ -200,6 +200,7 @@ which the `/roles` page renders directly — do not re-translate them locally).
 | Key | uz | ru |
 |---|---|---|
 | `teacher.today` | Bugungi darslarim | Мои уроки на сегодня |
+| `teacher.dashboard` | Mening statistikam (o‘quvchilar, to‘lov, davomat) | Моя статистика (ученики, оплаты, посещаемость) |
 
 ---
 
@@ -416,6 +417,7 @@ automatically (`01-api-integration.md` §2.6).
 | POST | `/syllabuses/ai/chat` · `/syllabuses/ai/save` | `syllabus.ai` | |
 | POST | `/syllabuses/:id/topics/:topicId/generate-content` | `syllabus.ai` | |
 | GET | `/teachers/me/today` | `teacher.today` | ⊕ |
+| GET | `/teachers/me/dashboard` | `teacher.dashboard` | |
 | GET | `/telegram/settings` · PUT · bot-token · send-now | `telegram.settings` | |
 | GET | `/telegram/students/:studentId/link` | `students.view` | |
 | POST | `/telegram/students/:studentId/link/regenerate` | `students.update` | |
@@ -445,6 +447,7 @@ the page is open to any authenticated user.
 |---|---|
 | `/statistics` | `statistics.view` |
 | `/today` | `teacher.today` |
+| `/my-dashboard` | `teacher.dashboard` |
 | `/users` | `users.view` |
 | `/users/:id` (staff card) | `staffPerformance.view` |
 | `/my-performance` | `staffAttendance.viewOwn` |
