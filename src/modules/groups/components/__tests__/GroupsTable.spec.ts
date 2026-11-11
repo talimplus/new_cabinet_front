@@ -78,7 +78,7 @@ describe('GroupsTable', () => {
     const tbody = wrapper.get('tbody')
     expect(tbody.find(`[aria-label="${t('common.edit')}"]`).exists()).toBe(false)
     expect(tbody.find(`[aria-label="${t('common.delete')}"]`).exists()).toBe(false)
-    // No view button any more — the row itself opens the group.
-    expect(tbody.find(`[aria-label="${t('common.view')}"]`).exists()).toBe(false)
+    // The view button always stays (the row click opens the group too).
+    expect(tbody.find(`[aria-label="${t('common.view')}"]`).exists()).toBe(true)
   })
 })

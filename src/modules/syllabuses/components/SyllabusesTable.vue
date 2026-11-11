@@ -28,6 +28,13 @@
     </template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
+        <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
+        <RouterLink
+          :to="`/syllabuses/${(row as SyllabusListItem).id}`"
+          class="rounded-md p-1.5 text-muted-foreground hover:bg-surface-muted hover:text-primary"
+        >
+          <UiIcon :icon="canManage ? Pencil : Eye" :size="16" />
+        </RouterLink>
         <UiIconButton
           v-if="canManage"
           :icon="Trash2"
@@ -43,8 +50,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { UiTable, UiBadge, UiIconButton } from '@/shared/components'
-import { Trash2 } from '@/shared/icons'
+import { UiTable, UiBadge, UiIcon, UiIconButton } from '@/shared/components'
+import { Pencil, Eye, Trash2 } from '@/shared/icons'
 import { formatDate } from '@/shared/utils/format-date'
 import type { SyllabusListItem } from '../interfaces/syllabus.interface'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'

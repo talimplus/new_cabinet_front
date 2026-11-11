@@ -23,6 +23,14 @@
     <template #cell-center="{ row }">{{ (row as User).center?.name ?? '—' }}</template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
+        <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
+        <UiIconButton
+          v-if="canView"
+          :icon="Eye"
+          tone="primary"
+          :label="t('common.view')"
+          @click="emit('view', row as User)"
+        />
         <UiIconButton
           v-if="canEdit"
           :icon="Pencil"
@@ -51,7 +59,7 @@
 
 <script setup lang="ts">
 import { UiTable, UiIconButton, UiBadge } from '@/shared/components'
-import { Pencil, Trash2, Ban, UserCheck } from '@/shared/icons'
+import { Pencil, Trash2, Eye, Ban, UserCheck } from '@/shared/icons'
 import { UserRole } from '@/shared/enums/user-role.enum'
 import { formatSom } from '@/shared/utils/format-money'
 import { ROLE_LABEL_KEYS } from '../config/role-labels'

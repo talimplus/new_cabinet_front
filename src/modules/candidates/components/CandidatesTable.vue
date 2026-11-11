@@ -21,6 +21,8 @@
     </template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
+        <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
+        <UiIconButton :icon="Eye" tone="primary" :label="t('common.view')" @click="emit('view', row as Candidate)" />
         <template v-if="canManage">
           <UiIconButton :icon="Pencil" tone="primary" :label="t('common.edit')" @click="emit('edit', row as Candidate)" />
           <UiIconButton :icon="Trash2" tone="danger" :label="t('common.delete')" @click="emit('delete', row as Candidate)" />
@@ -34,7 +36,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiIconButton } from '@/shared/components'
-import { Pencil, Trash2 } from '@/shared/icons'
+import { Eye, Pencil, Trash2 } from '@/shared/icons'
 import { formatDate } from '@/shared/utils/format-date'
 import { formatPhone } from '@/shared/utils/format-phone'
 import type { Candidate } from '../interfaces/candidate.interface'

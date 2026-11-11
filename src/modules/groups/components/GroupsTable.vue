@@ -34,6 +34,8 @@
     <template #cell-teacher="{ row }">{{ teacherName(row as Group) }}</template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
+        <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
+        <UiIconButton :icon="Eye" tone="primary" :label="t('common.view')" @click="emit('detail', row as Group)" />
         <UiIconButton v-if="canEdit" :icon="Pencil" tone="primary" :label="t('common.edit')" @click="emit('edit', row as Group)" />
         <UiIconButton v-if="canDelete" :icon="Trash2" tone="danger" :label="t('common.delete')" @click="emit('delete', row as Group)" />
       </div>
@@ -45,7 +47,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge, UiIconButton } from '@/shared/components'
-import { Pencil, Trash2 } from '@/shared/icons'
+import { Eye, Pencil, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import GroupStatusCell from './GroupStatusCell.vue'

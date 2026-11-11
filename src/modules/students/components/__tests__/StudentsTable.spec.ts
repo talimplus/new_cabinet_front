@@ -75,19 +75,21 @@ describe('StudentsTable', () => {
     expect(mountTable({ canEdit: false }).findAll(EDIT_BTN)).toHaveLength(0)
   })
 
-  it('opens the student on a row click — there is no view button any more', async () => {
+  it('opens the student from the view button and from a row click', async () => {
     const wrapper = mountTable({ canEdit: false })
-    expect(wrapper.findAll(`tbody button[aria-label="${t('students.view.title')}"]`)).toHaveLength(0)
+    const viewButtons = wrapper.findAll(`tbody button[aria-label="${t('students.view.title')}"]`)
+    expect(viewButtons).toHaveLength(3)
 
-    await wrapper.findAll('tbody tr')[0]!.trigger('click')
-    expect(last(wrapper.emitted('open'))).toEqual([rows[0]])
+    await viewButtons[0]!.trigger('click')
+    expect(wrapper.emitted('open')).toHaveLength(1) // the button does not also fire the row
+    await wrapper.findAll('tbody tr')[1]!.trigger('click')
+    expect(last(wrapper.emitted('open'))).toEqual([rows[1]])
   })
 
-  it('renders only the edit button per row when canEdit is true; it never opens the row', async () => {
+  it('renders the view and edit buttons per row when canEdit is true; edit never opens the row', async () => {
     const wrapper = mountTable({ canEdit: true })
-    const buttons = wrapper.findAll('tbody td:last-child button')
-    expect(buttons).toHaveLength(3)
-    await buttons[0]!.trigger('click')
+    expect(wrapper.findAll('tbody td:last-child button')).toHaveLength(6)
+    await wrapper.findAll(`tbody button[aria-label="${t('common.edit')}"]`)[0]!.trigger('click')
     expect(wrapper.emitted('open')).toBeUndefined()
   })
 

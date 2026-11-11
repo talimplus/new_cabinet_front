@@ -33,6 +33,8 @@
     </template>
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
+        <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
+        <UiIconButton :icon="Eye" :label="t('students.view.title')" @click="emit('open', row as Student)" />
         <UiIconButton v-if="canEdit" :icon="Pencil" tone="primary" :label="t('common.edit')" @click="emit('edit', row as Student)" />
         <UiIconButton
           v-if="deletable?.(row as Student)"
@@ -48,7 +50,7 @@
 
 <script setup lang="ts">
 import { UiTable, UiIconButton } from '@/shared/components'
-import { Pencil, Trash2 } from '@/shared/icons'
+import { Pencil, Eye, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import { formatPhone } from '@/shared/utils/format-phone'
