@@ -24,12 +24,10 @@
     <template #actions="{ row }">
       <div class="flex justify-end gap-1">
         <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
-        <UiIconButton
-          v-if="canView"
-          :icon="Eye"
-          tone="primary"
-          :label="t('common.view')"
-          @click="emit('view', row as User)"
+        <UiIconButton v-if="canView" :icon="Eye" tone="primary" :label="t('common.view')" @click="emit('view', row as User)" />
+        <UserExtraButtons
+          v-if="canPay && (row as User).isActive !== false"
+          @advance="emit('advance', row as User)" @bonus="emit('bonus', row as User)"
         />
         <UiIconButton
           v-if="canEdit"
@@ -45,13 +43,7 @@
           :label="(row as User).isActive === false ? t('users.unblock') : t('users.block')"
           @click="emit('toggleActive', row as User)"
         />
-        <UiIconButton
-          v-if="canDelete"
-          :icon="Trash2"
-          tone="danger"
-          :label="t('common.delete')"
-          @click="emit('delete', row as User)"
-        />
+        <UiIconButton v-if="canDelete" :icon="Trash2" tone="danger" :label="t('common.delete')" @click="emit('delete', row as User)" />
       </div>
     </template>
   </UiTable>
@@ -66,6 +58,7 @@ import { ROLE_LABEL_KEYS } from '../config/role-labels'
 import type { User } from '../interfaces/user.interface'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import { useI18n } from 'vue-i18n'
+import UserExtraButtons from './UserExtraButtons.vue'
 
 const { t } = useI18n()
 
@@ -76,6 +69,8 @@ defineProps<{
   canView?: boolean
   canEdit?: boolean
   canDelete?: boolean
+  /** `payroll.pay` — advance / bonus buttons. */
+  canPay?: boolean
   /** The signed-in user — nobody can block themself. */
   selfId?: number | null
 }>()
@@ -90,5 +85,7 @@ const emit = defineEmits<{
   edit: [user: User]
   delete: [user: User]
   toggleActive: [user: User]
+  advance: [user: User]
+  bonus: [user: User]
 }>()
 </script>

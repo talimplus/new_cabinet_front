@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { UiSelect } from '@/shared/components'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { usePayroll } from '../composables/use-payroll'
 import PayrollMonthTabs from '../components/PayrollMonthTabs.vue'
 import PayrollTable from '../components/PayrollTable.vue'
 import PayStaffModal from '../components/PayStaffModal.vue'
-import PayrollExtraDialog from '../components/PayrollExtraDialog.vue'
-import { usePayrollExtras } from '../composables/use-payroll-extras'
-import { PayrollExtraKind } from '../enums/payroll-extra-kind.enum'
+import StaffExtraDialog from '@/shared/components/staff-extras/StaffExtraDialog.vue'
+import { StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'
+import type { StaffSalary } from '../interfaces/staff-salary.interface'
 import StaffOverviewModal from '@/modules/staff/components/StaffOverviewModal.vue'
 
 const { canPaySalary, canDeductSalary, canViewStaffPerformance } = usePermissions()
 const p = usePayroll()
 onMounted(p.init)
-const extras = usePayrollExtras(p.load)
+const extraRef = ref<InstanceType<typeof StaffExtraDialog> | null>(null)
+/** A bonus defaults to the row's month; an advance to the current one. */
+const openExtra = (kind: StaffExtraKind, row: StaffSalary) =>
+  extraRef.value?.open(kind, { userId: row.userId, name: `${row.user.firstName} ${row.user.lastName}`, month: row.forMonth })
 
 const yearOptions = computed(() => p.yearOptions.value.map((y) => ({ label: String(y), value: y })))
 const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined)
@@ -47,16 +50,11 @@ const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined
       :can-view-staff="canViewStaffPerformance"
       @pay="p.openPay"
       @open-staff="p.openStaff"
-      @advance="extras.open(PayrollExtraKind.ADVANCE, $event)"
-      @bonus="extras.open(PayrollExtraKind.BONUS, $event)"
+      @advance="openExtra(StaffExtraKind.ADVANCE, $event)"
+      @bonus="openExtra(StaffExtraKind.BONUS, $event)"
     />
 
-    <PayrollExtraDialog
-      :form="extras.form"
-      @change="extras.setField"
-      @close="extras.close"
-      @submit="extras.submit"
-    />
+    <StaffExtraDialog ref="extraRef" @saved="p.load" />
 
     <PayStaffModal
       :model-value="p.pay.open"

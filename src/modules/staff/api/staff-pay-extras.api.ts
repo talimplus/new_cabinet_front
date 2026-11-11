@@ -1,27 +1,13 @@
 import { http } from '@/shared/api/http'
-import type { StaffDeductionRow } from '../interfaces/staff-overview.interface'
 import type {
-  StaffAdvanceForm,
-  StaffBonusForm,
   StaffBonusRow,
   StaffExtraDeleteResponse,
 } from '../interfaces/staff-pay-extras.interface'
-
-/** POST /staff/advances → the advance as a deduction row (`type: 'advance'`). 400 past next month. */
-export async function createStaffAdvance(form: StaffAdvanceForm): Promise<StaffDeductionRow> {
-  const { data } = await http.post<StaffDeductionRow>('/staff/advances', form)
-  return data
-}
+// Creating an advance/bonus lives in `shared/api/staff-extras.api.ts` (three modules open that dialog).
 
 /** DELETE /staff/advances/{id} — undo a mistaken advance; salaries are recomputed. */
 export async function deleteStaffAdvance(id: number): Promise<StaffExtraDeleteResponse> {
   const { data } = await http.delete<StaffExtraDeleteResponse>(`/staff/advances/${id}`)
-  return data
-}
-
-/** POST /staff/bonuses — `reason` is required; the month may not be in the future. */
-export async function createStaffBonus(form: StaffBonusForm): Promise<StaffBonusRow> {
-  const { data } = await http.post<StaffBonusRow>('/staff/bonuses', form)
   return data
 }
 

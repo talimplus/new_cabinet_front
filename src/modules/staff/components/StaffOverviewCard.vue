@@ -4,26 +4,22 @@
   </div>
 
   <div v-else-if="s.data.value" class="space-y-4">
-    <StaffOverviewHeader
-      :user="s.data.value.user"
-      :month="s.month.value"
-      @update:month="s.setMonth"
-    />
+    <StaffOverviewHeader :user="s.data.value.user" :month="s.month.value" @update:month="s.setMonth">
+      <StaffExtraActions
+        v-if="showActions && canPaySalary && userId" :user-id="userId" :month="s.month.value"
+        :name="`${s.data.value.user.firstName} ${s.data.value.user.lastName}`" @saved="onExtraSaved"
+      />
+    </StaffOverviewHeader>
 
     <StaffOverviewStats :summary="s.data.value.summary" />
 
     <StaffGroupsCard v-if="s.data.value.user.role === UserRole.TEACHER" :groups="s.data.value.groups ?? []" />
 
     <StaffSalaryCard
-      v-if="s.salary.value"
-      :salary="s.salary.value"
-      :outstanding="s.data.value.summary.deductionOutstanding"
+      v-if="s.salary.value" :salary="s.salary.value" :outstanding="s.data.value.summary.deductionOutstanding"
       :advance-outstanding="s.data.value.summary.advanceOutstanding"
-      :show-actions="showActions"
-      :can-pay="canPaySalary"
-      :can-deduct="canDeductSalary"
-      @pay="s.openPay"
-      @deduct="s.openDeduction"
+      :show-actions="showActions" :can-pay="canPaySalary" :can-deduct="canDeductSalary"
+      @pay="s.openPay" @deduct="s.openDeduction"
     />
     <!-- No salary row for that month yet — a fine can still be written. -->
     <UiButton v-else-if="showActions && canDeductSalary" size="sm" variant="outline" @click="s.openDeduction">
@@ -61,6 +57,7 @@ import StaffGroupsCard from './StaffGroupsCard.vue'
 import StaffSalaryCard from './StaffSalaryCard.vue'
 import StaffOverviewTabBody from './StaffOverviewTabBody.vue'
 import StaffOverviewDialogs from './StaffOverviewDialogs.vue'
+import StaffExtraActions from './StaffExtraActions.vue'
 
 const { t } = useI18n()
 const { canPaySalary, canDeductSalary } = usePermissions()
@@ -92,5 +89,9 @@ async function onDeducted(): Promise<void> {
 }
 async function onRemoved(done: Promise<boolean>): Promise<void> {
   if (await done) emit('changed')
+}
+async function onExtraSaved(): Promise<void> {
+  await s.load()
+  emit('changed')
 }
 </script>

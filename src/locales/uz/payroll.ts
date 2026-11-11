@@ -41,6 +41,9 @@ export default {
     comment: 'Izoh (ixtiyoriy)',
     reason: 'Sabab',
     reasonHint: 'Xodim buni oʻz sahifasida koʻradi',
+    advanceMonthHint: '{month} oyligidan ushlanadi — u odatda {payMonth} da beriladi. Sigʻmasa, qolgani keyingi oyliklardan.',
+    bonusMonthHint: '{month} oyligiga qoʻshiladi va oylik bilan birga beriladi.',
+    actions: 'Avans / mukofot',
     advanceSuccess: 'Avans berildi: {amount}',
     bonusSuccess: 'Mukofot yozildi: {amount}',
     validation: {

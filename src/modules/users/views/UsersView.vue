@@ -10,18 +10,24 @@ import UsersTable from '../components/UsersTable.vue'
 import UserFormModal from '../components/UserFormModal.vue'
 import UserDeleteDialog from '../components/UserDeleteDialog.vue'
 import UserBlockDialog from '../components/UserBlockDialog.vue'
+import StaffExtraDialog from '@/shared/components/staff-extras/StaffExtraDialog.vue'
+import { StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'
 import { useUserStore } from '@/stores/user.store'
 import type { UserForm } from '../interfaces/user-form.interface'
+import type { User } from '../interfaces/user.interface'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 
-const { canCreateUser, canEditUser, canDeleteUser, canViewStaffPerformance } = usePermissions()
+const { canCreateUser, canEditUser, canDeleteUser, canViewStaffPerformance, canPaySalary } = usePermissions()
 const u = useUsers()
 onMounted(u.init)
 
+// Advance / bonus right from the list — no salary row is needed for that.
+const extraRef = ref<InstanceType<typeof StaffExtraDialog> | null>(null)
+const openExtra = (kind: StaffExtraKind, x: User) => extraRef.value?.open(kind, { userId: x.id, name: `${x.firstName} ${x.lastName}` })
 const deleteOpen = computed({ get: () => u.deleteTarget.value !== null, set: (v: boolean) => { if (!v) u.deleteTarget.value = null } })
 
 const modalRef = ref<{ setBackendErrors: (e: unknown) => void } | null>(null)
@@ -67,18 +73,13 @@ async function onConfirmDelete() {
     </div>
 
     <UsersTable
-      :columns="u.columns.value"
-      :rows="u.rows.value"
-      :loading="u.loading.value"
-      :can-view="canViewStaffPerformance"
-      :can-edit="canEditUser"
-      :can-delete="canDeleteUser"
-      @view="(user) => router.push(`/users/${user.id}`)"
-      @edit="u.openEdit"
-      @delete="u.requestDelete"
-      :self-id="userStore.user?.id ?? null"
+      :columns="u.columns.value" :rows="u.rows.value" :loading="u.loading.value" :self-id="userStore.user?.id ?? null"
+      :can-view="canViewStaffPerformance" :can-edit="canEditUser" :can-delete="canDeleteUser" :can-pay="canPaySalary"
+      @view="(user) => router.push(`/users/${user.id}`)" @edit="u.openEdit" @delete="u.requestDelete"
       @toggle-active="u.requestToggleActive"
+      @advance="openExtra(StaffExtraKind.ADVANCE, $event)" @bonus="openExtra(StaffExtraKind.BONUS, $event)"
     />
+    <StaffExtraDialog ref="extraRef" />
 
     <UiPagination :page="u.filters.page" :total-pages="u.totalPages.value" @update:page="u.setPage" />
 

@@ -13,6 +13,9 @@
       <p class="truncate text-sm text-muted-foreground">{{ subtitle }}</p>
     </div>
 
+    <!-- Page-level actions (advance / bonus) — only the admin view fills it. -->
+    <slot />
+
     <div class="w-full sm:w-52">
       <UiSelect
         :model-value="month"

@@ -41,6 +41,9 @@ export default {
     comment: 'Комментарий (необязательно)',
     reason: 'Причина',
     reasonHint: 'Сотрудник увидит это на своей странице',
+    advanceMonthHint: 'Удерживается из зарплаты за {month} — её обычно выдают в {payMonth}. Если не хватит, остаток — из следующих зарплат.',
+    bonusMonthHint: 'Добавляется к зарплате за {month} и выдаётся вместе с ней.',
+    actions: 'Аванс / премия',
     advanceSuccess: 'Аванс выдан: {amount}',
     bonusSuccess: 'Премия начислена: {amount}',
     validation: {
