@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { toCandidateForm, useCandidateSchema, MIN_BIRTH_YEAR } from '../use-candidate-schema'
 import { t } from '@/locales'
+import { CandidatePosition } from '../../enums/candidate-position.enum'
 
 const valid = {
   centerId: 1,
@@ -9,6 +10,8 @@ const valid = {
   phone: '+998977522014',
   experience: '3 yil',
   birthYear: 1995,
+  // An assistant has an optional subject (a teacher's is required).
+  position: CandidatePosition.ASSISTANT,
   subjectId: 2,
   address: 'Toshkent',
   comment: '',
@@ -37,6 +40,7 @@ describe('toCandidateForm', () => {
       phone: '+998977522014',
       experience: '3 yil',
       birthYear: 1995,
+      position: CandidatePosition.ASSISTANT,
       subjectId: 2,
       address: 'Toshkent',
       comment: 'izoh',

@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { CandidatePosition } from '../../enums/candidate-position.enum'
+import { CandidateStatus } from '../../enums/candidate-status.enum'
 import { mount } from '@vue/test-utils'
 import CandidatesTable from '../CandidatesTable.vue'
 import { formatPhone } from '@/shared/utils/format-phone'
@@ -15,8 +17,11 @@ function makeCandidate(overrides: Partial<Candidate> = {}): Candidate {
     phone: '+998977522014',
     experience: '3 yil, 21-maktab',
     birthYear: 1995,
+    position: CandidatePosition.TEACHER,
     subjectId: 2,
     subject: { id: 2, name: 'Matematika' },
+    status: CandidateStatus.NEW,
+    hiredUserId: null,
     address: 'Toshkent',
     comment: 'Yaxshi nomzod',
     createdAt: '2026-09-01T10:00:00.000Z',
@@ -29,24 +34,27 @@ function makeCandidate(overrides: Partial<Candidate> = {}): Candidate {
 const cells = (wrapper: ReturnType<typeof mount>) => wrapper.findAll('tbody td').map((td) => td.text())
 
 describe('CandidatesTable', () => {
-  it('renders surname-first name, formatted phone, subject and address', () => {
+  it('renders surname-first name, formatted phone, position · subject, status and address', () => {
     const wrapper = mount(CandidatesTable, { props: { rows: [makeCandidate()] } })
     const row = cells(wrapper)
 
     expect(row).toContain('Valiyev Ali')
     expect(row).toContain(formatPhone('+998977522014'))
     expect(row).toContain('1995')
-    expect(row).toContain('Matematika')
+    // The subject sits next to the position ("O'qituvchi · Matematika").
+    expect(row).toContain(`${t('candidates.positions.teacher')} · Matematika`)
+    expect(row).toContain(t('candidates.statuses.new'))
     expect(row).toContain('Toshkent')
     expect(row).toContain(formatDate('2026-09-01T10:00:00.000Z'))
   })
 
-  it('shows a dash for a missing subject and address', () => {
+  it('shows only the position without a subject, and a dash for a missing address', () => {
     const wrapper = mount(CandidatesTable, {
       props: { rows: [makeCandidate({ subject: null, subjectId: null, address: null })] },
     })
+    expect(cells(wrapper)).toContain(t('candidates.positions.teacher'))
     const dashes = cells(wrapper).filter((text) => text === '—')
-    expect(dashes).toHaveLength(2)
+    expect(dashes).toHaveLength(1)
   })
 
   it('has no experience or comment column — they are on the candidate page', () => {
@@ -78,11 +86,12 @@ describe('CandidatesTable', () => {
   it('emits edit and delete with the row when canManage, without opening it', async () => {
     const candidate = makeCandidate()
     const wrapper = mount(CandidatesTable, { props: { rows: [candidate], canManage: true } })
+    // The first button is the status menu; then view, edit, delete.
     const buttons = wrapper.findAll('tbody button')
-    expect(buttons).toHaveLength(3)
+    expect(buttons).toHaveLength(4)
 
-    await buttons[1]!.trigger('click')
     await buttons[2]!.trigger('click')
+    await buttons[3]!.trigger('click')
 
     expect(wrapper.emitted('edit')?.[0]).toEqual([candidate])
     expect(wrapper.emitted('delete')?.[0]).toEqual([candidate])

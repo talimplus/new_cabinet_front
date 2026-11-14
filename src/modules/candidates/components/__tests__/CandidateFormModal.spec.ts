@@ -1,4 +1,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
+import { CandidatePosition } from '../../enums/candidate-position.enum'
+import { CandidateStatus } from '../../enums/candidate-status.enum'
 import { mount, flushPromises } from '@vue/test-utils'
 import CandidateFormModal from '../CandidateFormModal.vue'
 import { UiForm } from '@/shared/components'
@@ -20,8 +22,11 @@ function makeCandidate(overrides: Partial<Candidate> = {}): Candidate {
     phone: '+998977522014',
     experience: '3 yil',
     birthYear: 1995,
+    position: CandidatePosition.TEACHER,
     subjectId: 2,
     subject: { id: 2, name: 'Matematika' },
+    status: CandidateStatus.NEW,
+    hiredUserId: null,
     address: 'Toshkent',
     comment: 'Izoh matni',
     createdAt: '2026-09-01T10:00:00.000Z',
@@ -75,6 +80,7 @@ describe('CandidateFormModal', () => {
       firstName: 'Ali',
       phone: '+998977522014',
       birthYear: 1995,
+      position: CandidatePosition.TEACHER,
       experience: '3 yil',
       subjectId: 2,
       address: 'Toshkent',

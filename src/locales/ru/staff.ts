@@ -1,4 +1,5 @@
 export default {
+  dismissed: 'Уволен(а): {date}',
   title: 'Страница сотрудника',
   myTitle: 'Моя работа',
   viewAction: 'Открыть страницу сотрудника',

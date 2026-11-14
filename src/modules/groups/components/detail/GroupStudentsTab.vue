@@ -32,7 +32,7 @@
     <GroupFormerStudents :key="students.length" :group-id="groupId" :group-name="groupName" />
 
     <StudentTransferModal
-      allow-close-source
+      :allow-close-source="tx.allSelected.value"
       :state="tx.transfer.state"
       :group-options="tx.transfer.groupOptions.value"
       :total-debt="tx.transfer.totalDebt.value"

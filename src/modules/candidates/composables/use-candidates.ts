@@ -10,10 +10,14 @@ import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import { t } from '@/locales'
 import { useQueryState } from '@/shared/composables/use-query-state'
 import { QueryParam } from '@/shared/enums/query-param.enum'
+import { CandidatePosition } from '../enums/candidate-position.enum'
+import { CandidateStatus } from '../enums/candidate-status.enum'
 
 interface CandidateFilters {
   search: string
   subjectId: number | null
+  status: CandidateStatus | null
+  position: CandidatePosition | null
   page: number
   perPage: number
 }
@@ -27,8 +31,14 @@ export function useCandidates() {
   const total = ref(0)
   const totalPages = ref(1)
   const loading = ref(false)
-  const filters = reactive<CandidateFilters>({ search: '', subjectId: null, page: 1, perPage: 20 })
-  useQueryState(filters, { kinds: { subjectId: QueryParam.NUMBER }, onExternalChange: () => load() })
+  const filters = reactive<CandidateFilters>({
+    search: '', subjectId: null, status: null, position: null, page: 1, perPage: 20,
+  })
+  useQueryState(filters, {
+    kinds: { subjectId: QueryParam.NUMBER, status: QueryParam.STRING, position: QueryParam.STRING },
+    oneOf: { status: [null, ...Object.values(CandidateStatus)], position: [null, ...Object.values(CandidatePosition)] },
+    onExternalChange: () => load(),
+  })
   const subjects = ref<SelectOption[]>([])
 
   const modalOpen = ref(false)
@@ -42,6 +52,8 @@ export function useCandidates() {
       const { data, meta } = await fetchCandidates({
         search: filters.search || undefined,
         subjectId: filters.subjectId ?? undefined,
+        status: filters.status ?? undefined,
+        position: filters.position ?? undefined,
         page: filters.page,
         perPage: filters.perPage,
       })
@@ -71,6 +83,16 @@ export function useCandidates() {
   }
   function setSubject(value: number | null): void {
     filters.subjectId = value
+    filters.page = 1
+    load()
+  }
+  function setStatus(value: CandidateStatus | null): void {
+    filters.status = value
+    filters.page = 1
+    load()
+  }
+  function setPosition(value: CandidatePosition | null): void {
+    filters.position = value
     filters.page = 1
     load()
   }
@@ -120,6 +142,6 @@ export function useCandidates() {
 
   return {
     scope, rows, total, totalPages, loading, filters, subjects, modalOpen, editing, deleteTarget, deleting,
-    init, load, search, setSubject, setPage, openCreate, openEdit, submit, requestDelete, cancelDelete, confirmDelete,
+    init, load, search, setSubject, setStatus, setPosition, setPage, openCreate, openEdit, submit, requestDelete, cancelDelete, confirmDelete,
   }
 }

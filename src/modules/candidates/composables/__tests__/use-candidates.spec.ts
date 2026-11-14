@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { CandidatePosition } from '../../enums/candidate-position.enum'
+import { CandidateStatus } from '../../enums/candidate-status.enum'
 import { setActivePinia, createPinia } from 'pinia'
 import { flushPromises } from '@vue/test-utils'
 import { useCandidates } from '../use-candidates'
@@ -43,8 +45,11 @@ function makeCandidate(overrides: Partial<Candidate> = {}): Candidate {
     phone: '+998977522014',
     experience: '3 yil',
     birthYear: 1995,
+    position: CandidatePosition.TEACHER,
     subjectId: null,
     subject: null,
+    status: CandidateStatus.NEW,
+    hiredUserId: null,
     address: null,
     comment: null,
     createdAt: '2026-09-01T10:00:00.000Z',
@@ -60,6 +65,7 @@ const form: CandidateForm = {
   phone: '+998977522014',
   experience: '3 yil',
   birthYear: 1995,
+  position: CandidatePosition.TEACHER,
   subjectId: null,
   address: null,
   comment: null,

@@ -32,5 +32,8 @@ export interface User {
   userRole?: UserRoleRef
   /** `false` — blocked: cannot log in, history (salary, commission) is kept. */
   isActive?: boolean
+  /** Last working day (YYYY-MM-DD) — set once dismissed; the row is then in the archive. */
+  dismissedAt?: string | null
+  dismissalReason?: string | null
   createdAt?: string
 }

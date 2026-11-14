@@ -303,8 +303,10 @@ old app: logo ≤ 300 KB, favicon ≤ 100 KB.
 | PUT | `/users/{id}` | `UpdateUserDto` | user |
 | DELETE | `/users/{id}` | — | — ⚠️ **400** if the employee has history (salary, commission, receipts, taught a group) or is the admin — block instead |
 | PUT | `/users/{id}/active` | `{ isActive* }` | user — **block / unblock** (2026-09-27). Blocked = can't log in, live token dies within 15 s, history kept |
+| PUT | `/users/{id}/dismiss` | `{ dismissedAt?: 'YYYY-MM-DD', reason? }` | user — **dismiss** (2026-11-13, verified live): blocked + moved to the archive. Future date / before hire → 422 `dismissedAt`; teacher with unfinished groups → 400 (names in message). A dismissed user cannot be unblocked via `/active` (400) |
+| PUT | `/users/{id}/reinstate` | — | user — take a dismissed employee back |
 | GET | `/users/email/{email}` | — | user |
-| GET | `/users/employees` | `centerId, name, phone, page, perPage` | `{ data, meta }` |
+| GET | `/users/employees` | `centerId, name, phone, archived?, page, perPage` | `{ data, meta }` — default: working staff only; `archived=true` → dismissed only. Row has `isActive, dismissedAt, dismissalReason`. `/users/teachers` excludes dismissed |
 | GET | `/users/teachers` | `centerId?, name?` | **bare array** |
 | GET | `/users/me` | — | own profile `{…}` |
 | PUT | `/users/me` | `{ firstName?, lastName?, login?, phone?, password? }` | profile |
@@ -1172,6 +1174,15 @@ Converting takes the **student** payload, creates the student and marks the lead
 | POST | `/candidates` | `CreateCandidateDto` |
 | PUT | `/candidates/{id}` | `UpdateCandidateDto` (partial) |
 | DELETE | `/candidates/{id}` | → `{ success: true }` |
+| PUT | `/candidates/{id}/status` | `{ status* }` → row *(2026-11-13)* |
+| POST | `/candidates/{id}/hire` | `{ login*, password* (≥6), roleId*, firstName?, lastName?, phone?, salary?, commissionPercentage? }` → row *(2026-11-13)* |
+
+2026-11-13 (verified live): `position*` (`teacher|assistant|admin|manager|sales|marketing|accountant|other`)
+— subject only for teacher (required → 422 `subjectId`) and assistant, cleared for the rest.
+`status` (`new|hired|maybe|rejected`, default `new`) — list filters `status?, position?`.
+`hire` creates the employee (needs `users.create` too; taken login/phone → 422), sets
+`status=hired, hiredUserId`; a second hire → 400, a status change after it → 422 `status`.
+⚠️ The login must be an e-mail: `POST /auth/login` validates `email` with `@IsEmail`.
 
 Body: `lastName*, firstName*, phone*, experience*` (free text), `birthYear*`
 (1940…current year), `subjectId?, address?, comment?` (`null`/'' clears),
@@ -1180,7 +1191,7 @@ center → 422 `subjectId`. Phone is **not** unique. `search` matches first/last
 name and phone digits.
 
 Row: `{ id, centerId, firstName, lastName, phone, experience, birthYear, subjectId,
-subject: { id, name } | null, address, comment, createdAt, updatedAt }`.
+subject: { id, name } | null, position, status, hiredUserId, address, comment, createdAt, updatedAt }`.
 `GET /candidates/{id}` and `PUT` return the same row shape (`toView`) — the
 candidate card page (`/candidates/:id`, 2026-10-19) reads and edits through them.
 

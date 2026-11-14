@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { CandidatePosition } from '../../enums/candidate-position.enum'
+import { CandidateStatus } from '../../enums/candidate-status.enum'
 import { mount } from '@vue/test-utils'
 import CandidateInfoCard from '../CandidateInfoCard.vue'
 import { formatPhone } from '@/shared/utils/format-phone'
@@ -14,8 +16,11 @@ const candidate: Candidate = {
   phone: '+998977522014',
   experience: '3 yil, 21-maktab',
   birthYear: 1995,
+  position: CandidatePosition.TEACHER,
   subjectId: 2,
   subject: { id: 2, name: 'Matematika' },
+  status: CandidateStatus.NEW,
+  hiredUserId: null,
   address: null,
   comment: "Birinchi qator\nIkkinchi qator — to'liq matn",
   createdAt: '2026-09-01T10:00:00.000Z',

@@ -12,7 +12,7 @@
         <UiInput name="birthYear" type="number" :label="t('candidates.form.birthYear')" :placeholder="t('candidates.form.birthYearPlaceholder')" required />
       </div>
       <UiTextarea name="experience" :label="t('candidates.form.experience')" :placeholder="t('candidates.form.experiencePlaceholder')" :rows="2" required />
-      <UiSelect name="subjectId" :label="t('candidates.form.subject')" :options="subjects" :placeholder="t('candidates.form.subjectPlaceholder')" clearable />
+      <CandidatePositionFields :subjects="subjects" />
       <UiInput name="address" :label="t('candidates.form.address')" />
       <UiTextarea name="comment" :label="t('candidates.form.comment')" :rows="2" />
     </UiForm>
@@ -28,7 +28,8 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { GenericObject } from 'vee-validate'
-import { UiModal, UiForm, UiInput, UiPhoneInput, UiSelect, UiTextarea, UiButton } from '@/shared/components'
+import { UiModal, UiForm, UiInput, UiPhoneInput, UiTextarea, UiButton } from '@/shared/components'
+import CandidatePositionFields from './CandidatePositionFields.vue'
 import { useCandidateSchema } from '../composables/use-candidate-schema'
 import type { Candidate } from '../interfaces/candidate.interface'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
@@ -56,6 +57,7 @@ const initialValues = computed(() => {
     phone: c?.phone ?? '',
     birthYear: c?.birthYear ?? undefined,
     experience: c?.experience ?? '',
+    position: c?.position ?? undefined,
     subjectId: c?.subjectId ?? null,
     address: c?.address ?? '',
     comment: c?.comment ?? '',

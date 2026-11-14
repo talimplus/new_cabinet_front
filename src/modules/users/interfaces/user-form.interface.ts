@@ -21,3 +21,9 @@ export interface UserForm {
 export interface UserActiveForm {
   isActive: boolean
 }
+
+/** Body of PUT /users/{id}/dismiss — last working day (default today) + reason. */
+export interface UserDismissForm {
+  dismissedAt?: string
+  reason?: string
+}

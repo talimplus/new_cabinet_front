@@ -287,6 +287,8 @@ export default {
     closeSourceGroup: "Ko'chirishdan keyin eski guruhni yopish",
     closeSourceGroupHint:
       "Guruhda o'quvchi qolmasa yoki kam qolgani uchun yopilayotgan bo'lsa belgilang",
+    closeSourceGroupWarning:
+      "Diqqat: «{name}» guruhi ko'chirishdan keyin yopiladi (tugatilgan bo'ladi) va faol guruhlar ro'yxatidan chiqib ketadi. Undagi to'lov va davomat tarixi saqlanadi.",
     student: "O'quvchi",
     debt: 'Qarzi',
     overpaid: "Ortiqcha to'lov",

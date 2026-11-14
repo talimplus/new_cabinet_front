@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { CandidatePosition } from '../../enums/candidate-position.enum'
+import { CandidateStatus } from '../../enums/candidate-status.enum'
 import { fetchCandidates, fetchCandidate, createCandidate, updateCandidate, deleteCandidate } from '../candidates.api'
 import { http } from '@/shared/api/http'
 import type { Candidate } from '../../interfaces/candidate.interface'
@@ -17,6 +19,7 @@ const form: CandidateForm = {
   phone: '+998977522014',
   experience: '3 yil',
   birthYear: 1995,
+  position: CandidatePosition.TEACHER,
   subjectId: 2,
   address: null,
   comment: null,

@@ -24,6 +24,7 @@ import { Phone, Calendar, BookOpen, Briefcase, MapPin, MessageSquare, CalendarDa
 import { formatDate } from '@/shared/utils/format-date'
 import { formatPhone } from '@/shared/utils/format-phone'
 import type { Candidate } from '../interfaces/candidate.interface'
+import { CANDIDATE_POSITION_LABEL_KEYS } from '../enums/candidate-position.enum'
 
 const props = defineProps<{ candidate: Candidate }>()
 const { t } = useI18n()
@@ -37,6 +38,7 @@ const fields = computed(() => {
       key: 'birthYear', icon: Calendar, mono: true,
       value: c.birthYear ? `${c.birthYear} (${t('candidates.detail.age', { age })})` : '',
     },
+    { key: 'position', icon: Briefcase, value: t(CANDIDATE_POSITION_LABEL_KEYS[c.position]) },
     { key: 'subject', icon: BookOpen, value: c.subject?.name },
     { key: 'createdAt', icon: CalendarDays, value: formatDate(c.createdAt), mono: true },
     { key: 'experience', icon: Briefcase, value: c.experience, wide: true },

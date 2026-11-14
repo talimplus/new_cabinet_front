@@ -4,6 +4,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import type { GenericObject } from 'vee-validate'
 import { t } from '@/locales'
 import type { CandidateForm } from '../interfaces/candidate-form.interface'
+import { CandidatePosition, POSITIONS_WITH_SUBJECT } from '../enums/candidate-position.enum'
 
 export const MIN_BIRTH_YEAR = 1940
 
@@ -22,7 +23,11 @@ export function toCandidateForm(values: GenericObject): CandidateForm {
     phone: values.phone as string,
     experience: String(values.experience).trim(),
     birthYear: values.birthYear as number,
-    subjectId: (values.subjectId as number | null | undefined) ?? null,
+    position: values.position as CandidatePosition,
+    // Admin / manager / ... have no subject — a value left over from a switch is dropped.
+    subjectId: POSITIONS_WITH_SUBJECT.includes(values.position as CandidatePosition)
+      ? ((values.subjectId as number | null | undefined) ?? null)
+      : null,
     address: textOrNull(values.address),
     comment: textOrNull(values.comment),
   }
@@ -44,9 +49,13 @@ export function useCandidateSchema() {
           .int(t('candidates.validation.birthYear'))
           .min(MIN_BIRTH_YEAR, t('candidates.validation.birthYearRange', { min: MIN_BIRTH_YEAR, max: maxYear }))
           .max(maxYear, t('candidates.validation.birthYearRange', { min: MIN_BIRTH_YEAR, max: maxYear })),
+        position: z.nativeEnum(CandidatePosition, { message: t('candidates.validation.position') }),
         subjectId: z.number().nullable().optional(),
         address: z.string().optional(),
         comment: z.string().optional(),
+      }).refine((v) => v.position !== CandidatePosition.TEACHER || v.subjectId != null, {
+        message: t('candidates.validation.subject'),
+        path: ['subjectId'],
       }),
     )
   })

@@ -12,7 +12,18 @@
       <span class="whitespace-nowrap font-mono">{{ formatPhone((row as Candidate).phone) || '—' }}</span>
     </template>
     <template #cell-birthYear="{ row }"><span class="font-mono">{{ (row as Candidate).birthYear }}</span></template>
-    <template #cell-subject="{ row }">{{ (row as Candidate).subject?.name ?? '—' }}</template>
+    <template #cell-position="{ row }">
+      {{ t(positionKeys[(row as Candidate).position]) }}<span v-if="(row as Candidate).subject" class="text-muted-foreground"> · {{ (row as Candidate).subject?.name }}</span>
+    </template>
+    <template #cell-status="{ row }">
+      <!-- The badge opens a menu — it must not also open the candidate page. -->
+      <span class="inline-flex" @click.stop>
+        <CandidateStatusCell
+          :candidate="row as Candidate" :can-edit="canManage" :loading="changingId === (row as Candidate).id"
+          @change="emit('status', row as Candidate, $event)"
+        />
+      </span>
+    </template>
     <template #cell-address="{ row }">
       <span class="block max-w-[16rem] truncate" :title="(row as Candidate).address ?? ''">{{ (row as Candidate).address || '—' }}</span>
     </template>
@@ -40,13 +51,17 @@ import { Eye, Pencil, Trash2 } from '@/shared/icons'
 import { formatDate } from '@/shared/utils/format-date'
 import { formatPhone } from '@/shared/utils/format-phone'
 import type { Candidate } from '../interfaces/candidate.interface'
+import { CANDIDATE_POSITION_LABEL_KEYS as positionKeys } from '../enums/candidate-position.enum'
+import type { CandidateStatus } from '../enums/candidate-status.enum'
+import CandidateStatusCell from './CandidateStatusCell.vue'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 
 const { t } = useI18n()
 
-defineProps<{ rows: Candidate[]; loading?: boolean; rowOffset?: number; canManage?: boolean }>()
+defineProps<{ rows: Candidate[]; loading?: boolean; rowOffset?: number; canManage?: boolean; changingId?: number | null }>()
 const emit = defineEmits<{
   view: [candidate: Candidate]; edit: [candidate: Candidate]; delete: [candidate: Candidate]
+  status: [candidate: Candidate, status: CandidateStatus]
 }>()
 
 // Experience and the comment are long free text — they live on the candidate page only.
@@ -54,8 +69,9 @@ const columns = computed<TableColumn[]>(() => [
   { key: 'index', label: t('candidates.table.index'), rowNumber: true },
   { key: 'fullName', label: t('candidates.table.fullName'), primary: true },
   { key: 'phone', label: t('candidates.table.phone') },
-  { key: 'birthYear', label: t('candidates.table.birthYear') },
-  { key: 'subject', label: t('candidates.table.subject') },
+  { key: 'position', label: t('candidates.table.position') },
+  { key: 'status', label: t('candidates.table.status') },
+  { key: 'birthYear', label: t('candidates.table.birthYear'), hideOnMobile: true },
   { key: 'address', label: t('candidates.table.address'), hideOnMobile: true },
   { key: 'createdAt', label: t('candidates.table.createdAt'), hideOnMobile: true },
 ])

@@ -20,6 +20,11 @@ export interface StaffOverviewUser {
   salary: number
   commissionPercentage: number
   createdAt: string
+  /** `false` — blocked (cannot log in). */
+  isActive?: boolean
+  /** Last working day (YYYY-MM-DD) — the page is then the employee's archive. */
+  dismissedAt?: string | null
+  dismissalReason?: string | null
 }
 
 export interface StaffOverviewSummary {

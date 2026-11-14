@@ -11,6 +11,9 @@
         {{ user.firstName }} {{ user.lastName }}
       </p>
       <p class="truncate text-sm text-muted-foreground">{{ subtitle }}</p>
+      <p v-if="user.dismissedAt" class="mt-1 inline-flex rounded-sm bg-danger-soft px-2 py-0.5 text-xs font-semibold text-danger">
+        {{ t('staff.dismissed', { date: formatDate(user.dismissedAt) }) }}<template v-if="user.dismissalReason"> — {{ user.dismissalReason }}</template>
+      </p>
     </div>
 
     <!-- Page-level actions (advance / bonus) — only the admin view fills it. -->
@@ -34,6 +37,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiSelect } from '@/shared/components'
 import { buildStaffMonthOptions } from '../config/staff-months'
+import { formatDate } from '@/shared/utils/format-date'
 import type { StaffOverviewUser } from '../interfaces/staff-overview.interface'
 
 const { t } = useI18n()

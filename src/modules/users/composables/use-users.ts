@@ -8,8 +8,12 @@ import type { UsersParams } from '../interfaces/user-params.interface'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import { t } from '@/locales'
 import { useQueryState } from '@/shared/composables/use-query-state'
+import { UsersTab } from '../enums/users-tab.enum'
+import type { TabItem } from '@/shared/interfaces/tab-item.interface'
 
 interface UsersFilters {
+  /** Working staff or the archive of dismissed employees. */
+  tab: UsersTab
   name: string
   phone: string
   page: number
@@ -24,8 +28,13 @@ export function useUsers() {
   const rows = ref<User[]>([])
   const totalPages = ref(1)
   const loading = ref(false)
-  const filters = reactive<UsersFilters>({ name: '', phone: '', page: 1, perPage: 10 })
-  useQueryState(filters, { onExternalChange: () => load() })
+  const filters = reactive<UsersFilters>({ tab: UsersTab.ACTIVE, name: '', phone: '', page: 1, perPage: 10 })
+  useQueryState(filters, { oneOf: { tab: Object.values(UsersTab) }, onExternalChange: () => load() })
+  const isArchive = computed(() => filters.tab === UsersTab.ARCHIVE)
+  const tabs: TabItem[] = [
+    { key: UsersTab.ACTIVE, labelKey: 'users.tabs.active' },
+    { key: UsersTab.ARCHIVE, labelKey: 'users.tabs.archive' },
+  ]
 
   const modalOpen = ref(false)
   const editing = ref<User | null>(null)
@@ -37,6 +46,7 @@ export function useUsers() {
       const params: UsersParams = {
         name: filters.name || undefined,
         phone: filters.phone || undefined,
+        archived: isArchive.value || undefined,
         page: filters.page,
         perPage: filters.perPage,
       }
@@ -62,6 +72,10 @@ export function useUsers() {
   }
   function searchPhone(value: string): void {
     filters.phone = value
+    applyFilters()
+  }
+  function setTab(tab: string): void {
+    filters.tab = tab === UsersTab.ARCHIVE ? UsersTab.ARCHIVE : UsersTab.ACTIVE
     applyFilters()
   }
   function setPage(page: number): void {
@@ -110,14 +124,22 @@ export function useUsers() {
     }
   }
 
+  // The archive swaps pay columns for the dismissal date and reason.
   const columns = computed<TableColumn[]>(() => [
     { key: 'id', label: t('users.table.id'), hideOnMobile: true },
     { key: 'firstName', label: t('users.table.firstName'), primary: true },
     { key: 'lastName', label: t('users.table.lastName') },
     { key: 'phone', label: t('users.table.phone') },
     { key: 'role', label: t('users.table.role') },
-    { key: 'salary', label: t('users.table.salary'), align: 'right' },
-    { key: 'commissionPercentage', label: t('users.table.commissionPercentage') },
+    ...(isArchive.value
+      ? [
+          { key: 'dismissedAt', label: t('users.archive.dismissedAt') },
+          { key: 'dismissalReason', label: t('users.archive.reason') },
+        ]
+      : [
+          { key: 'salary', label: t('users.table.salary'), align: 'right' as const },
+          { key: 'commissionPercentage', label: t('users.table.commissionPercentage') },
+        ]),
     { key: 'center', label: t('users.table.center') },
   ])
 
@@ -130,9 +152,9 @@ export function useUsers() {
   }
 
   return {
-    scope, rows, totalPages, loading, filters,
+    scope, rows, totalPages, loading, filters, tabs, isArchive,
     modalOpen, editing, deleteTarget,
-    init, load, applyFilters, search, searchPhone, setPage,
+    init, load, applyFilters, search, searchPhone, setPage, setTab,
     openCreate, openEdit, submit, requestDelete, confirmDelete,
     toggleTarget, toggling, requestToggleActive, confirmToggleActive, columns,
   }

@@ -16,7 +16,16 @@
     <p v-else-if="d.failed.value" class="p-8 text-center text-sm text-muted-foreground">
       {{ t('candidates.detail.notFound') }}
     </p>
-    <CandidateInfoCard v-else-if="d.candidate.value" :candidate="d.candidate.value" />
+    <template v-else-if="d.candidate.value">
+      <CandidateHireBanner
+        :candidate="d.candidate.value" :can-manage="canManageCandidates" :can-hire="h.canHire.value"
+        :can-view-staff="canViewStaffPerformance" :loading="h.state.changingId === d.candidate.value.id"
+        @status="h.changeStatus(d.candidate.value, $event)" @hire="h.openHire(d.candidate.value)"
+      />
+      <CandidateInfoCard :candidate="d.candidate.value" />
+    </template>
+    <CandidateHireAskDialog :candidate="h.state.askTarget" @yes="h.askYes" @no="h.askNo" @cancel="h.state.askTarget = null" />
+    <CandidateHireModal :h="h" />
 
     <CandidateFormModal
       v-if="canManageCandidates"
@@ -43,11 +52,16 @@ import { useCandidateDetail } from '../composables/use-candidate-detail'
 import { toCandidateForm } from '../composables/use-candidate-schema'
 import CandidateInfoCard from '../components/CandidateInfoCard.vue'
 import CandidateFormModal from '../components/CandidateFormModal.vue'
+import CandidateHireBanner from '../components/CandidateHireBanner.vue'
+import CandidateHireAskDialog from '../components/CandidateHireAskDialog.vue'
+import CandidateHireModal from '../components/CandidateHireModal.vue'
+import { useCandidateHire } from '../composables/use-candidate-hire'
 
 const { t } = useI18n()
 const route = useRoute()
-const { canManageCandidates } = usePermissions()
+const { canManageCandidates, canViewStaffPerformance } = usePermissions()
 const d = useCandidateDetail(() => Number(route.params.id))
+const h = useCandidateHire((updated) => { d.candidate.value = updated })
 onMounted(d.init)
 
 const modalRef = ref<{ setBackendErrors: (err: unknown) => void } | null>(null)

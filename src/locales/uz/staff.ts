@@ -1,4 +1,5 @@
 export default {
+  dismissed: "Ishdan bo'shatilgan: {date}",
   title: 'Xodim sahifasi',
   myTitle: 'Mening faoliyatim',
   viewAction: "Xodim sahifasini ko'rish",

@@ -65,6 +65,8 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/users', permissions: [Permission.USERS_VIEW], acceptsCenterId: true },
   { method: POST, path: '/users', permissions: [Permission.USERS_CREATE] },
   { method: PUT, path: '/users/:id/active', permissions: [Permission.USERS_UPDATE] },
+  { method: PUT, path: '/users/:id/dismiss', permissions: [Permission.USERS_UPDATE] },
+  { method: PUT, path: '/users/:id/reinstate', permissions: [Permission.USERS_UPDATE] },
   { method: GET, path: '/users/:id', permissions: [Permission.USERS_VIEW] },
   { method: PUT, path: '/users/:id', permissions: [Permission.USERS_UPDATE] },
   { method: DELETE, path: '/users/:id', permissions: [Permission.USERS_DELETE] },
@@ -193,6 +195,8 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/candidates/:id', permissions: [Permission.CANDIDATES_VIEW] },
   { method: PUT, path: '/candidates/:id', permissions: [Permission.CANDIDATES_MANAGE] },
   { method: DELETE, path: '/candidates/:id', permissions: [Permission.CANDIDATES_MANAGE] },
+  { method: PUT, path: '/candidates/:id/status', permissions: [Permission.CANDIDATES_MANAGE] },
+  { method: POST, path: '/candidates/:id/hire', permissions: [Permission.CANDIDATES_MANAGE] },
 
   // ---- expenses ----
   { method: GET, path: '/expenses', permissions: [Permission.EXPENSES_VIEW], acceptsCenterId: true },

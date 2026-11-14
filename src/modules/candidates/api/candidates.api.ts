@@ -1,6 +1,6 @@
 import { http } from '@/shared/api/http'
 import type { Candidate } from '../interfaces/candidate.interface'
-import type { CandidateForm } from '../interfaces/candidate-form.interface'
+import type { CandidateForm, CandidateHireForm, CandidateStatusForm } from '../interfaces/candidate-form.interface'
 import type { CandidatesParams } from '../interfaces/candidate-params.interface'
 import type { PaginatedResponse } from '@/shared/interfaces/paginated.interface'
 
@@ -27,4 +27,19 @@ export async function updateCandidate(id: number, form: CandidateForm): Promise<
 
 export async function deleteCandidate(id: number): Promise<void> {
   await http.delete(`/candidates/${id}`)
+}
+
+/** PUT /candidates/:id/status — new / hired / 50-50 / rejected. */
+export async function changeCandidateStatus(id: number, form: CandidateStatusForm): Promise<Candidate> {
+  const { data } = await http.put<Candidate>(`/candidates/${id}/status`, form)
+  return data
+}
+
+/**
+ * POST /candidates/:id/hire — creates the employee and marks the candidate
+ * hired (`hiredUserId`). Needs `users.create` too; a taken login/phone is a 422.
+ */
+export async function hireCandidate(id: number, form: CandidateHireForm): Promise<Candidate> {
+  const { data } = await http.post<Candidate>(`/candidates/${id}/hire`, form)
+  return data
 }
