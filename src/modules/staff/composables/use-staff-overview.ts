@@ -96,6 +96,12 @@ export function useStaffOverview(
     } finally {
       loading.value = false
     }
+    // Nothing happens after the last working month — open that one instead.
+    const lastMonth = data.value?.user.dismissedAt?.slice(0, 7)
+    if (lastMonth && month.value > lastMonth) {
+      month.value = lastMonth
+      await load()
+    }
   }
 
   function setMonth(value: string): void {

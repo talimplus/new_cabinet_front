@@ -6,7 +6,7 @@
   <div v-else-if="s.data.value" class="space-y-4">
     <StaffOverviewHeader :user="s.data.value.user" :month="s.month.value" @update:month="s.setMonth">
       <StaffExtraActions
-        v-if="showActions && canPaySalary && userId" :user-id="userId" :month="s.month.value"
+        v-if="writable && canPaySalary && userId" :user-id="userId" :month="s.month.value"
         :name="`${s.data.value.user.firstName} ${s.data.value.user.lastName}`" @saved="onExtraSaved"
       />
     </StaffOverviewHeader>
@@ -18,11 +18,11 @@
     <StaffSalaryCard
       v-if="s.salary.value" :salary="s.salary.value" :outstanding="s.data.value.summary.deductionOutstanding"
       :advance-outstanding="s.data.value.summary.advanceOutstanding"
-      :show-actions="showActions" :can-pay="canPaySalary" :can-deduct="canDeductSalary"
+      :show-actions="showActions" :can-pay="canPaySalary" :can-deduct="writable && canDeductSalary"
       @pay="s.openPay" @deduct="s.openDeduction"
     />
     <!-- No salary row for that month yet — a fine can still be written. -->
-    <UiButton v-else-if="showActions && canDeductSalary" size="sm" variant="outline" @click="s.openDeduction">
+    <UiButton v-else-if="writable && canDeductSalary" size="sm" variant="outline" @click="s.openDeduction">
       {{ t('staff.deduction.addButton') }}
     </UiButton>
 
@@ -31,8 +31,8 @@
     <StaffOverviewTabBody
       :data="s.data.value"
       :tab="s.tab.value"
-      :can-deduct="showActions && canDeductSalary"
-      :can-manage-pay="showActions && canPaySalary"
+      :can-deduct="writable && canDeductSalary"
+      :can-manage-pay="writable && canPaySalary"
       :busy="s.submitting.value || extras.busy.value"
       @remove="s.removeDeduction"
       @remove-advance="onRemoved(extras.removeAdvance($event))"
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiSpinner, UiTabs, UiButton } from '@/shared/components'
 import { usePermissions } from '@/shared/composables/use-permissions'
@@ -78,6 +78,8 @@ const emit = defineEmits<{ changed: [] }>()
 
 const s = useStaffOverview(() => props.userId, () => props.month, props.syncQuery)
 onMounted(s.load)
+/** A dismissed employee's page is an archive — only the final salary can still be paid. */
+const writable = computed(() => props.showActions && !s.data.value?.user.dismissedAt)
 const extras = useStaffPayExtras(s.load)
 
 /** The payroll table behind the modal has to reflect the new numbers. */

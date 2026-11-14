@@ -16,7 +16,7 @@
       </p>
     </div>
 
-    <!-- Page-level actions (advance / bonus) — only the admin view fills it. -->
+    <!-- Page-level actions (advance / bonus) — admin view only, never for a dismissed employee. -->
     <slot />
 
     <div class="w-full sm:w-52">
@@ -45,7 +45,10 @@ const { t } = useI18n()
 const props = defineProps<{ user: StaffOverviewUser; month: string }>()
 const emit = defineEmits<{ 'update:month': [value: string] }>()
 
-const monthOptions = computed(() => buildStaffMonthOptions())
+// A dismissed employee has no months after the last working day.
+const monthOptions = computed(() =>
+  buildStaffMonthOptions(props.user.dismissedAt ? new Date(`${props.user.dismissedAt}T00:00:00`) : undefined),
+)
 
 const initials = computed(() =>
   `${props.user.firstName?.[0] ?? ''}${props.user.lastName?.[0] ?? ''}`.toUpperCase(),

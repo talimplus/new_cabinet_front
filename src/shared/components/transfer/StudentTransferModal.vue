@@ -31,15 +31,12 @@
         :disabled="state.loading"
       />
       <!-- Closes the WHOLE source group — group page only, and only when every student is moving. -->
-      <UiCheckbox
+      <CloseSourceGroupField
         v-if="allowCloseSource"
         v-model="state.closeSourceGroup"
-        :label="t('students.transfer.closeSourceGroup')"
+        :group-name="state.fromGroupName"
         :disabled="state.loading"
       />
-      <p v-if="allowCloseSource && state.closeSourceGroup" class="rounded-md bg-danger-soft px-3 py-2 text-xs text-danger">
-        {{ t('students.transfer.closeSourceGroupWarning', { name: state.fromGroupName }) }}
-      </p>
 
       <p v-if="state.previewing" class="text-xs text-muted-foreground">
         {{ t('payments.exclusion.calculating') }}
@@ -75,7 +72,8 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiButton, UiSelect, UiDatepicker, UiTextarea, UiCheckbox } from '@/shared/components'
+import { UiModal, UiButton, UiSelect, UiDatepicker, UiTextarea } from '@/shared/components'
+import CloseSourceGroupField from './CloseSourceGroupField.vue'
 import { formatSom } from '@/shared/utils/format-money'
 import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 import type { useStudentTransfer } from '@/shared/composables/use-student-transfer'
