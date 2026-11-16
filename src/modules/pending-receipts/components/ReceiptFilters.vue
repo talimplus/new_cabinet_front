@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-2 rounded-lg border border-border bg-surface p-3 shadow-card">
+    <UiInput type="search" :model-value="search" :placeholder="t('pendingReceipts.filters.search')" @input="onSearch">
+      <template #prefix><UiIcon :icon="Search" :size="16" /></template>
+    </UiInput>
     <div class="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <UiDatepicker
         :model-value="dateFrom"
@@ -24,16 +27,18 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { UiDatepicker, UiButton, UiIcon } from '@/shared/components'
-import { FilterX } from '@/shared/icons'
+import { UiDatepicker, UiButton, UiIcon, UiInput } from '@/shared/components'
+import { FilterX, Search } from '@/shared/icons'
+import { debounce } from '@/shared/utils/debounce'
 
 const { t } = useI18n()
 
-defineProps<{ hasFilters?: boolean; disabled?: boolean }>()
+defineProps<{ hasFilters?: boolean; disabled?: boolean; search?: string }>()
 
 const dateFrom = defineModel<Date | null>('dateFrom', { default: null })
 const dateTo = defineModel<Date | null>('dateTo', { default: null })
-const emit = defineEmits<{ change: []; reset: [] }>()
+const emit = defineEmits<{ change: []; reset: []; search: [value: string] }>()
+const onSearch = debounce((ev: Event) => emit('search', (ev.target as HTMLInputElement).value))
 
 const models = { dateFrom, dateTo }
 function update(key: keyof typeof models, value: Date | null): void {

@@ -9,6 +9,8 @@ import type { PaginationMeta } from '@/shared/interfaces/paginated.interface'
  */
 export interface PendingReceiptsParams {
   centerId?: number
+  /** Student first/last name, group name, or phone (≥ 3 digits). */
+  search?: string
   dateFrom?: string
   dateTo?: string
   page?: number

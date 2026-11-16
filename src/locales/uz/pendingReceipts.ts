@@ -24,6 +24,7 @@ export default {
     receivedAt: 'Qabul qilingan sana',
   },
   filters: {
+    search: 'O‘quvchi, guruh yoki telefon',
     title: 'Filtrlar',
     dateFrom: 'Sanadan',
     dateTo: 'Sanagacha',

@@ -5,7 +5,7 @@ export interface PendingReceiptPayment {
   id: number
   studentId: number
   groupId: number | null
-  /** e.g. "2025-09" — render as MM.YYYY. */
+  /** e.g. "2025-09" — render with `formatMonthName` ("Sentabr 2025"). */
   forMonth: string
   student: { firstName: string; lastName: string }
   group: { name: string } | null

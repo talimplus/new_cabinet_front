@@ -11,7 +11,7 @@
       </div>
       <div class="flex justify-between">
         <span class="text-muted-foreground">{{ t('pendingReceipts.columns.month') }}</span>
-        <span class="font-mono">{{ formatMonth(receipt.payment.forMonth) }}</span>
+        <span class="font-medium">{{ formatMonthName(receipt.payment.forMonth) }}</span>
       </div>
     </div>
     <template #footer>
@@ -25,7 +25,7 @@
 import { UiModal, UiButton } from '@/shared/components'
 import { useI18n } from 'vue-i18n'
 import { formatSom } from '@/shared/utils/format-money'
-import { formatMonth } from '@/shared/utils/format-month'
+import { formatMonthName } from '@/shared/utils/format-month'
 import type { PendingReceipt } from '../interfaces/pending-receipt.interface'
 
 const { t } = useI18n()

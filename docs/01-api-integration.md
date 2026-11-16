@@ -857,13 +857,15 @@ A teacher sees only their own groups.
 | PUT | `/payments/apply-exclusion/{id}` | `{ excludeLessons?, excludeAmount?, comment }` | saved |
 | GET | `/payments/{paymentId}/receipts` | — | `{ data: Check[] }` |
 | GET | `/payments/receipt/{receiptId}/check` | — | Check |
-| GET | `/payments/pending-receipts` | `centerId?, page?, perPage?, dateFrom?, dateTo?` | `{ data, meta(+totalAmount) }` |
-| GET | `/payments/receipts-stats` | `centerId?, dateFrom?, dateTo?` | stats |
+| GET | `/payments/pending-receipts` | `centerId?, page?, perPage?, dateFrom?, dateTo?, search?` | `{ data, meta(+totalAmount) }` |
+| GET | `/payments/receipts-stats` | `centerId?, dateFrom?, dateTo?, search?` | stats |
 | PUT | `/payments/confirm-receipt/{id}` | — | — |
 | PUT | `/payments/reject-receipt/{id}` | — | — |
-| PUT | `/payments/confirm-receipts` | `{ receiptIds?[] \| all*, centerId?, dateFrom?, dateTo? }` | bulk result |
+| PUT | `/payments/confirm-receipts` | `{ receiptIds?[] \| all*, centerId?, dateFrom?, dateTo?, search? }` | bulk result |
 | PUT | `/payments/pay-debt/student/{studentId}` | `{ amount?, comment?, paymentMethod?, paidAt? }` | summary + `checks[]` |
 | GET | `/payments/student/{studentId}/summary` | — | `{ student, totals, months[] }` |
+
+`search` (all three receipts endpoints, same filter): student first/last name in either order, group name, or phone digits (≥ 3). `confirm-receipts` applies it only with `all: true`.
 
 `GET /payments` runs **`ensurePayments`** first: missing monthly rows are created
 for ACTIVE students and their groups before the list is returned.

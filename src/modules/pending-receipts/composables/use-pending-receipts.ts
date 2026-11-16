@@ -22,6 +22,8 @@ import { useQueryState } from '@/shared/composables/use-query-state'
 import { QueryParam } from '@/shared/enums/query-param.enum'
 
 interface ReceiptFilters {
+  /** Student name, group name or phone digits. */
+  search: string
   dateFrom: Date | null
   dateTo: Date | null
   page: number
@@ -54,6 +56,7 @@ export function usePendingReceipts() {
   const statsLoading = ref(false)
 
   const filters = reactive<ReceiptFilters>({
+    search: '',
     dateFrom: null,
     dateTo: null,
     page: 1,
@@ -61,6 +64,7 @@ export function usePendingReceipts() {
   })
   const query = useQueryState(filters, {
     kinds: { dateFrom: QueryParam.DATE, dateTo: QueryParam.DATE },
+    debounce: ['search'],
     onExternalChange: () => { selection.clear(); void reload() },
   })
 
@@ -74,11 +78,12 @@ export function usePendingReceipts() {
     mode: BulkConfirmMode.SELECTED,
   })
 
-  const hasFilters = computed(() => !!(filters.dateFrom || filters.dateTo))
+  const hasFilters = computed(() => !!(filters.search.trim() || filters.dateFrom || filters.dateTo))
 
   /** The one filter state the list, the stat cards and "confirm all" all share. */
   function filterParams(): PendingReceiptsParams {
     return {
+      search: filters.search.trim() || undefined,
       dateFrom: filters.dateFrom ? toDateString(filters.dateFrom) : undefined,
       dateTo: filters.dateTo ? toDateString(filters.dateTo) : undefined,
     }
@@ -136,7 +141,16 @@ export function usePendingReceipts() {
     reload()
   }
 
+  /** Typing in the search box (the view debounces it). */
+  function search(value: string): void {
+    filters.search = value
+    filters.page = 1
+    selection.clear()
+    void reload()
+  }
+
   function resetFilters(): void {
+    filters.search = ''
     filters.dateFrom = null
     filters.dateTo = null
     applyFilters()
@@ -237,7 +251,7 @@ export function usePendingReceipts() {
     scope, rows, totalPages, pendingTotal, pendingTotalAmount, loading, processing,
     stats, statsLoading, filters, hasFilters, selection,
     confirmDialog, rejectDialog, rejectReason, bulkDialog,
-    init, load, reload, applyFilters, resetFilters, setPage,
+    init, load, reload, applyFilters, resetFilters, setPage, search,
     openConfirm, confirm, openReject, reject, openBulk, confirmBulk,
   }
 }

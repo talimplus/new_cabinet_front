@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { mount, DOMWrapper } from '@vue/test-utils'
 import ReceiptRejectDialog from '../ReceiptRejectDialog.vue'
 import { formatSom } from '@/shared/utils/format-money'
-import { formatMonth } from '@/shared/utils/format-month'
+import { formatMonthName } from '@/shared/utils/format-month'
 import { ReceiptStatus } from '@/shared/enums/receipt-status.enum'
 import type { PendingReceipt } from '../../interfaces/pending-receipt.interface'
 import { t } from '@/locales'
@@ -61,7 +61,7 @@ describe('ReceiptRejectDialog', () => {
     mountDialog({ receipt: makeReceipt({ amount: '250000' }) })
     expect(document.body.textContent).toContain('Ali Valiyev')
     expect(document.body.textContent).toContain(formatSom(250000))
-    expect(document.body.textContent).toContain(formatMonth('2025-09'))
+    expect(document.body.textContent).toContain(formatMonthName('2025-09'))
   })
 
   it('two-way binds the reason through the textarea', async () => {

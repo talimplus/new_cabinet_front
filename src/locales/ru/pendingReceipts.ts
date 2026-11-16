@@ -24,6 +24,7 @@ export default {
     receivedAt: 'Дата получения',
   },
   filters: {
+    search: 'Ученик, группа или телефон',
     title: 'Фильтры',
     dateFrom: 'С даты',
     dateTo: 'По дату',

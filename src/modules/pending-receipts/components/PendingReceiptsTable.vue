@@ -21,7 +21,7 @@
       {{ (row as PendingReceipt).payment.group?.name ?? '—' }}
     </template>
     <template #cell-month="{ row }">
-      {{ formatMonth((row as PendingReceipt).payment.forMonth) }}
+      {{ formatMonthName((row as PendingReceipt).payment.forMonth) }}
     </template>
     <template #cell-amount="{ row }">
       <span class="font-mono font-semibold text-primary">
@@ -62,7 +62,7 @@ import { computed } from 'vue'
 import { UiTable, UiButton, UiCheckbox } from '@/shared/components'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatDateTime } from '@/shared/utils/format-date'
-import { formatMonth } from '@/shared/utils/format-month'
+import { formatMonthName } from '@/shared/utils/format-month'
 import type { PendingReceipt } from '../interfaces/pending-receipt.interface'
 import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 import { useI18n } from 'vue-i18n'

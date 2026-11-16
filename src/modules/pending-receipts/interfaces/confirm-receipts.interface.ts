@@ -10,6 +10,8 @@ export interface ConfirmReceiptsForm {
   centerId?: number
   dateFrom?: string
   dateTo?: string
+  /** `all: true` only — the same search the list used. */
+  search?: string
 }
 
 export interface ConfirmedReceiptResult {

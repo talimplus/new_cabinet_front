@@ -25,10 +25,12 @@ onMounted(r.init)
     <ReceiptFilters
       v-model:date-from="r.filters.dateFrom"
       v-model:date-to="r.filters.dateTo"
+      :search="r.filters.search"
       :has-filters="r.hasFilters.value"
       :disabled="r.processing.value"
       @change="r.applyFilters"
       @reset="r.resetFilters"
+      @search="r.search"
     />
 
     <ReceiptToolbar
