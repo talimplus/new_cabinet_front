@@ -1,6 +1,7 @@
 <template>
-  <div class="flex flex-wrap gap-2">
+  <div class="flex w-full flex-wrap gap-2 sm:w-auto">
     <UiButton
+      class="flex-1 sm:flex-none"
       variant="secondary"
       :loading="exportingMonth"
       :disabled="exportingPeriod"
@@ -9,7 +10,7 @@
       <UiIcon :icon="FileSpreadsheet" :size="16" />
       {{ t('payments.export.month') }}
     </UiButton>
-    <UiButton variant="outline" :disabled="exportingMonth || exportingPeriod" @click="emit('period')">
+    <UiButton class="flex-1 sm:flex-none" variant="outline" :disabled="exportingMonth || exportingPeriod" @click="emit('period')">
       <UiIcon :icon="CalendarRange" :size="16" />
       {{ t('payments.export.period') }}
     </UiButton>

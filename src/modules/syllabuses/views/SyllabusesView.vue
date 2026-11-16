@@ -45,7 +45,7 @@ async function confirmDelete() {
           @update:model-value="(v) => { s.filters.subjectId = (typeof v === 'number' ? v : null); s.applyFilters() }"
         />
       </div>
-      <div class="min-w-0 flex-1 sm:max-w-xs">
+      <div class="w-full sm:w-auto sm:min-w-0 sm:flex-1 sm:max-w-xs">
         <UiInput type="search" :model-value="s.filters.name" :placeholder="t('common.searchPlaceholder')" @input="onSearch">
           <template #prefix><UiIcon :icon="Search" :size="16" /></template>
         </UiInput>

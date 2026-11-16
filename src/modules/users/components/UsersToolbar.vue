@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <div class="min-w-0 flex-1 sm:max-w-xs">
+    <div class="w-full sm:w-auto sm:min-w-0 sm:flex-1 sm:max-w-xs">
       <UiInput type="search" :model-value="name" :placeholder="t('users.filter.namePlaceholder')" @input="onName">
         <template #prefix><UiIcon :icon="Search" :size="16" /></template>
       </UiInput>
     </div>
-    <div class="min-w-0 flex-1 sm:max-w-xs">
+    <div class="w-full sm:w-auto sm:min-w-0 sm:flex-1 sm:max-w-xs">
       <UiInput type="search" :model-value="phone" :placeholder="t('users.filter.phonePlaceholder')" @input="onPhone" />
     </div>
     <UiButton v-if="canCreate" class="ml-auto" @click="emit('create')">

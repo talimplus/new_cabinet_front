@@ -1,5 +1,5 @@
 <template>
-  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
     <UiSelect
       :model-value="year"
       :options="yearOptions"
@@ -19,6 +19,7 @@
     <!-- Picking a teacher narrows the group list to that teacher's groups. -->
     <UiSelect
       v-if="canViewTeachers"
+      class="col-span-2 sm:col-span-1"
       :model-value="teacherId"
       :options="teacherOptions"
       :placeholder="t('payments.filters.teacher')"
@@ -26,6 +27,7 @@
     />
     <UiSelect
       v-if="canViewGroups"
+      class="col-span-2 sm:col-span-1"
       :model-value="groupId"
       :options="groupOptions"
       :placeholder="t('payments.filters.group')"

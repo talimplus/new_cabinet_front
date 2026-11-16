@@ -56,7 +56,7 @@ async function onDelete(center: Center) {
 <template>
   <div class="space-y-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="w-full max-w-xs">
+      <div class="w-full sm:max-w-xs">
         <UiInput :model-value="params.name" :placeholder="t('common.searchPlaceholder')" @input="onSearch" />
       </div>
       <UiButton v-if="canManageCenters" @click="openCreate"

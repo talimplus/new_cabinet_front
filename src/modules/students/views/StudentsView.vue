@@ -46,7 +46,7 @@ const del = useStudentDelete(() => s.load())
 <template>
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-3">
-      <div class="min-w-0 flex-1 sm:max-w-xs">
+      <div class="w-full sm:w-auto sm:min-w-0 sm:flex-1 sm:max-w-xs">
         <UiInput type="search" :model-value="s.filters.search" :placeholder="t('common.searchPlaceholder')" @input="onSearch">
           <template #prefix><UiIcon :icon="Search" :size="16" /></template>
         </UiInput>
