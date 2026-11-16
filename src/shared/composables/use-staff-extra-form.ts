@@ -1,9 +1,9 @@
 import { computed, reactive } from 'vue'
-import { createStaffAdvance, createStaffBonus } from '@/shared/api/staff-extras.api'
+import { createStaffAdvance, createStaffBonus, updateStaffAdvance, updateStaffBonus } from '@/shared/api/staff-extras.api'
 import { useNotificationStore } from '@/stores/notification.store'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { formatSom } from '@/shared/utils/format-money'
-import { StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'
+import { StaffExtraKind, STAFF_EXTRA_TITLE_KEYS, STAFF_EXTRA_EDIT_TITLE_KEYS } from '@/shared/enums/staff-extra-kind.enum'
 import type { StaffExtraTarget } from '@/shared/interfaces/staff-extras.interface'
 import { t } from '@/locales'
 
@@ -51,6 +51,8 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
   })
 
   const isBonus = computed(() => form.kind === StaffExtraKind.BONUS)
+  const editing = computed(() => !!form.target?.edit)
+  const title = computed(() => t(editing.value ? STAFF_EXTRA_EDIT_TITLE_KEYS[form.kind] : STAFF_EXTRA_TITLE_KEYS[form.kind]))
   /** "Noyabr 2026 oyligidan — odatda Dekabr 2026 da beriladi." */
   const monthHint = computed(() => {
     if (!/^\d{4}-\d{2}$/.test(form.forMonth)) return ''
@@ -61,6 +63,11 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
   })
 
   function open(kind: StaffExtraKind, target: StaffExtraTarget): void {
+    const edit = target.edit
+    if (edit) {
+      Object.assign(form, { open: true, kind, target, amount: edit.amount, forMonth: edit.forMonth.slice(0, 7), text: edit.text, errors: {} })
+      return
+    }
     const forMonth = kind === StaffExtraKind.BONUS ? (target.month?.slice(0, 7) || monthKey()) : monthKey()
     Object.assign(form, { open: true, kind, target, amount: null, forMonth, text: '', errors: {} })
   }
@@ -87,16 +94,21 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
   async function submit(): Promise<void> {
     if (!form.target || !validate()) return
     const amount = form.amount ?? 0
-    const base = { userId: form.target.userId, amount, forMonth: form.forMonth }
+    const base = { amount, forMonth: form.forMonth }
+    const userId = form.target.userId
+    const editId = form.target.edit?.id
     form.saving = true
     try {
       if (isBonus.value) {
-        await createStaffBonus({ ...base, reason: form.text.trim() })
-        notify.success(t('payroll.extras.bonusSuccess', { amount: formatSom(amount) }))
+        const reason = form.text.trim()
+        if (editId) await updateStaffBonus(editId, { ...base, reason })
+        else await createStaffBonus({ ...base, userId, reason })
       } else {
-        await createStaffAdvance({ ...base, comment: form.text.trim() || undefined })
-        notify.success(t('payroll.extras.advanceSuccess', { amount: formatSom(amount) }))
+        // On edit an empty comment is sent as '' so a wrong one can be cleared.
+        if (editId) await updateStaffAdvance(editId, { ...base, comment: form.text.trim() })
+        else await createStaffAdvance({ ...base, userId, comment: form.text.trim() || undefined })
       }
+      notify.success(successText(editId, amount))
       form.open = false
       await onSaved()
     } catch (e) {
@@ -109,5 +121,10 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
     }
   }
 
-  return { form, isBonus, monthHint, open, setField, close, submit }
+  function successText(editId: number | undefined, amount: number): string {
+    if (editId) return t('payroll.extras.updated', { amount: formatSom(amount) })
+    return t(isBonus.value ? 'payroll.extras.bonusSuccess' : 'payroll.extras.advanceSuccess', { amount: formatSom(amount) })
+  }
+
+  return { form, isBonus, editing, title, monthHint, open, setField, close, submit }
 }

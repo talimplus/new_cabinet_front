@@ -37,6 +37,7 @@
       @remove="s.removeDeduction"
       @remove-advance="onRemoved(extras.removeAdvance($event))"
       @remove-bonus="onRemoved(extras.removeBonus($event))"
+      @extra-saved="onExtraSaved"
     />
   </div>
 

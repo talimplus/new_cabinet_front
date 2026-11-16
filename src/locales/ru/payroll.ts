@@ -29,6 +29,9 @@ export default {
     bonus: 'Премия',
   },
   extras: {
+    advanceEditTitle: 'Изменить аванс',
+    bonusEditTitle: 'Изменить премию',
+    updated: 'Сохранено: {amount}. Зарплата пересчитана',
     advanceTitle: 'Выдать аванс',
     bonusTitle: 'Начислить премию',
     worker: 'Сотрудник',

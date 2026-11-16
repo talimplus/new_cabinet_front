@@ -16,6 +16,33 @@ export interface StaffBonusForm {
   reason: string
 }
 
+/** An existing advance / bonus opened for correction (`PATCH /staff/{advances|bonuses}/{id}`). */
+export interface StaffExtraEdit {
+  id: number
+  amount: number
+  /** "YYYY-MM" or "YYYY-MM-DD" — only the month is used. */
+  forMonth: string
+  /** Advance comment or bonus reason. */
+  text: string
+}
+
+/** `PATCH /staff/advances/{id}` — every field optional on the backend; the dialog sends all three. */
+export interface StaffAdvancePatch {
+  amount: number
+  /** "YYYY-MM". */
+  forMonth: string
+  /** '' clears the comment (the backend stores "Avans"). */
+  comment: string
+}
+
+/** `PATCH /staff/bonuses/{id}` — lowering / moving a bonus already paid out → 400. */
+export interface StaffBonusPatch {
+  amount: number
+  /** "YYYY-MM", never in the future. */
+  forMonth: string
+  reason: string
+}
+
 /** Who the extras dialog is opened for. */
 export interface StaffExtraTarget {
   userId: number
@@ -23,4 +50,6 @@ export interface StaffExtraTarget {
   name: string
   /** "YYYY-MM" — a bonus defaults to it (e.g. the payroll row's month); else the current month. */
   month?: string
+  /** Set = correct this existing record instead of creating a new one. */
+  edit?: StaffExtraEdit
 }

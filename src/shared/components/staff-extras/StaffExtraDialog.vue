@@ -1,5 +1,5 @@
 <template>
-  <UiModal :model-value="f.form.open" :title="t(STAFF_EXTRA_TITLE_KEYS[f.form.kind])" size="sm" @update:model-value="f.close">
+  <UiModal :model-value="f.form.open" :title="f.title.value" size="sm" @update:model-value="f.close">
     <div v-if="f.form.target" class="space-y-3">
       <p class="rounded-md bg-surface-muted px-3 py-2 text-sm">
         <span class="text-muted-foreground">{{ t('payroll.extras.worker') }}:</span>
@@ -53,7 +53,7 @@ import UiTextarea from '../UiTextarea.vue'
 import UiButton from '../UiButton.vue'
 import { cn } from '@/shared/utils/cn'
 import { useStaffExtraForm } from '@/shared/composables/use-staff-extra-form'
-import { STAFF_EXTRA_TITLE_KEYS, StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'
+import type { StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'
 import type { StaffExtraTarget } from '@/shared/interfaces/staff-extras.interface'
 
 const { t } = useI18n()

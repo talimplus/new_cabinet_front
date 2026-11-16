@@ -10,3 +10,9 @@ export const STAFF_EXTRA_TITLE_KEYS: Record<StaffExtraKind, string> = {
   [StaffExtraKind.ADVANCE]: 'payroll.extras.advanceTitle',
   [StaffExtraKind.BONUS]: 'payroll.extras.bonusTitle',
 }
+
+/** Dialog title when an existing record is being corrected. */
+export const STAFF_EXTRA_EDIT_TITLE_KEYS: Record<StaffExtraKind, string> = {
+  [StaffExtraKind.ADVANCE]: 'payroll.extras.advanceEditTitle',
+  [StaffExtraKind.BONUS]: 'payroll.extras.bonusEditTitle',
+}

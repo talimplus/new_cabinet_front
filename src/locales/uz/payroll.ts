@@ -29,6 +29,9 @@ export default {
     bonus: 'Mukofot',
   },
   extras: {
+    advanceEditTitle: 'Avansni tahrirlash',
+    bonusEditTitle: 'Mukofotni tahrirlash',
+    updated: 'Saqlandi: {amount}. Oylik qayta hisoblandi',
     advanceTitle: 'Avans berish',
     bonusTitle: 'Mukofot berish',
     worker: 'Xodim',

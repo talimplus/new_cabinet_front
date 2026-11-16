@@ -22,6 +22,13 @@
     <template #actions="{ row }">
       <UiIconButton
         v-if="canManage"
+        :icon="Pencil"
+        :label="t('common.edit')"
+        :disabled="busy"
+        @click="emit('edit', row as StaffDeductionRow)"
+      />
+      <UiIconButton
+        v-if="canManage"
         :icon="Trash2"
         tone="danger"
         :label="t('common.delete')"
@@ -36,7 +43,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge, UiIconButton } from '@/shared/components'
-import { Trash2 } from '@/shared/icons'
+import { Pencil, Trash2 } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import { formatMonth } from '@/shared/utils/format-month'
 import StaffAuthorCell from './StaffAuthorCell.vue'
@@ -47,7 +54,7 @@ const { t } = useI18n()
 
 /** `canManage` = an admin with `payroll.pay`; the employee's own page only reads. */
 defineProps<{ rows: StaffDeductionRow[]; canManage?: boolean; busy?: boolean }>()
-const emit = defineEmits<{ remove: [row: StaffDeductionRow] }>()
+const emit = defineEmits<{ remove: [row: StaffDeductionRow]; edit: [row: StaffDeductionRow] }>()
 
 const columns = computed<TableColumn[]>(() => [
   { key: 'sourceForMonth', label: t('staff.table.month'), primary: true },
