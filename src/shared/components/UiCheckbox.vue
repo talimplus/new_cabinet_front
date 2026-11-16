@@ -53,7 +53,10 @@ interface Props extends FormControlProps<boolean> {
   indeterminate?: boolean
 }
 
-const props = defineProps<Props>()
+// `modelValue: undefined` on purpose: Vue casts an absent boolean prop to `false`,
+// which as the field's initialValue overrode the form's `initialValues`
+// (an edited default center showed its "default" box unchecked).
+const props = withDefaults(defineProps<Props>(), { modelValue: undefined })
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const id = useId()
