@@ -17,6 +17,7 @@
     <h1 class="hidden truncate text-base font-semibold text-foreground sm:block">{{ title }}</h1>
 
     <div class="ml-auto flex min-w-0 items-center gap-1">
+      <AppCheckInButton />
       <AppCenterSwitcher />
       <UiLocaleToggle />
       <UiThemeToggle />
@@ -57,6 +58,7 @@ import {
 } from '@/shared/components'
 import { Menu, LogOut, User } from '@/shared/icons'
 import AppCenterSwitcher from './AppCenterSwitcher.vue'
+import AppCheckInButton from './AppCheckInButton.vue'
 import { useUserStore } from '@/stores/user.store'
 import { USER_ROLE_LABEL_KEYS } from '@/shared/enums/user-role.enum'
 

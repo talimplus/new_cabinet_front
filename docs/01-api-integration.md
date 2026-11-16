@@ -1096,7 +1096,7 @@ already applied to a **paid** salary cannot be removed.
             "expectedDays","attendedDays","missedDays","lateDays",
             "totalLateMinutes","flaggedDays" }] }
 ```
-Check-in is **one record per day** — pressing again returns the existing one with
+Check-in is allowed for base roles **teacher** and **reception** only (others → 403); reception sees the button in the header (`AppCheckInButton`), teachers on `/today`; reception has no lessons, so `lateMinutes` stays 0 and no `no_lesson_today` flag. Check-in is **one record per day** — pressing again returns the existing one with
 `alreadyCheckedIn: true`. Geo/device data is optional; omitting it only lowers
 `confidence` (`high|medium|low`) and adds `flags`
 (`no_geo, low_gps_accuracy, far_from_center, ip_mismatch, center_not_configured,
