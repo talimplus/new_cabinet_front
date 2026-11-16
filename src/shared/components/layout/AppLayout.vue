@@ -13,7 +13,8 @@
           too: /groups/1 → /groups/2 (a link on the group timeline) must load
           the other group, not keep the mounted one. Query changes don't remount.
         -->
-        <RouterView :key="`center-${scope.activeCenterId ?? 'all'}:${route.path}`" />
+        <!-- A switcher waits for the center list: the default center is picked there, so the page loads once. -->
+        <RouterView v-if="scope.settled || !scope.canSwitch" :key="`center-${scope.activeCenterId ?? 'all'}:${route.path}`" />
       </main>
     </div>
   </div>

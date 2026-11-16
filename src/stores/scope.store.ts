@@ -6,18 +6,25 @@ import { UserRole } from '@/shared/enums/user-role.enum'
 import type { Center } from '@/modules/centers/interfaces/center.interface'
 
 const STORAGE_KEY = 'activeCenterId'
+/** Stored when the user picked "All centers" — so it is not mistaken for "no choice yet". */
+const ALL_CENTERS = 'all'
 
 /** Base role types that may switch centers — the owner side of the org (§7). */
 const SWITCHER_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.SUPER_ADMIN]
 
-function readStored(): number | null {
+/**
+ * The choice made in this session: a center id, `null` = "All centers",
+ * `undefined` = nothing chosen yet (fresh login) → the default center is used.
+ */
+function readStored(): number | null | undefined {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
+    if (!raw) return undefined
+    if (raw === ALL_CENTERS) return null
     const id = Number(raw)
-    return Number.isFinite(id) && id > 0 ? id : null
+    return Number.isFinite(id) && id > 0 ? id : undefined
   } catch {
-    return null
+    return undefined
   }
 }
 
@@ -32,14 +39,22 @@ function readStored(): number | null {
  * `activeCenterId === null` means **"All centers"**: no `centerId` is sent and
  * the backend answers for the whole organization.
  *
+ * After every login the **default center** (`isDefault`, set on the Centers
+ * page) is selected; a choice made in the header then lasts until logout.
+ *
  * A non-admin cannot switch — the backend pins them to `req.user.centerId`
  * anyway, so the frontend sends nothing and shows their center as a chip.
  */
 export const useScopeStore = defineStore('scope', () => {
   const centers = ref<Center[]>([])
-  const activeCenterId = ref<number | null>(readStored())
+  const stored = readStored()
+  const activeCenterId = ref<number | null>(stored ?? null)
+  /** No choice yet this session — `loadCenters` picks the default center. */
+  let pickDefault = stored === undefined
   const loading = ref(false)
   const loaded = ref(false)
+  /** The first load finished (even if it failed) — the layout waits for it. */
+  const settled = ref(false)
 
   const userStore = useUserStore()
 
@@ -76,9 +91,9 @@ export const useScopeStore = defineStore('scope', () => {
 
   function setActive(id: number | null): void {
     activeCenterId.value = id
+    pickDefault = false
     try {
-      if (id === null) localStorage.removeItem(STORAGE_KEY)
-      else localStorage.setItem(STORAGE_KEY, String(id))
+      localStorage.setItem(STORAGE_KEY, id === null ? ALL_CENTERS : String(id))
     } catch {
       /* storage unavailable (private mode) */
     }
@@ -92,21 +107,29 @@ export const useScopeStore = defineStore('scope', () => {
     try {
       centers.value = await fetchAllCenters()
       loaded.value = true
-      // A stored center that no longer exists falls back to "All centers".
-      if (activeCenterId.value !== null && !centers.value.some((c) => c.id === activeCenterId.value)) {
-        setActive(null)
-      }
+      const missing = activeCenterId.value !== null && !centers.value.some((c) => c.id === activeCenterId.value)
+      // Fresh login (or a stored center that no longer exists) → the default center.
+      if (canSwitch.value && (pickDefault || missing)) setActive(defaultCenter.value?.id ?? null)
     } catch {
       centers.value = []
     } finally {
       loading.value = false
+      settled.value = true
     }
   }
 
+  /** Logout / login: forget the choice so the next session starts on the default center. */
   function reset(): void {
     centers.value = []
     loaded.value = false
-    setActive(null)
+    settled.value = false
+    activeCenterId.value = null
+    pickDefault = true
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      /* storage unavailable (private mode) */
+    }
   }
 
   return {
@@ -120,6 +143,7 @@ export const useScopeStore = defineStore('scope', () => {
     centerIdForCreate,
     loading,
     loaded,
+    settled,
     loadCenters,
     setActive,
     reset,

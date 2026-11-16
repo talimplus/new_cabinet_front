@@ -32,6 +32,10 @@ export const useUserStore = defineStore('user', () => {
   async function login(form: LoginForm): Promise<AuthUser> {
     const { access_token, user: authUser } = await loginApi(form)
     localStorage.setItem(TOKEN_KEY, access_token)
+    // Every login starts on the default center, even if the last session
+    // ended without a logout (expired token). Lazy import — circular otherwise.
+    const { useScopeStore } = await import('@/stores/scope.store')
+    useScopeStore().reset()
     user.value = authUser
     return authUser
   }

@@ -83,7 +83,7 @@ describe('scope store', () => {
   })
 
   describe('setActive', () => {
-    it('persists the choice and clears it for "All centers"', () => {
+    it('persists the choice, "All centers" included', () => {
       signIn(UserRole.ADMIN)
       const store = useScopeStore()
 
@@ -93,16 +93,33 @@ describe('scope store', () => {
 
       store.setActive(null)
       expect(store.activeCenterId).toBeNull()
-      expect(localStorage.getItem('activeCenterId')).toBeNull()
+      expect(localStorage.getItem('activeCenterId')).toBe('all')
     })
 
-    it('falls back to "All centers" when the stored center is gone', async () => {
+    it('falls back to the default center when the stored center is gone', async () => {
       localStorage.setItem('activeCenterId', '99')
       signIn(UserRole.ADMIN)
       mockedFetchAll.mockResolvedValueOnce(CENTERS)
       const store = useScopeStore()
 
       expect(store.activeCenterId).toBe(99)
+      await store.loadCenters()
+      expect(store.activeCenterId).toBe(2)
+    })
+
+    it('selects the default center on a fresh login', async () => {
+      signIn(UserRole.ADMIN)
+      mockedFetchAll.mockResolvedValueOnce(CENTERS)
+      const store = useScopeStore()
+      await store.loadCenters()
+      expect(store.activeCenterId).toBe(2)
+    })
+
+    it('keeps "All centers" once the user picked it', async () => {
+      localStorage.setItem('activeCenterId', 'all')
+      signIn(UserRole.ADMIN)
+      mockedFetchAll.mockResolvedValueOnce(CENTERS)
+      const store = useScopeStore()
       await store.loadCenters()
       expect(store.activeCenterId).toBeNull()
     })
@@ -153,6 +170,7 @@ describe('scope store', () => {
     })
 
     it('falls back to the default center on "All centers"', async () => {
+      localStorage.setItem('activeCenterId', 'all')
       signIn(UserRole.ADMIN)
       mockedFetchAll.mockResolvedValueOnce(CENTERS)
       const store = useScopeStore()
