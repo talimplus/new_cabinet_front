@@ -3,11 +3,16 @@
     <p class="text-sm font-semibold text-foreground">{{ label }}</p>
     <p class="mt-0.5 text-xs text-muted-foreground">{{ hint }}</p>
 
+    <!--
+      Flex, not grid: in a grid with an auto row `max-h-full` resolves against
+      an indefinite height and a big logo spilled over the blocks below.
+      `h-full w-full object-contain` always fits the image inside the box.
+    -->
     <div
-      class="mt-2 grid place-items-center rounded-lg border border-dashed border-border bg-surface-muted p-3"
-      :class="variant === 'favicon' ? 'h-24 w-24' : 'h-24'"
+      class="mt-2 flex items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-surface-muted p-3"
+      :class="variant === 'favicon' ? 'h-24 w-24' : 'h-24 w-full'"
     >
-      <img v-if="modelValue" :src="modelValue" :alt="label" class="max-h-full max-w-full object-contain" />
+      <img v-if="modelValue" :src="modelValue" :alt="label" class="h-full w-full object-contain" />
       <span v-else class="flex flex-col items-center gap-1 text-xs text-muted-foreground">
         <UiIcon :icon="ImageOff" :size="20" />
         {{ t('organization.noImage') }}
