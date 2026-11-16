@@ -1,5 +1,6 @@
 import type { GroupStatus } from '@/modules/groups/enums/group-status.enum'
 import type { PaymentStatus } from '@/modules/payments/enums/payment-status.enum'
+import type { StudentStatus } from '@/modules/students/enums/student-status.enum'
 import type { SalaryStatus } from '../enums/salary-status.enum'
 
 /** Query for GET /teachers/me/dashboard. */
@@ -36,9 +37,37 @@ export interface TeacherDashboardTotals extends TeacherPaymentStats {
   groupsCount: number
   /** Active students now in the teacher's groups, each counted once. */
   studentsCount: number
-  /** Unpaid balance of every month up to the chosen one (the debtors' sum). */
+  /** Unpaid balance of every month up to the chosen one (Σ `groups[].totalDebt`). */
   totalDebt: number
   attendance: TeacherAttendanceStats
+}
+
+/**
+ * One student of a group for the chosen month — every member, not only
+ * debtors. The money fields are the month's payment row (0 when there is none).
+ */
+export interface TeacherGroupStudent {
+  studentId: number
+  groupId: number
+  firstName: string
+  lastName: string
+  phone: string | null
+  studentStatus: StudentStatus
+  /** First day in the group (`YYYY-MM-DD`); null without an enrollment window. */
+  joinedAt: string | null
+  /** Left the group on this day (exclusive); null while still a member. */
+  leftAt: string | null
+  /** The chosen month's row status; null when there is no row for the month. */
+  monthStatus: PaymentStatus | null
+  amountDue: number
+  amountPaid: number
+  /** Handed in, waiting for the admin to confirm. */
+  pendingAmount: number
+  /** `amountDue − amountPaid` of the month. */
+  monthDebt: number
+  /** Every unpaid month in this group up to the chosen one. */
+  totalDebt: number
+  debtMonths: number
 }
 
 export interface TeacherDashboardGroup extends TeacherPaymentStats {
@@ -46,7 +75,11 @@ export interface TeacherDashboardGroup extends TeacherPaymentStats {
   name: string
   status: GroupStatus
   studentsCount: number
+  /** Unpaid balance of this group, all months up to the chosen one. */
+  totalDebt: number
   attendance: TeacherAttendanceStats
+  /** Sorted by last name. */
+  students: TeacherGroupStudent[]
 }
 
 export interface TeacherDashboardTrendPoint {
@@ -143,6 +176,6 @@ export interface TeacherDashboardResponse {
   groups: TeacherDashboardGroup[]
   /** The 6 months ending with the chosen one, oldest first. */
   trend: TeacherDashboardTrendPoint[]
-  /** Biggest debt first, at most 100. */
+  /** Biggest debt first, at most 100. Kept for compatibility — the page reads `groups[].students`. */
   debtors: TeacherDashboardDebtor[]
 }

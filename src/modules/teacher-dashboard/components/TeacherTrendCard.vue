@@ -1,14 +1,19 @@
 <template>
   <section class="min-w-0 space-y-5 rounded-lg border border-border bg-surface p-4 shadow-card">
-    <h3 class="text-sm font-semibold text-foreground">{{ t('teacherDashboard.trend.title') }}</h3>
-    <!-- Money and attendance have different units, so they are two charts — never one with two axes. -->
-    <div class="space-y-2">
-      <p class="text-xs font-medium text-muted-foreground">{{ t('teacherDashboard.trend.money') }}</p>
-      <UiColumnChart :categories="money" :series="moneySeries" :format="formatSom" />
+    <div>
+      <h3 class="text-sm font-semibold text-foreground">{{ t('teacherDashboard.trend.title') }}</h3>
+      <p class="text-xs text-muted-foreground">{{ t('teacherDashboard.trend.hint') }}</p>
     </div>
-    <div class="space-y-2">
-      <p class="text-xs font-medium text-muted-foreground">{{ t('teacherDashboard.trend.attendanceRate') }}</p>
-      <UiColumnChart :categories="attendance" :series="attendanceSeries" :format="percent" :axis-format="percent" :max="100" />
+    <!-- Money and attendance have different units, so they are two charts — never one with two axes. -->
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="min-w-0 space-y-2">
+        <p class="text-xs font-medium text-muted-foreground">{{ t('teacherDashboard.trend.money') }}</p>
+        <UiColumnChart :categories="money" :series="moneySeries" :format="formatSom" />
+      </div>
+      <div class="min-w-0 space-y-2">
+        <p class="text-xs font-medium text-muted-foreground">{{ t('teacherDashboard.trend.attendanceRate') }}</p>
+        <UiColumnChart :categories="attendance" :series="attendanceSeries" :format="percent" :axis-format="percent" :max="100" />
+      </div>
     </div>
   </section>
 </template>

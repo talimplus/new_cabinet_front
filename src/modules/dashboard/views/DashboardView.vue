@@ -1,44 +1,32 @@
 <template>
-  <div class="space-y-5">
-    <DashboardFilters
-      :from-month="range.fromMonth"
-      :to-month="range.toMonth"
-      @update:from="setFromMonth"
-      @update:to="setToMonth"
+  <div class="space-y-6">
+    <DateRangeFilter
+      :range="o.period.range"
+      :preset="o.period.preset.value"
+      :label="o.period.label.value"
+      @preset="o.period.setPreset"
+      @range="o.period.set"
     />
-
-    <div class="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4 shadow-card">
-      <div class="min-w-0">
-        <p class="text-xs font-medium text-muted-foreground">{{ t('statistics.netCashflow') }}</p>
-        <p :class="cn('mt-1 truncate font-mono text-2xl font-bold', netTone)">{{ formatSom(data?.netCashflow) }}</p>
-      </div>
-      <UiSpinner v-if="loading" :size="22" class="shrink-0 text-muted-foreground" />
-      <UiIcon v-else :icon="net >= 0 ? TrendingUp : TrendingDown" :size="28" :class="cn('shrink-0', netTone)" />
-    </div>
-
-    <DashboardStats :data="data" />
-    <DashboardDetails :data="data" />
-    <DashboardMonthly :data="data" />
+    <StatsSummary :lines="s.lines.value" :level="s.level.value" :label="o.period.label.value" :loading="o.loading.value" />
+    <StatsMoneySection :data="o.data.value" :query="o.period.query.value" />
+    <StatsBillingCard :data="o.data.value" :query="o.period.query.value" />
+    <StatsStudentsSection :data="o.data.value" :query="o.period.query.value" />
+    <StatsTrendSection />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { UiSpinner, UiIcon } from '@/shared/components'
-import { cn } from '@/shared/utils/cn'
-import { formatSom } from '@/shared/utils/format-money'
-import { TrendingUp, TrendingDown } from '@/shared/icons'
-import DashboardFilters from '../components/DashboardFilters.vue'
-import DashboardStats from '../components/DashboardStats.vue'
-import DashboardDetails from '../components/DashboardDetails.vue'
-import DashboardMonthly from '../components/DashboardMonthly.vue'
-import { useDashboard } from '../composables/use-dashboard'
+import { onMounted } from 'vue'
+import { useStatsOverview } from '../composables/use-stats-overview'
+import { useStatsSummary } from '../composables/use-stats-summary'
+import DateRangeFilter from '../components/DateRangeFilter.vue'
+import StatsSummary from '../components/StatsSummary.vue'
+import StatsMoneySection from '../components/StatsMoneySection.vue'
+import StatsBillingCard from '../components/StatsBillingCard.vue'
+import StatsStudentsSection from '../components/StatsStudentsSection.vue'
+import StatsTrendSection from '../components/StatsTrendSection.vue'
 
-const { t } = useI18n()
-const { data, loading, range, init, setFromMonth, setToMonth } = useDashboard()
-onMounted(init)
-
-const net = computed(() => data.value?.netCashflow ?? 0)
-const netTone = computed(() => (net.value >= 0 ? 'text-success' : 'text-danger'))
+const o = useStatsOverview()
+const s = useStatsSummary(o.data)
+onMounted(o.load)
 </script>

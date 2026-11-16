@@ -37,6 +37,13 @@ const appChildren: RouteRecordRaw[] = [
     meta: { titleKey: 'layout.menu.statistics', permission: [Permission.STATISTICS_VIEW] },
   },
   {
+    // Inner pages of the statistics blocks; `:kind` is a StatsDetailKind, the period rides in ?from=&to=.
+    path: 'statistics/:kind(income|expenses|salaries|students|debts)',
+    name: 'statistics-detail',
+    component: () => import('@/modules/dashboard/views/StatsDetailView.vue'),
+    meta: { titleKey: 'layout.menu.statistics', permission: [Permission.STATISTICS_VIEW] },
+  },
+  {
     // Open on purpose: any signed-in user edits their own profile; it is also the
     // resolved-home fallback, so it must always be reachable (no `permission`).
     path: 'profile',

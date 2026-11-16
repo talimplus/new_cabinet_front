@@ -1032,8 +1032,10 @@ the total and fine / advance (−) separately in the deduction cell
 | DELETE | `/staff/deductions/{id}` | — (404 for an advance) |
 | POST | `/staff/advances` | `{ userId*, amount*, forMonth?(YYYY-MM, ≤ next month), comment? }` → deduction row, `type:'advance'` · `payroll.pay` |
 | DELETE | `/staff/advances/{id}` | — → `{ success: true }` · `payroll.pay` |
+| PATCH | `/staff/advances/{id}` | `{ amount?, forMonth?(≤ next month, checked only if changed), comment? }` → updated deduction row. Advance is un-applied from every salary and withheld again (FIFO) from the new month on; `paidAmount` untouched · `payroll.pay` |
 | POST | `/staff/bonuses` | `{ userId*, amount*, forMonth?(YYYY-MM, ≤ current), reason* }` → `{ id,userId,amount,reason,forMonth:'YYYY-MM-01',createdAt,createdBy }` · `payroll.pay` |
 | DELETE | `/staff/bonuses/{id}` | — → `{ success: true }`; 400 once paid out · `payroll.pay` |
+| PATCH | `/staff/bonuses/{id}` | `{ amount?, forMonth?(≤ current), reason? }` → bonus row; old and new month salaries re-synced; 400 if lowering/moving a bonus already paid out · `payroll.pay` |
 | GET | `/staff/{userId}/bonuses` | — → **bare array** · `staffPerformance.view` |
 
 `POST /staff/deductions` rejects `type:'advance'` (400) — fines and advances are
@@ -1246,6 +1248,18 @@ Telegram (`getMe`) when set — the username is derived, never typed. The token 
 never returned, only `botTokenMasked`. `debtReminderDay` is **1–28**.
 `send-now` ignores the `notifyDebt` switch (the button was pressed on purpose).
 
+### 5.17a Statistics by day range (2026-11-16)
+
+All `statistics.view`, `acceptsCenterId: true`. Verified against the live API.
+
+| Endpoint | Params | Response |
+|---|---|---|
+| `GET /statistics/overview` | `fromDate`, `toDate` (`YYYY-MM-DD`, inclusive; default — current month) | `StatsOverviewResponse`: `income` (confirmed receipts by paid day, `byMethod`), `pending`, `refunds`, `expenses`, `salaries` (+`salaryAmount`/`advanceAmount`), `balance`, `billing` (months the range touches: due/paid/pending/collectable + counts, `debtorsCount`), `students` (`active` now; `started`/`registered`/`stopped` in range), `billingFromMonth/ToMonth` |
+| `GET /statistics/trend` | `months` = 3/6/12/24 | `{ points: [{ month, income, charged, students, started, stopped }] }` — independent of the page period |
+| `GET /statistics/details/:kind` | `kind` ∈ `income\|expenses\|salaries\|students\|debts`; range + `page`, `perPage`, `search`; income `status=confirmed\|pending`; students `kind=active\|started\|registered\|stopped` | `{ fromDate, toDate, data[], meta, summary: { count, amount } }` — row shapes in `modules/dashboard/interfaces/stats-details.interface.ts` |
+
+Frontend: `/` (statistics) and `/statistics/:kind` (inner pages). The period lives in `?from=&to=` and is carried into the inner page; the trend switch is `?trend=6|12`.
+
 ### 5.18a Teacher dashboard (2026-11-11)
 `GET /teachers/me/dashboard` — `month?` (`YYYY-MM`, default current), `teacherId?`
 (ignored for a `teacher`-role user, who always gets themself; anyone else must
@@ -1258,7 +1272,7 @@ current groups that are unfinished or still open in that month.
   "totals":{ "groupsCount","studentsCount",          // active members, distinct
              "paidCount","partialCount","unpaidCount", // the month's payment rows
              "amountDue","amountPaid","debt","pendingAmount",
-             "totalDebt",                               // all months ≤ month (= Σ debtors)
+             "totalDebt",                               // all months ≤ month (= Σ groups[].totalDebt, uncapped)
              "attendance":{"present","late","absent","excused","rate"} }, // rate % or null
   "earning":{"baseSalary","commission","carryOver","total"} | null,
   "salary":{ "row":{ "baseSalary","bonusAmount","deductionAmount","advanceAmount","fineAmount",
@@ -1268,12 +1282,27 @@ current groups that are unfinished or still open in that month.
              "bonuses":[{ "id","amount","reason","createdAt" }],          // this month
              "advances":[{ "id","amount","appliedAmount","comment","createdAt" }], // from this month
              "advanceOutstanding" },                                      // not withheld yet
-  "groups":[{ "id","name","status","studentsCount", …payment fields, "attendance":{…} }],
+  "groups":[{ "id","name","status","studentsCount", …payment fields,
+              "totalDebt",                              // this group, all months ≤ month
+              "attendance":{…},
+              // 2026-11-16: EVERY student of the group for the month (not only debtors):
+              // enrollment window touches the month, OR a payment row for the month,
+              // OR unpaid balance left in this group (even after leaving). Sorted by lastName.
+              "students":[{ "studentId","groupId","firstName","lastName","phone",
+                            "studentStatus",            // students.status (ACTIVE uppercase)
+                            "joinedAt":"YYYY-MM-DD"|null, "leftAt":"YYYY-MM-DD"|null, // leftAt exclusive; null = still a member
+                            "monthStatus":"paid|partial|unpaid"|null, // null = no row this month
+                            "amountDue","amountPaid","pendingAmount","monthDebt", // the month's row
+                            "totalDebt","debtMonths" }] }],          // all months ≤ month
   "trend":[{ "month":"2026-06","amountDue","amountPaid","attendanceRate" }], // 6, oldest first
   "debtors":[{ "studentId","groupId","firstName","lastName","phone","groupName",
                "totalDebt","monthDebt","debtMonths","monthStatus","pendingAmount" }] } // ≤100
 ```
+Verified 2026-11-16 by running the `groups[].students` SQL on the local DB.
 Front: `modules/teacher-dashboard` (`/my-dashboard`, menu "Mening statistikam").
+The front derives a per-student state (`StudentPayState`): no row → `none`;
+`paid`; `amountPaid + pendingAmount >= amountDue` with pending → `pending`
+(handed in, waiting for admin); else `partial` / `unpaid`.
 
 ### 5.18 Teacher today (1)
 `GET /teachers/me/today` — `centerId?` (admin only).

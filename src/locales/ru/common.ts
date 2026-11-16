@@ -9,6 +9,7 @@ export default {
   edit: 'Редактировать',
   create: 'Создать',
   refresh: 'Обновить',
+  details: 'Подробнее',
   add: 'Добавить',
   search: 'Поиск',
   close: 'Закрыть',

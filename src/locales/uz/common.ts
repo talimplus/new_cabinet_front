@@ -9,6 +9,7 @@ export default {
   edit: 'Tahrirlash',
   create: 'Yaratish',
   refresh: 'Yangilash',
+  details: "Batafsil ko'rish",
   add: "Qo'shish",
   search: 'Qidirish',
   close: 'Yopish',

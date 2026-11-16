@@ -1,6 +1,7 @@
 <template>
   <UiFieldShell :label="label" :hint="hint" :error="errorMessage" :required="required" :for-id="id">
     <VueDatePicker
+      ref="picker"
       :uid="id"
       v-model="model"
       :dark="isDark"
@@ -22,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { useId } from 'vue'
+import { ref, useId } from 'vue'
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { useFormControl, type FormControlProps } from '@/shared/composables/use-form-control'
 import { useTheme } from '@/shared/composables/use-theme'
@@ -55,6 +56,10 @@ const emit = defineEmits<{ 'update:modelValue': [value: DateModel] }>()
 const id = useId()
 const { isDark } = useTheme()
 const { model, errorMessage, handleBlur } = useFormControl<DateModel>(props, emit)
+
+const picker = ref<{ openMenu: () => void } | null>(null)
+/** Open the calendar from outside (e.g. a calendar icon button next to it). */
+defineExpose({ open: () => picker.value?.openMenu() })
 </script>
 
 <style scoped>

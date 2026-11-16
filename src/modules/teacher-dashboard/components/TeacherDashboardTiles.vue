@@ -21,9 +21,9 @@ import { formatMoneyShort, formatSom } from '@/shared/utils/format-money'
 import type { TeacherDashboardResponse } from '../interfaces/teacher-dashboard.interface'
 
 const { t } = useI18n()
-const props = defineProps<{ data: TeacherDashboardResponse }>()
+const props = defineProps<{ data: TeacherDashboardResponse; debtorsCount: number }>()
 
-/** The headline numbers — a tile each, the detail lives in the cards below. */
+/** The headline numbers — a tile each, with a one-line meaning under the figure. */
 const tiles = computed(() => {
   const s = props.data.totals
   const collected = s.amountDue ? Math.round((s.amountPaid / s.amountDue) * 100) : 0
@@ -38,12 +38,14 @@ const tiles = computed(() => {
     },
     {
       label: t('teacherDashboard.tiles.monthDebt'), value: formatMoneyShort(s.debt),
-      hint: s.pendingAmount ? t('teacherDashboard.tiles.pending', { amount: formatSom(s.pendingAmount) }) : undefined,
+      hint: s.pendingAmount
+        ? t('teacherDashboard.tiles.pending', { amount: formatSom(s.pendingAmount) })
+        : t('teacherDashboard.tiles.monthDebtHint'),
       icon: ReceiptText, tone: 'danger' as const,
     },
     {
       label: t('teacherDashboard.tiles.totalDebt'), value: formatMoneyShort(s.totalDebt),
-      hint: t('teacherDashboard.tiles.debtors', { count: props.data.debtors.length }), icon: Wallet, tone: 'warning' as const,
+      hint: t('teacherDashboard.tiles.debtors', { count: props.debtorsCount }), icon: Wallet, tone: 'warning' as const,
     },
     {
       label: t('teacherDashboard.tiles.attendance'),

@@ -20,23 +20,23 @@
       <UiSpinner :size="24" class="mx-auto text-muted-foreground" />
     </div>
     <template v-else-if="d.data.value">
-      <TeacherDashboardTiles :data="d.data.value" />
+      <TeacherDashboardTiles :data="d.data.value" :debtors-count="d.list.debtorsCount.value" />
+      <TeacherStudentsSection
+        :filters="d.filters"
+        :list="d.list"
+        :has-groups="d.data.value.groups.length > 0"
+        :can-open-group="canViewGroups"
+        :can-open-student="canViewStudents"
+        @change="d.patchFilters"
+        @open-group="(id) => router.push(`/groups/${id}`)"
+        @open-student="(id) => router.push({ name: 'student-card', params: { id } })"
+      />
       <div class="grid gap-4 lg:grid-cols-2">
         <TeacherPaymentsCard :totals="d.data.value.totals" />
         <TeacherAttendanceCard :attendance="d.data.value.totals.attendance" />
       </div>
-      <div class="grid gap-4 lg:grid-cols-2">
-        <TeacherSalaryCard :salary="d.data.value.salary" />
-        <TeacherTrendCard :trend="d.data.value.trend" />
-      </div>
-      <TeacherGroupsTable :groups="d.data.value.groups" :can-open="canViewGroups" @open="(g) => router.push(`/groups/${g.id}`)" />
-      <TeacherDebtorsTable
-        :debtors="d.debtors.value"
-        :filter="d.filters.debtors"
-        :can-open="canViewStudents"
-        @update:filter="d.filters.debtors = $event"
-        @open="(x) => router.push({ name: 'student-card', params: { id: x.studentId } })"
-      />
+      <TeacherSalaryCard :salary="d.data.value.salary" />
+      <TeacherTrendCard :trend="d.data.value.trend" />
     </template>
   </div>
 </template>
@@ -51,12 +51,11 @@ import { usePermissions } from '@/shared/composables/use-permissions'
 import { useTeacherDashboard } from '../composables/use-teacher-dashboard'
 import TeacherDashboardFilters from '../components/TeacherDashboardFilters.vue'
 import TeacherDashboardTiles from '../components/TeacherDashboardTiles.vue'
+import TeacherStudentsSection from '../components/TeacherStudentsSection.vue'
 import TeacherPaymentsCard from '../components/TeacherPaymentsCard.vue'
 import TeacherAttendanceCard from '../components/TeacherAttendanceCard.vue'
-import TeacherGroupsTable from '../components/TeacherGroupsTable.vue'
 import TeacherTrendCard from '../components/TeacherTrendCard.vue'
 import TeacherSalaryCard from '../components/TeacherSalaryCard.vue'
-import TeacherDebtorsTable from '../components/TeacherDebtorsTable.vue'
 
 const { t } = useI18n()
 const router = useRouter()

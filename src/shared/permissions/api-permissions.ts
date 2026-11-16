@@ -33,7 +33,7 @@ export enum HttpMethod {
   DELETE = 'DELETE',
 }
 
-const { GET, POST, PUT, DELETE } = HttpMethod
+const { GET, POST, PUT, PATCH, DELETE } = HttpMethod
 
 export const API_PERMISSIONS: ApiPermissionRule[] = [
   // ---- auth / organization (open) ----
@@ -214,8 +214,10 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   // param segment can never swallow the literal `advances` / `bonuses`.
   { method: POST, path: '/staff/advances', permissions: [Permission.PAYROLL_PAY] },
   { method: DELETE, path: '/staff/advances/:id', permissions: [Permission.PAYROLL_PAY] },
+  { method: PATCH, path: '/staff/advances/:id', permissions: [Permission.PAYROLL_PAY] },
   { method: POST, path: '/staff/bonuses', permissions: [Permission.PAYROLL_PAY] },
   { method: DELETE, path: '/staff/bonuses/:id', permissions: [Permission.PAYROLL_PAY] },
+  { method: PATCH, path: '/staff/bonuses/:id', permissions: [Permission.PAYROLL_PAY] },
   { method: GET, path: '/staff/me/overview', permissions: [Permission.STAFF_ATTENDANCE_VIEW_OWN] },
   {
     method: GET,
@@ -251,6 +253,9 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
 
   // ---- statistics ----
   { method: GET, path: '/statistics/dashboard', permissions: [Permission.STATISTICS_VIEW], acceptsCenterId: true },
+  { method: GET, path: '/statistics/overview', permissions: [Permission.STATISTICS_VIEW], acceptsCenterId: true },
+  { method: GET, path: '/statistics/trend', permissions: [Permission.STATISTICS_VIEW], acceptsCenterId: true },
+  { method: GET, path: '/statistics/details/:kind', permissions: [Permission.STATISTICS_VIEW], acceptsCenterId: true },
 
   // ---- syllabuses ----
   { method: POST, path: '/syllabuses/ai/chat', permissions: [Permission.SYLLABUS_AI] },
