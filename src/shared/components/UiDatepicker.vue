@@ -6,7 +6,7 @@
       v-model="model"
       :dark="isDark"
       :enable-time-picker="enableTime"
-      :range="range"
+      :range="range ? RANGE_CONFIG : false"
       :month-picker="monthPicker"
       :format="format"
       :placeholder="placeholder"
@@ -18,7 +18,10 @@
       :teleport="true"
       :state="errorMessage ? false : undefined"
       @blur="handleBlur"
-    />
+    >
+      <!-- Optional custom trigger (e.g. an icon button): replaces the input, click toggles the calendar. -->
+      <template v-if="$slots.trigger" #trigger><slot name="trigger" /></template>
+    </VueDatePicker>
   </UiFieldShell>
 </template>
 
@@ -52,6 +55,13 @@ const props = withDefaults(defineProps<Props>(), {
   clearable: true,
 })
 const emit = defineEmits<{ 'update:modelValue': [value: DateModel] }>()
+
+/**
+ * A range is emitted only once BOTH ends are picked. The package default
+ * (`partialRange: true`) auto-applies after the first click, so a parent that
+ * reacts to the model re-renders the picker and the second click is lost.
+ */
+const RANGE_CONFIG = { partialRange: false }
 
 const id = useId()
 const { isDark } = useTheme()

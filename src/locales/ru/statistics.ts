@@ -7,8 +7,6 @@ export default {
     week: 'Эта неделя',
     month: 'Этот месяц',
     custom: 'Выбрать в календаре',
-    from: 'С какого дня',
-    to: 'По какой день',
   },
   summary: {
     title: 'Коротко',

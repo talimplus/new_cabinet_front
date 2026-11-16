@@ -12,42 +12,33 @@
         >
           {{ t(DATE_PRESET_LABEL_KEYS[p]) }}
         </button>
-        <button
-          type="button"
-          :aria-pressed="showPicker"
-          :aria-label="t('statistics.period.custom')"
-          :title="t('statistics.period.custom')"
-          :class="cn('grid h-10 w-10 place-items-center rounded-sm transition-colors md:h-8 md:w-9', showPicker ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')"
-          @click="toggleCalendar"
+        <!-- The icon IS the calendar trigger: no input field, the calendar opens right under it. -->
+        <UiDatepicker
+          range
+          :clearable="false"
+          :model-value="dates"
+          @update:model-value="onPick"
         >
-          <UiIcon :icon="CalendarRange" :size="16" />
-        </button>
+          <template #trigger>
+            <button
+              type="button"
+              :aria-pressed="preset === DatePreset.CUSTOM"
+              :aria-label="t('statistics.period.custom')"
+              :title="t('statistics.period.custom')"
+              :class="cn('grid h-10 w-10 place-items-center rounded-sm transition-colors md:h-8 md:w-9', preset === DatePreset.CUSTOM ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')"
+            >
+              <UiIcon :icon="CalendarRange" :size="16" />
+            </button>
+          </template>
+        </UiDatepicker>
       </div>
       <span class="min-w-0 font-mono text-sm text-muted-foreground">{{ label }}</span>
-    </div>
-    <!-- Two plain pickers (from / to): a single range calendar was unreliable on phones. -->
-    <div v-if="showPicker" class="grid grid-cols-2 gap-2 sm:max-w-md">
-      <UiDatepicker
-        ref="fromPicker"
-        :model-value="from"
-        :label="t('statistics.period.from')"
-        :clearable="false"
-        :max-date="to ?? undefined"
-        @update:model-value="pickFrom"
-      />
-      <UiDatepicker
-        :model-value="to"
-        :label="t('statistics.period.to')"
-        :clearable="false"
-        :min-date="from ?? undefined"
-        @update:model-value="pickTo"
-      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiDatepicker, UiIcon } from '@/shared/components'
 import { CalendarRange } from '@/shared/icons'
@@ -61,34 +52,13 @@ const props = defineProps<{ range: StatsRangeParams; preset: DatePreset; label: 
 const emit = defineEmits<{ preset: [value: DatePreset]; range: [value: StatsRangeParams] }>()
 
 const quick = [DatePreset.TODAY, DatePreset.WEEK, DatePreset.MONTH]
-const fromPicker = ref<{ open: () => void } | null>(null)
-const opened = ref<boolean | null>(null)
-/** Open by default for a custom period; the icon toggles it either way. */
-const showPicker = computed(() => opened.value ?? props.preset === DatePreset.CUSTOM)
-const from = computed(() => parseDate(props.range.fromDate))
-const to = computed(() => parseDate(props.range.toDate))
+const dates = computed(() => [parseDate(props.range.fromDate), parseDate(props.range.toDate)].filter((d): d is Date => !!d))
 
-async function toggleCalendar(): Promise<void> {
-  opened.value = !showPicker.value
-  if (!opened.value) return
-  await nextTick()
-  fromPicker.value?.open()
-}
-
-const day = (v: Date | Date[] | null): string | null => {
-  const d = Array.isArray(v) ? v[0] : v
-  return d ? toDateString(d) : null
-}
-
-/** A start after the end pulls the end along (and vice versa) — never an empty range. */
-function pickFrom(value: Date | Date[] | null): void {
-  const fromDate = day(value)
-  if (!fromDate) return
-  emit('range', { fromDate, toDate: props.range.toDate >= fromDate ? props.range.toDate : fromDate })
-}
-function pickTo(value: Date | Date[] | null): void {
-  const toDate = day(value)
-  if (!toDate) return
-  emit('range', { fromDate: props.range.fromDate <= toDate ? props.range.fromDate : toDate, toDate })
+/** The picker emits only a complete range (`partialRange: false` in UiDatepicker). */
+function onPick(value: Date | Date[] | null): void {
+  if (!Array.isArray(value) || !value[0]) return
+  const a = toDateString(value[0])
+  const b = toDateString(value[1] ?? value[0])
+  emit('range', a <= b ? { fromDate: a, toDate: b } : { fromDate: b, toDate: a })
 }
 </script>

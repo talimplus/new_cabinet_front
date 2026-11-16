@@ -7,8 +7,6 @@ export default {
     week: 'Shu hafta',
     month: 'Shu oy',
     custom: 'Kalendardan tanlash',
-    from: 'Qaysi kundan',
-    to: 'Qaysi kungacha',
   },
   summary: {
     title: 'Qisqacha xulosa',
