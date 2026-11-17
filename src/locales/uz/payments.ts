@@ -166,6 +166,7 @@ export default {
     enterValidAmount: "Iltimos, to'g'ri miqdorni kiriting",
     amountExceeds: 'Miqdor qolgan summadan oshmasligi kerak',
     partialSuccess: "{amount} miqdoridagi qisman to'lov qabul qilindi",
+    writeOffSuccess: 'Summa chiqarib tashlandi, bu oy uchun qarz qolmadi',
     partialError: "To'lovni qayta ishlashda xatolik",
     exportSuccess: 'Excel fayl yuklab olindi',
     exportError: "Excel faylni yuklashda xatolik",

@@ -81,7 +81,7 @@ const emit = defineEmits<{
 }>()
 
 const { method, paidAt, comment, toForm } = useReceptionForm(() => props.open)
-const { amount, exclusion, payable, error, valid, setExclusion } = usePartialAmount(
+const { amount, exclusion, payable, writeOffOnly, error, valid, setExclusion } = usePartialAmount(
   () => props.payment,
   () => props.calculation,
   () => props.open,
@@ -93,7 +93,8 @@ function onClearDate(): void {
 }
 
 function submit(): void {
-  if (!amount.value) return
-  emit('confirm', { amount: amount.value, exclusion: exclusion.value.form, reception: toForm() })
+  if (!valid.value) return
+  const only = writeOffOnly.value
+  emit('confirm', { amount: only ? 0 : (amount.value ?? 0), exclusion: exclusion.value.form, reception: toForm(), writeOffOnly: only })
 }
 </script>

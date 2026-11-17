@@ -208,6 +208,13 @@ export function usePayments() {
     try {
       // The write-off is stored first so mark-as-paid reads the reduced total.
       if (submit.exclusion) await applyExclusion(markDialog.payment.id, submit.exclusion)
+      if (submit.exclusion && submit.writeOffOnly) {
+        notify.success(t('payments.messages.writeOffSuccess'))
+        markDialog.open = false
+        markDialog.payment = null
+        await load()
+        return
+      }
       const { check } = await markAsPaid(markDialog.payment.id, submit.reception)
       notify.success(t('payments.messages.markSuccess'))
       markDialog.open = false
@@ -253,7 +260,8 @@ export function usePayments() {
   }
 
   async function confirmPartial(submit: PartialSubmit): Promise<void> {
-    if (!partial.payment || submit.amount <= 0) return
+    const writeOffOnly = !!submit.exclusion && !!submit.writeOffOnly
+    if (!partial.payment || (submit.amount <= 0 && !writeOffOnly)) return
     partial.loading = true
     try {
       if (partial.plannedStudyUntilDate) {
@@ -262,19 +270,20 @@ export function usePayments() {
         })
       }
       if (submit.exclusion) await applyExclusion(partial.payment.id, submit.exclusion)
-      const { check } = await payPartial(partial.payment.id, {
-        amount: submit.amount,
-        ...submit.reception,
-      })
+      const check = writeOffOnly
+        ? null
+        : (await payPartial(partial.payment.id, { amount: submit.amount, ...submit.reception })).check
       notify.success(
-        t('payments.messages.partialSuccess', { amount: formatSom(submit.amount) }),
+        writeOffOnly
+          ? t('payments.messages.writeOffSuccess')
+          : t('payments.messages.partialSuccess', { amount: formatSom(submit.amount) }),
       )
       partial.open = false
       partial.payment = null
       partial.calculation = null
       partial.plannedStudyUntilDate = null
       await load()
-      checks.showChecks([check])
+      if (check) checks.showChecks([check])
     } finally {
       partial.loading = false
     }

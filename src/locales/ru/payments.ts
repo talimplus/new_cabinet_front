@@ -164,6 +164,7 @@ export default {
     enterValidAmount: 'Пожалуйста, введите корректную сумму',
     amountExceeds: 'Сумма не должна превышать остаток',
     partialSuccess: 'Частичный платёж на сумму {amount} принят',
+    writeOffSuccess: 'Сумма списана, долга за этот месяц не осталось',
     partialError: 'Ошибка при обработке платежа',
     exportSuccess: 'Excel-файл загружен',
     exportError: 'Ошибка при выгрузке в Excel',

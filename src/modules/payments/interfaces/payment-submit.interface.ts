@@ -9,6 +9,11 @@ import type { ExclusionForm } from './payment-exclusion.interface'
 export interface MarkAsPaidSubmit {
   exclusion: ExclusionForm | null
   reception: PaymentReceptionForm
+  /**
+   * The write-off alone closes the month — nothing is left to collect, so only
+   * apply-exclusion is sent (the backend rejects a zero / already-paid payment).
+   */
+  writeOffOnly?: boolean
 }
 
 export interface PartialSubmit extends MarkAsPaidSubmit {
