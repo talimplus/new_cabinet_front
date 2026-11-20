@@ -330,19 +330,21 @@ A teacher's groups are **not** on this row — they come with the employee page
 `GET /users/me` additionally returns `organization {…}`, `centerId`,
 `organizationId`, `roleId`, `roleName`.
 
-### 5.4 Roles & permissions (5)
+### 5.4 Roles & permissions (6)
 | Method | Path | Params / Body | Response |
 |---|---|---|---|
 | GET | `/roles` | — | **bare array** of Role |
 | GET | `/roles/permissions` | — | **bare array** of PermissionGroup |
 | POST | `/roles` | `{ name*, baseRole*, permissions*[], key? }` | Role |
 | PUT | `/roles/{id}` | `{ name?, baseRole?, permissions?[] }` | Role |
+| POST | `/roles/{id}/reset` | — | Role — system role back to the preset name + permissions (403 locked, 400 custom role) |
 | DELETE | `/roles/{id}` | — | — |
 
 ```jsonc
 // Role
 { "id":2, "key":"admin", "name":"Administrator", "baseRole":"admin",
   "permissions":["*"], "isSystem":true, "isLocked":true, "userCount":1,
+  "canReset":false, "isDefault":true,   // 2026-11-20: reset available / equals the preset
   "createdAt":"…", "updatedAt":"…" }
 
 // PermissionGroup
@@ -456,6 +458,16 @@ The status cell shows "Tasdiqlash kutilmoqda" instead of "To'lanmagan"; the
 - `POST /students/{id}/start-date/preview` `{ startDate, groupIds? }` — same
   `rows/totals/paidSalaryMonths` shape as the group preview (+ `startDate`);
   `groupIds` omitted = activation. Perm `students.changeStatus` OR `students.update`.
+- **Personal price → group price (2026-11-20):**
+  `POST /students/{id}/personal-fee/clear/preview` `{ fromMonth? }` → `{ fromMonth,
+  defaultFromMonth, minMonth, personalFee, rows, totals, paidSalaryMonths }`
+  (backdate preview shape; `fromMonth` omitted = month the student was activated).
+  `POST /students/{id}/personal-fee/clear` `{ fromMonth }` → `{ studentId, fromMonth }`:
+  `students.monthlyFee = 0`, `student_base_discounts` price 0 from that month (discount
+  kept, earlier months keep the old price), rows from that month to now rebilled with
+  force (paid too: overpaid → `refundedAmount`). Month: ≤ current, ≥ 24 months back
+  (422 `fromMonth`); no personal price left → 400. Perm `students.personalFee`.
+  UI: card header `StudentCardFee` + `StudentPersonalFeeDialog`.
 - UI: `StudentStartDialog` — activation always asks the date (today → no
   preview); the edit form shows "Yangi guruhga qo'shilgan sana" when a group is added.
 

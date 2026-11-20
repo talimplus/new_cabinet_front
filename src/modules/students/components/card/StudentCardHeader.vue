@@ -19,12 +19,7 @@
     </UiBadge>
 
     <div class="ms-auto flex flex-wrap items-center gap-4">
-      <div class="text-right">
-        <p class="text-xs text-muted-foreground">{{ t('students.view.card.monthlyFee') }}</p>
-        <p class="font-mono text-lg font-semibold text-foreground">
-          {{ formatSom(student?.monthlyFee ?? 0) }}
-        </p>
-      </div>
+      <StudentCardFee :student="student" @changed="emit('changed')" />
       <UiButton v-if="canReactivate" variant="outline" @click="student && reactivateRef?.open(student.id, fullName, student.centerId)">
         <UiIcon :icon="RotateCcw" :size="16" />
         {{ t('students.reactivate.action') }}
@@ -38,7 +33,7 @@
         {{ t('common.delete') }}
       </UiButton>
     </div>
-    <StudentReactivateDialog ref="reactivateRef" @done="emit('reactivated')" />
+    <StudentReactivateDialog ref="reactivateRef" @done="emit('changed')" />
   </div>
 </template>
 
@@ -49,7 +44,7 @@ import { UiBadge, UiButton, UiIcon, UiBackButton } from '@/shared/components'
 import { Pencil, Trash2, RotateCcw } from '@/shared/icons'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import StudentReactivateDialog from './StudentReactivateDialog.vue'
-import { formatSom } from '@/shared/utils/format-money'
+import StudentCardFee from './StudentCardFee.vue'
 import { formatPhone } from '@/shared/utils/format-phone'
 import {
   STUDENT_STATUS_LABEL_KEYS,
@@ -68,7 +63,8 @@ const props = defineProps<{
   /** Permission + NEW status — decided by `useStudentDelete().canDelete`. */
   canDelete?: boolean
 }>()
-const emit = defineEmits<{ edit: []; delete: []; reactivated: [] }>()
+/** `changed` — returned to active or switched to the group price: the card reloads. */
+const emit = defineEmits<{ edit: []; delete: []; changed: [] }>()
 
 /** Stopped / finished — e.g. a status set by mistake — goes back to active from a date. */
 const { canChangeStudentStatus } = usePermissions()

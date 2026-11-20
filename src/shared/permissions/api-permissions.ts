@@ -76,6 +76,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/roles', permissions: [Permission.ROLES_VIEW] },
   { method: POST, path: '/roles', permissions: [Permission.ROLES_MANAGE] },
   { method: PUT, path: '/roles/:id', permissions: [Permission.ROLES_MANAGE] },
+  { method: POST, path: '/roles/:id/reset', permissions: [Permission.ROLES_MANAGE] },
   { method: DELETE, path: '/roles/:id', permissions: [Permission.ROLES_MANAGE] },
 
   // ---- centers ----
@@ -97,6 +98,8 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/students/:id/reactivation', permissions: [Permission.STUDENTS_CHANGE_STATUS] },
   { method: POST, path: '/students/:id/leave-group', permissions: [Permission.STUDENTS_CHANGE_STATUS] },
   { method: POST, path: '/students/:id/start-date/preview', permissions: [Permission.STUDENTS_CHANGE_STATUS, Permission.STUDENTS_UPDATE] },
+  { method: POST, path: '/students/:id/personal-fee/clear/preview', permissions: [Permission.STUDENTS_PERSONAL_FEE] },
+  { method: POST, path: '/students/:id/personal-fee/clear', permissions: [Permission.STUDENTS_PERSONAL_FEE] },
   { method: GET, path: '/students/:id/discount-periods', permissions: [Permission.STUDENTS_DISCOUNTS] },
   { method: POST, path: '/students/:id/discount-periods', permissions: [Permission.STUDENTS_DISCOUNTS] },
   { method: PUT, path: '/students/:id/discount-periods/:periodId', permissions: [Permission.STUDENTS_DISCOUNTS] },

@@ -83,6 +83,7 @@ which the `/roles` page renders directly — do not re-translate them locally).
 | `students.delete` | O'quvchini o'chirish | Удаление ученика |
 | `students.changeStatus` | O'quvchi statusini o'zgartirish | Изменение статуса ученика |
 | `students.discounts` | Chegirmalarni boshqarish | Управление скидками |
+| `students.personalFee` | O'quvchiga shaxsiy oylik narx belgilash | Установка личной ежемесячной цены ученика |
 | `students.transfer` | Boshqa guruhga ko'chirish | Перевод в другую группу |
 
 ### leads — Lidlar (qabul) / Лиды (приём)
@@ -315,6 +316,7 @@ automatically (`01-api-integration.md` §2.6).
 | GET | `/roles/permissions` | `roles.view` | |
 | POST | `/roles` | `roles.manage` | |
 | PUT | `/roles/:id` | `roles.manage` | |
+| POST | `/roles/:id/reset` | `roles.manage` | system role → preset (2026-11-20) |
 | DELETE | `/roles/:id` | `roles.manage` | |
 | GET | `/centers` | `centers.view` | |
 | GET | `/centers/all` | — | |
@@ -333,6 +335,7 @@ automatically (`01-api-integration.md` §2.6).
 | POST | `/students/:id/start-date/preview` | `students.changeStatus` OR `students.update` | backdate preview |
 | GET | `/students/:id/attendance` | `attendance.view` | all groups, former too |
 | GET/POST/PUT/DELETE | `/students/:id/discount-periods[/:periodId]` | `students.discounts` | |
+| POST | `/students/:id/personal-fee/clear` · `…/clear/preview` | `students.personalFee` | switch to the group price |
 | POST | `/students/transfer` · `/students/transfer/preview` | `students.transfer` | |
 | POST | `/students/:id/leave-group` | `students.changeStatus` | |
 | GET | `/groups` · `/groups/all` · `/group/all` | `groups.view` | ⊕ |
@@ -504,6 +507,23 @@ then three collapsible groups. A group disappears when all its items are hidden.
 | **Sozlamalar** | Bayram kunlari (`schedule.view`) · Markazlar (`centers.view`) · Fanlar (`subjects.view`) · Xonalar (`rooms.view`) · Tashkilot (`organization.settings`) · Telegram (`telegram.settings`) |
 
 ---
+
+## 6.1 Personal price — `students.personalFee` (2026-11-20)
+
+In **no** preset — by default only the admin (`*`) has it. Reception used to type
+the group price into the student's personal price by mistake; a later group price
+change then never reached that student.
+
+- Without the key the `monthlyFee` field is hidden in the student form (create +
+  edit) and the lead form, and never sent. The backend also refuses (403) a
+  `monthlyFee` that differs from the stored one on `POST/PUT /students`,
+  `POST/PUT /leads`, `POST /leads/:id/transfer-to-student`; an unchanged value passes.
+- With the key, emptying the field on edit sends `0` (group price) — before it
+  sent nothing and the stored price silently stayed.
+- Old mistakes: the student card shows "Guruh narxiga o'tkazish" (personal price
+  > 0 + key) — see `01-api-integration.md` §5.6 "Personal price".
+- System roles stay editable; `/roles` shows "O'zgartirilgan" and a reset button
+  when a system role differs from its preset (`canReset && !isDefault`).
 
 ## 7. Business rules that are NOT permissions
 

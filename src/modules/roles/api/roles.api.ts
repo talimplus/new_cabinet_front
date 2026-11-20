@@ -24,6 +24,12 @@ export async function updateRole(id: number, form: RoleUpdateForm): Promise<Role
   return data
 }
 
+/** System role back to its preset name + permissions; answers with the role. */
+export async function resetRole(id: number): Promise<Role> {
+  const { data } = await http.post<Role>(`/roles/${id}/reset`)
+  return data
+}
+
 export async function deleteRole(id: number): Promise<void> {
   await http.delete(`/roles/${id}`)
 }

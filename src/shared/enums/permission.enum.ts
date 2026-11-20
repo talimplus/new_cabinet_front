@@ -26,6 +26,8 @@ export enum Permission {
   STUDENTS_DELETE = 'students.delete',
   STUDENTS_CHANGE_STATUS = 'students.changeStatus',
   STUDENTS_DISCOUNTS = 'students.discounts',
+  /** Personal monthly price (`monthlyFee`) — in no preset, admin only by default. */
+  STUDENTS_PERSONAL_FEE = 'students.personalFee',
   STUDENTS_TRANSFER = 'students.transfer',
 
   // leads

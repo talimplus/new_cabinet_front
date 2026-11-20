@@ -49,6 +49,7 @@ export function usePermissions() {
     canDeleteStudent: computed(() => can(Permission.STUDENTS_DELETE)),
     canChangeStudentStatus: computed(() => can(Permission.STUDENTS_CHANGE_STATUS)),
     canManageDiscounts: computed(() => can(Permission.STUDENTS_DISCOUNTS)),
+    canSetPersonalFee: computed(() => can(Permission.STUDENTS_PERSONAL_FEE)),
     canTransferStudents: computed(() => can(Permission.STUDENTS_TRANSFER)),
 
     // ---- leads ----

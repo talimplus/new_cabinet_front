@@ -9,6 +9,7 @@ export default {
   badges: {
     system: 'Tizim roli',
     locked: 'O‘zgartirib bo‘lmaydi',
+    modified: 'O‘zgartirilgan',
   },
   table: {
     name: 'Rol',
@@ -36,6 +37,13 @@ export default {
     selectAll: 'Hammasini belgilash',
     clearAll: 'Tozalash',
     selectGroup: 'Guruhdagi hammasini belgilash',
+  },
+  reset: {
+    action: 'Boshlang‘ich holatga qaytarish',
+    title: 'Rolni boshlang‘ich holatga qaytarish',
+    confirm: '"{name}" rolining nomi va ruxsatlari tizimdagi boshlang‘ich holatga qaytariladi.',
+    hint: 'Shu rolga qo‘shgan yoki olib tashlagan ruxsatlaringiz bekor bo‘ladi. Bu roldagi xodimlar yangi ruxsatlarni qayta kirmasdan oladi.',
+    done: 'Rol boshlang‘ich holatga qaytarildi',
   },
   remove: {
     title: 'Rolni o‘chirish',

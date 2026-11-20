@@ -262,6 +262,17 @@ export default {
       payError: "To'lovni amalga oshirishda xatolik",
     },
   },
+  personalFee: {
+    personal: 'shaxsiy narx',
+    group: 'guruh narxi',
+    action: "Guruh narxiga o'tkazish",
+    title: "Shaxsiy narxni olib tashlash",
+    hint: "O'quvchiga {amount} shaxsiy narx yozilgan — guruh narxi o'zgarsa unga o'tmaydi. Tanlangan oydan boshlab guruh narxi ishlatiladi va to'lovlar (to'langanlari ham) qayta hisoblanadi. Undan oldingi oylar eski narxda qoladi, chegirma saqlanadi.",
+    fromMonth: 'Qaysi oydan guruh narxi',
+    fromMonthHint: "Odatda o'quvchi faollashgan oy",
+    confirm: "Guruh narxiga o'tkazish",
+    done: "{month} dan guruh narxi ishlatiladi",
+  },
   reactivate: {
     action: 'Qayta faollashtirish',
     title: '{name} — qayta faollashtirish',

@@ -12,7 +12,7 @@
         <UiPhoneInput v-model="form.phone" :label="t('students.form.phone')" :error="errors.phone" required />
         <UiPhoneInput v-model="form.secondPhone" :label="t('students.form.secondPhone')" :error="errors.secondPhone" />
         <UiDatepicker v-model="form.birthDate" :label="t('students.form.birthDate')" :error="errors.birthDate" />
-        <UiMoneyInput v-model="form.monthlyFee" :label="t('students.form.monthlyFee')" :error="errors.monthlyFee" />
+        <UiMoneyInput v-if="canSetPersonalFee" v-model="form.monthlyFee" :label="t('students.form.monthlyFee')" :error="errors.monthlyFee" />
         <UiSelect :model-value="form.preferredTime" :options="timeOptions" :label="t('students.form.preferredTime')" :searchable="false" @update:model-value="form.preferredTime = ($event as StudentPreferredTime | null)" />
         <UiSelect :model-value="form.preferredDays" :options="dayOptions" mode="multiple" :label="t('students.form.preferredDays')" @update:model-value="form.preferredDays = ($event as WeekDay[])" />
         <UiSelect v-if="showSubjects" :model-value="form.subjectIds" :options="subjects" mode="multiple" :label="t('students.form.subject')" :disabled="!form.centerId" @update:model-value="form.subjectIds = ($event as number[])" />
@@ -40,6 +40,7 @@ import { UiModal, UiInput, UiMoneyInput, UiPhoneInput, UiSelect, UiDatepicker, U
 import StudentIdentityFields from './StudentIdentityFields.vue'
 import StudentDiscountSection from './StudentDiscountSection.vue'
 import { useStudentForm } from '../composables/use-student-form'
+import { usePermissions } from '@/shared/composables/use-permissions'
 import { useBrandingStore } from '@/stores/branding.store'
 import { StudentPreferredTime, PREFERRED_TIME_LABEL_KEYS } from '../enums/student-preferred-time.enum'
 import { WeekDay, WEEK_DAY_LABEL_KEYS } from '@/modules/groups/enums/week-day.enum'
@@ -48,6 +49,8 @@ import type { StudentForm } from '../interfaces/student-form.interface'
 
 const { t } = useI18n()
 
+/** Personal price is admin-only by default — reception typed the group price there by mistake. */
+const { canSetPersonalFee } = usePermissions()
 const props = defineProps<{
   modelValue: boolean
   editing: Student | null
@@ -57,7 +60,7 @@ const props = defineProps<{
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; submit: [payload: StudentForm] }>()
 
 const { form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, reset, validate, toPayload, setBackendErrors, setGroupIds } =
-  useStudentForm(() => props.defaultCenterId)
+  useStudentForm(() => props.defaultCenterId, () => canSetPersonalFee.value)
 
 const timeOptions = computed(() =>
   Object.values(StudentPreferredTime).map((v) => ({ label: t(PREFERRED_TIME_LABEL_KEYS[v]), value: v })),

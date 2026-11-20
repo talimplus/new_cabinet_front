@@ -58,10 +58,16 @@ function blankState(centerId: number | null): StudentFormState {
  * discount block toggles between a single discount (percent OR amount) and a
  * list of periods (each optionally limited to one group).
  */
-export function useStudentForm(defaultCenterId: () => number | null) {
+export function useStudentForm(
+  defaultCenterId: () => number | null,
+  /** `students.personalFee` — without it the price field is hidden and never sent. */
+  canSetPersonalFee: () => boolean = () => true,
+) {
   const { subjects, groups, referrers, loadFor, clear } = useStudentOptions()
 
   const form = reactive<StudentFormState>(blankState(defaultCenterId()))
+  /** Personal price stored when the edit opened (0 — the group price is used). */
+  let storedFee = 0
   const errors = reactive<Record<string, string>>({})
   /**
    * The subject only matters at reception: once the student is active (or
@@ -110,6 +116,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     isEditing = !!editing
     isEditingRef.value = !!editing
     baseline = { enabled: false, freeMonths: 0 }
+    storedFee = Number(editing?.monthlyFee ?? 0)
     originalGroupIds.value = [...(editing?.groupIds ?? [])]
     showSubjects.value = !editing || editing.status === StudentStatus.NEW
     if (editing) fillFrom(editing)
@@ -192,8 +199,7 @@ export function useStudentForm(defaultCenterId: () => number | null) {
     if (addedGroupIds.value.length && joined && joined < toDateString(new Date())) {
       payload.groupJoinedAt = joined
     }
-    const fee = num(form.monthlyFee)
-    if (fee !== undefined) payload.monthlyFee = fee
+    applyFee(payload)
 
     // Identity: passport and jshshir are mutually exclusive.
     if (form.jshshir.trim()) {
@@ -205,6 +211,19 @@ export function useStudentForm(defaultCenterId: () => number | null) {
 
     applyDiscount(form, payload, baseline)
     return payload
+  }
+
+  /**
+   * Only with `students.personalFee` (the field is hidden otherwise and the
+   * group price applies). On edit an emptied field clears the stored price —
+   * sends 0, the group price — instead of silently keeping it. A stored
+   * mistake for past months is fixed by "Switch to the group price".
+   */
+  function applyFee(payload: StudentForm): void {
+    if (!canSetPersonalFee()) return
+    const fee = num(form.monthlyFee)
+    if (fee !== undefined) payload.monthlyFee = fee
+    else if (isEditing && storedFee > 0) payload.monthlyFee = 0
   }
 
   /**

@@ -68,7 +68,7 @@ const payable = computed(() => card.payableNow.value > 0)
         :can-delete="del.canDelete(card.student.value)"
         @edit="card.openEdit"
         @delete="card.student.value && del.request(card.student.value)"
-        @reactivated="card.load"
+        @changed="card.load"
       />
 
       <StudentInfoCard :student="card.student.value" :can-transfer="canTransferStudents" @transfer="openTransfer" />

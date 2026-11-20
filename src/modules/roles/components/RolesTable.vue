@@ -14,6 +14,9 @@
         <UiBadge v-else-if="(row as Role).isSystem" variant="neutral">{{
           t('roles.badges.system')
         }}</UiBadge>
+        <UiBadge v-if="(row as Role).canReset && !(row as Role).isDefault" variant="warning">{{
+          t('roles.badges.modified')
+        }}</UiBadge>
       </div>
     </template>
     <template #cell-baseRole="{ row }">{{ t(baseRoleLabelKey((row as Role).baseRole)) }}</template>
@@ -38,6 +41,12 @@
           @click="emit('edit', row as Role)"
         />
         <UiIconButton
+          v-if="canManage && (row as Role).canReset && !(row as Role).isDefault"
+          :icon="RotateCcw"
+          :label="t('roles.reset.action')"
+          @click="emit('reset', row as Role)"
+        />
+        <UiIconButton
           v-if="canManage && !(row as Role).isSystem && !(row as Role).isLocked"
           :icon="Trash2"
           tone="danger"
@@ -53,7 +62,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge, UiIcon, UiIconButton } from '@/shared/components'
-import { Pencil, Trash2 } from '@/shared/icons'
+import { Pencil, RotateCcw, Trash2 } from '@/shared/icons'
 import { ALL_PERMISSIONS } from '@/shared/enums/permission.enum'
 import { baseRoleLabelKey } from '../config/base-roles'
 import type { Role } from '../interfaces/role.interface'
@@ -62,7 +71,7 @@ import type { TableColumn } from '@/shared/interfaces/table-column.interface'
 const { t } = useI18n()
 
 defineProps<{ rows: Role[]; loading?: boolean; canManage?: boolean }>()
-const emit = defineEmits<{ edit: [role: Role]; delete: [role: Role] }>()
+const emit = defineEmits<{ edit: [role: Role]; delete: [role: Role]; reset: [role: Role] }>()
 
 const columns = computed<TableColumn[]>(() => [
   { key: 'name', label: t('roles.table.name') },

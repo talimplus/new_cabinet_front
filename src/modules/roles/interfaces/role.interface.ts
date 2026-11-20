@@ -15,6 +15,10 @@ export interface Role {
   permissions: string[]
   isSystem: boolean
   isLocked: boolean
+  /** System role with a preset — `POST /roles/{id}/reset` restores it (2026-11-20). */
+  canReset?: boolean
+  /** Name and permissions currently equal the preset (`true` for non-resettable roles). */
+  isDefault?: boolean
   userCount: number
   createdAt: string
   updatedAt: string

@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { fetchRoles, fetchPermissionCatalog, createRole, updateRole, deleteRole } from '../api/roles.api'
+import { fetchRoles, fetchPermissionCatalog, createRole, updateRole, deleteRole, resetRole } from '../api/roles.api'
 import { useNotificationStore } from '@/stores/notification.store'
 import { t } from '@/locales'
 import type { Role } from '../interfaces/role.interface'
@@ -20,6 +20,7 @@ export function useRoles() {
   const formOpen = ref(false)
   const editing = ref<Role | null>(null)
   const deleteTarget = ref<Role | null>(null)
+  const resetTarget = ref<Role | null>(null)
 
   async function load(): Promise<void> {
     loading.value = true
@@ -67,9 +68,21 @@ export function useRoles() {
     await load()
   }
 
+  function requestReset(role: Role): void {
+    resetTarget.value = role
+  }
+  /** System role → its preset (the default the center started with). */
+  async function confirmReset(): Promise<void> {
+    if (!resetTarget.value) return
+    await resetRole(resetTarget.value.id)
+    notify.success(t('roles.reset.done'))
+    resetTarget.value = null
+    await load()
+  }
+
   return {
     roles, catalog, loading,
-    formOpen, editing, deleteTarget,
-    load, openCreate, openEdit, submit, requestDelete, confirmDelete,
+    formOpen, editing, deleteTarget, resetTarget,
+    load, openCreate, openEdit, submit, requestDelete, confirmDelete, requestReset, confirmReset,
   }
 }

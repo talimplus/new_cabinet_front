@@ -8,6 +8,7 @@ import { useRoles } from '../composables/use-roles'
 import RolesTable from '../components/RolesTable.vue'
 import RoleFormModal from '../components/RoleFormModal.vue'
 import RoleDeleteDialog from '../components/RoleDeleteDialog.vue'
+import RoleResetDialog from '../components/RoleResetDialog.vue'
 import type { RoleForm } from '../interfaces/role-form.interface'
 
 const { t } = useI18n()
@@ -18,6 +19,11 @@ onMounted(r.load)
 const modalRef = ref<{ setBackendErrors: (e: unknown) => void } | null>(null)
 const saving = ref(false)
 const deleting = ref(false)
+const resetting = ref(false)
+const resetOpen = computed({
+  get: () => r.resetTarget.value !== null,
+  set: (open: boolean) => { if (!open) r.resetTarget.value = null },
+})
 const deleteOpen = computed({
   get: () => r.deleteTarget.value !== null,
   set: (open: boolean) => { if (!open) r.deleteTarget.value = null },
@@ -41,6 +47,14 @@ async function onConfirmDelete() {
     deleting.value = false
   }
 }
+async function onConfirmReset() {
+  resetting.value = true
+  try {
+    await r.confirmReset()
+  } finally {
+    resetting.value = false
+  }
+}
 </script>
 
 <template>
@@ -58,6 +72,7 @@ async function onConfirmDelete() {
       :can-manage="canManageRoles"
       @edit="r.openEdit"
       @delete="r.requestDelete"
+      @reset="r.requestReset"
     />
 
     <RoleFormModal
@@ -73,6 +88,12 @@ async function onConfirmDelete() {
       :role="r.deleteTarget.value"
       :loading="deleting"
       @confirm="onConfirmDelete"
+    />
+    <RoleResetDialog
+      v-model="resetOpen"
+      :role="r.resetTarget.value"
+      :loading="resetting"
+      @confirm="onConfirmReset"
     />
   </div>
 </template>

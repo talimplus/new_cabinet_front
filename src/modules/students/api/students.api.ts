@@ -1,5 +1,11 @@
 import { http } from '@/shared/api/http'
 import type {
+  PersonalFeeClearForm,
+  PersonalFeeClearResponse,
+  PersonalFeePreview,
+  PersonalFeePreviewForm,
+} from '../interfaces/student-personal-fee.interface'
+import type {
   StudentLeaveGroupForm,
   StudentLeaveGroupResponse,
 } from '../interfaces/student-leave-group.interface'
@@ -95,5 +101,23 @@ export async function previewStudentStartDate(
   form: StudentStartPreviewForm,
 ): Promise<StudentStartPreview> {
   const { data } = await http.post<StudentStartPreview>(`/students/${id}/start-date/preview`, form)
+  return data
+}
+
+/** POST /students/:id/personal-fee/clear/preview — impact of switching to the group price; writes nothing. */
+export async function previewClearPersonalFee(
+  id: number,
+  form: PersonalFeePreviewForm,
+): Promise<PersonalFeePreview> {
+  const { data } = await http.post<PersonalFeePreview>(`/students/${id}/personal-fee/clear/preview`, form)
+  return data
+}
+
+/** POST /students/:id/personal-fee/clear — from `fromMonth` the group price applies, payments are rebilled. */
+export async function clearPersonalFee(
+  id: number,
+  form: PersonalFeeClearForm,
+): Promise<PersonalFeeClearResponse> {
+  const { data } = await http.post<PersonalFeeClearResponse>(`/students/${id}/personal-fee/clear`, form)
   return data
 }

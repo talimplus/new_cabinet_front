@@ -45,7 +45,11 @@ function blankState(centerId: number | null): LeadFormState {
  * building. A lead carries no group — the group is chosen once it becomes a
  * student.
  */
-export function useLeadForm(defaultCenterId: () => number | null) {
+export function useLeadForm(
+  defaultCenterId: () => number | null,
+  /** `students.personalFee` — without it the price field is hidden and never sent. */
+  canSetPersonalFee: () => boolean = () => true,
+) {
   const form = reactive<LeadFormState>(blankState(defaultCenterId()))
   const errors = reactive<Record<string, string>>({})
 
@@ -105,8 +109,10 @@ export function useLeadForm(defaultCenterId: () => number | null) {
     if (form.preferredTime) payload.preferredTime = form.preferredTime
     if (form.preferredDays.length) payload.preferredDays = [...form.preferredDays]
     if (form.centerId != null) payload.centerId = form.centerId
+    // Without the key the field is hidden and nothing is sent — the student
+    // then pays the group price (reception used to type it here by mistake).
     const fee = num(form.monthlyFee)
-    if (fee !== undefined) payload.monthlyFee = fee
+    if (canSetPersonalFee() && fee !== undefined) payload.monthlyFee = fee
     const percent = num(form.discountPercent)
     if (percent !== undefined) payload.discountPercent = percent
     if (form.discountReason.trim()) payload.discountReason = form.discountReason.trim()
