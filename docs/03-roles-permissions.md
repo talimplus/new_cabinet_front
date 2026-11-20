@@ -514,12 +514,14 @@ In **no** preset — by default only the admin (`*`) has it. Reception used to t
 the group price into the student's personal price by mistake; a later group price
 change then never reached that student.
 
-- Without the key the `monthlyFee` field is hidden in the student form (create +
-  edit) and the lead form, and never sent. The backend also refuses (403) a
-  `monthlyFee` that differs from the stored one on `POST/PUT /students`,
-  `POST/PUT /leads`, `POST /leads/:id/transfer-to-student`; an unchanged value passes.
-- With the key, emptying the field on edit sends `0` (group price) — before it
-  sent nothing and the stored price silently stayed.
+- The price is **per group** (`groupFees`, one field per selected group in the
+  student form). Without the key those fields are hidden in the student form
+  (create + edit) and never sent. The lead form has **no** price field at all
+  (2026-11-20) — the price is set per group once the lead becomes a student. The
+  backend also refuses (403) a `monthlyFee` / `groupFees` value that differs from
+  the stored one on `POST/PUT /students`, `POST/PUT /leads`,
+  `POST /leads/:id/transfer-to-student`; an unchanged value passes.
+- With the key, emptying a group's field on edit sends `0` (group price).
 - Old mistakes: the student card shows "Guruh narxiga o'tkazish" (personal price
   > 0 + key) — see `01-api-integration.md` §5.6 "Personal price".
 - System roles stay editable; `/roles` shows "O'zgartirilgan" and a reset button

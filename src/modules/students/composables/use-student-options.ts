@@ -21,7 +21,8 @@ export function useStudentOptions() {
     ])
     subjects.value = s.data.map((x) => ({ label: x.name, value: x.id }))
     // `status` rides along: the form locks the student's ongoing groups.
-    groups.value = g.map((x) => ({ label: x.name, value: x.id, status: x.status }))
+    // `fee` — the group's price, shown as the hint of its personal price field.
+    groups.value = g.map((x) => ({ label: x.name, value: x.id, status: x.status, fee: Number(x.monthlyFee ?? 0) }))
     referrers.value = r.map((x) => ({
       label: `${x.firstName ?? ''} ${x.lastName ?? ''}`.trim() || `#${x.id}`,
       value: x.id,

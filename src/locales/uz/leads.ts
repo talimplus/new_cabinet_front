@@ -37,7 +37,6 @@ export default {
     phone: 'Telefon',
     secondPhone: '2-telefon',
     birthDate: "Tug'ilgan sana",
-    monthlyFee: "Oylik to'lov",
     heardAboutUs: 'Qayerdan eshitdi',
     preferredTime: 'Qulay vaqt',
     preferredDays: 'Qulay kunlar',

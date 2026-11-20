@@ -9,7 +9,6 @@ export interface LeadForm {
   phone: string
   secondPhone?: string
   birthDate?: string // "YYYY-MM-DD"
-  monthlyFee?: number
   discountPercent?: number
   discountReason?: string
   comment?: string

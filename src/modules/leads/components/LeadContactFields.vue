@@ -5,18 +5,15 @@
     <UiPhoneInput v-model="form.phone" :label="t('leads.form.phone')" :error="errors.phone" required />
     <UiPhoneInput v-model="form.secondPhone" :label="t('leads.form.secondPhone')" :error="errors.secondPhone" />
     <UiDatepicker v-model="form.birthDate" :label="t('leads.form.birthDate')" :error="errors.birthDate" />
-    <UiMoneyInput v-if="canSetPersonalFee" v-model="form.monthlyFee" :label="t('leads.form.monthlyFee')" :error="errors.monthlyFee" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiInput, UiMoneyInput, UiDatepicker, UiPhoneInput } from '@/shared/components'
+import { UiInput, UiDatepicker, UiPhoneInput } from '@/shared/components'
 import type { LeadFormState } from '../composables/use-lead-form'
 import { useI18n } from 'vue-i18n'
-import { usePermissions } from '@/shared/composables/use-permissions'
 
 const { t } = useI18n()
-const { canSetPersonalFee } = usePermissions()
 
 defineProps<{ form: LeadFormState; errors: Record<string, string> }>()
 </script>

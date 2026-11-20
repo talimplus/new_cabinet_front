@@ -37,7 +37,6 @@ export default {
     phone: 'Телефон',
     secondPhone: '2-й телефон',
     birthDate: 'Дата рождения',
-    monthlyFee: 'Ежемесячная оплата',
     heardAboutUs: 'Откуда узнал',
     preferredTime: 'Удобное время',
     preferredDays: 'Удобные дни',

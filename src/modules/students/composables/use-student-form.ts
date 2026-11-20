@@ -26,7 +26,8 @@ interface StudentFormState extends DiscountState {
   secondPhone: string
   birthDate: Date | null
   referrerId: number | null
-  monthlyFee: string | number
+  /** Personal price per group id ('' — the group's own price). */
+  groupFees: Record<number, string | number>
   heardAboutUs: string
   preferredTime: StudentPreferredTime | null
   preferredDays: WeekDay[]
@@ -45,7 +46,7 @@ interface StudentFormState extends DiscountState {
 function blankState(centerId: number | null): StudentFormState {
   return {
     firstName: '', lastName: '', phone: '', secondPhone: '', birthDate: null,
-    referrerId: null, monthlyFee: '', heardAboutUs: '', preferredTime: null,
+    referrerId: null, groupFees: {}, heardAboutUs: '', preferredTime: null,
     preferredDays: [], centerId, groupIds: [], subjectIds: [],
     passportSeries: '', passportNumber: '', jshshir: '', comment: '', groupJoinedAt: new Date(),
     ...blankDiscount(),
@@ -66,8 +67,10 @@ export function useStudentForm(
   const { subjects, groups, referrers, loadFor, clear } = useStudentOptions()
 
   const form = reactive<StudentFormState>(blankState(defaultCenterId()))
-  /** Personal price stored when the edit opened (0 — the group price is used). */
-  let storedFee = 0
+  /** Personal price per group when the edit opened (0 — the group price is used). */
+  let storedFees: Record<number, number> = {}
+  /** Upcoming prices (set in a paid month, start next month) — for the field hints. */
+  const upcomingFees = ref<Record<number, { fee: number; from: string }>>({})
   const errors = reactive<Record<string, string>>({})
   /**
    * The subject only matters at reception: once the student is active (or
@@ -116,7 +119,8 @@ export function useStudentForm(
     isEditing = !!editing
     isEditingRef.value = !!editing
     baseline = { enabled: false, freeMonths: 0 }
-    storedFee = Number(editing?.monthlyFee ?? 0)
+    storedFees = {}
+    upcomingFees.value = {}
     originalGroupIds.value = [...(editing?.groupIds ?? [])]
     showSubjects.value = !editing || editing.status === StudentStatus.NEW
     if (editing) fillFrom(editing)
@@ -141,7 +145,7 @@ export function useStudentForm(
     form.secondPhone = editing.secondPhone ?? ''
     form.birthDate = parseDate(editing.birthDate)
     form.referrerId = editing.referrerId ?? null
-    form.monthlyFee = editing.monthlyFee ?? ''
+    fillFees(editing)
     form.heardAboutUs = editing.heardAboutUs ?? ''
     form.preferredTime = editing.preferredTime ?? null
     form.preferredDays = [...(editing.preferredDays ?? [])]
@@ -157,6 +161,21 @@ export function useStudentForm(
     const discount = discountFromStudent(editing)
     Object.assign(form, discount)
     baseline = { enabled: discount.discountEnabled, freeMonths: discount.freeMonths }
+  }
+
+  /**
+   * A field shows the price the admin last entered — the upcoming one when it
+   * is scheduled — so saving the form unchanged sends nothing for the group.
+   */
+  function fillFees(editing: Student): void {
+    for (const gf of editing.groupFees ?? []) {
+      const shown = gf.upcomingMonthlyFee ?? gf.monthlyFee
+      storedFees[gf.groupId] = shown
+      form.groupFees[gf.groupId] = shown > 0 ? shown : ''
+      if (gf.upcomingMonthlyFee != null && gf.upcomingFromMonth) {
+        upcomingFees.value[gf.groupId] = { fee: gf.upcomingMonthlyFee, from: gf.upcomingFromMonth }
+      }
+    }
   }
 
   function validate(): boolean {
@@ -214,16 +233,17 @@ export function useStudentForm(
   }
 
   /**
-   * Only with `students.personalFee` (the field is hidden otherwise and the
-   * group price applies). On edit an emptied field clears the stored price —
-   * sends 0, the group price — instead of silently keeping it. A stored
-   * mistake for past months is fixed by "Switch to the group price".
+   * Only with `students.personalFee` (the fields are hidden otherwise and the
+   * group price applies). Each selected group has its own price; only the
+   * groups whose value changed are sent. An emptied field sends 0 — the group
+   * price. A stored mistake for past months is fixed by "Switch to the group price".
    */
   function applyFee(payload: StudentForm): void {
     if (!canSetPersonalFee()) return
-    const fee = num(form.monthlyFee)
-    if (fee !== undefined) payload.monthlyFee = fee
-    else if (isEditing && storedFee > 0) payload.monthlyFee = 0
+    const changed = form.groupIds
+      .map((groupId) => ({ groupId, monthlyFee: num(form.groupFees[groupId] ?? '') ?? 0 }))
+      .filter((g) => g.monthlyFee !== (storedFees[g.groupId] ?? 0))
+    if (changed.length) payload.groupFees = changed
   }
 
   /**
@@ -241,7 +261,7 @@ export function useStudentForm(
   }
 
   return {
-    form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects,
+    form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, upcomingFees,
     reset, validate, toPayload, setBackendErrors, setGroupIds,
   }
 }

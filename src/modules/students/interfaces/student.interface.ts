@@ -49,6 +49,8 @@ export interface Student {
   freeMonths?: number
   /** The free window (`GET /students/{id}` only); null until the student has a group. */
   freeWindow?: FreeWindow | null
+  /** `GET /students/{id}` only: the personal price in each current group. */
+  groupFees?: StudentGroupFee[]
   status: StudentStatus
   returnLikelihood?: ReturnLikelihood | null
   activatedAt?: string | null
@@ -94,4 +96,22 @@ export interface StudentDetail extends Student {
 export interface FreeWindow {
   from: string
   untilExclusive: string
+}
+
+/**
+ * The student's personal price in ONE group (`GET /students/{id}` → `groupFees`).
+ * Each group has its own: a student in a 200k and a 500k group is not billed
+ * one price for both. 0 — the group's own price applies.
+ */
+export interface StudentGroupFee {
+  groupId: number
+  groupName: string | null
+  /** Personal price in effect this month (0 — group price). */
+  monthlyFee: number
+  /** Set in a month the student already paid for → takes effect next month. */
+  upcomingMonthlyFee: number | null
+  /** `YYYY-MM-01` the upcoming price starts. */
+  upcomingFromMonth: string | null
+  /** The group's own current price. */
+  groupMonthlyFee: number
 }

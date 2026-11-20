@@ -30,7 +30,10 @@ export interface StudentForm {
   passportNumber?: string
   jshshir?: string
   referrerId?: number
+  /** Legacy single price for every group — the new form sends `groupFees`. */
   monthlyFee?: number
+  /** Personal price per group (0 — group price); only the changed groups are sent. */
+  groupFees?: GroupFeeForm[]
   discountPercent?: number
   /** so'm per month; sent instead of `discountPercent` when the type is "amount" */
   discountAmount?: number
@@ -49,4 +52,11 @@ export interface StudentForm {
   groupJoinedAt?: string
   /** Any number of subjects; the first becomes `subjectId`. [] on update clears them. */
   subjectIds?: number[]
+}
+
+/** One group's personal price in the student form. */
+export interface GroupFeeForm {
+  groupId: number
+  /** 0 — the group's own price. */
+  monthlyFee: number
 }

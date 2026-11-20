@@ -24,6 +24,8 @@ vi.mock('@/shared/composables/use-status-confirm', () => ({
 }))
 vi.mock('../../api/students.api', () => ({
   fetchStudents: vi.fn(),
+  // Edit reads the per-group personal prices first (the list row lacks them).
+  fetchStudentById: vi.fn().mockResolvedValue({ groupFees: [] }),
   createStudent: vi.fn(),
   updateStudent: vi.fn(),
   changeStudentStatus: vi.fn(),
@@ -139,7 +141,7 @@ describe('useStudents', () => {
     it('updates the editing student WITHOUT the status key', async () => {
       const s = useStudents(() => StudentStatus.NEW)
       const editing = makeStudent({ id: 42 })
-      s.openEdit(editing)
+      await s.openEdit(editing)
       mockedUpdateStudent.mockResolvedValueOnce(editing)
 
       await s.submit({
@@ -261,7 +263,7 @@ describe('useStudents', () => {
     it('an edit with a past groupJoinedAt previews the added groups and saves on confirm', async () => {
       mockedUpdateStudent.mockResolvedValue(makeStudent())
       const s = useStudents(() => StudentStatus.ACTIVE)
-      s.openEdit(makeStudent({ id: 9, status: StudentStatus.ACTIVE, groupIds: [1] }))
+      await s.openEdit(makeStudent({ id: 9, status: StudentStatus.ACTIVE, groupIds: [1] }))
       const form = { firstName: 'Ali', lastName: 'V', phone: '+998901112233', groupIds: [1, 2], groupJoinedAt: '2026-10-15' }
 
       await s.submit(form)
@@ -282,7 +284,7 @@ describe('useStudents', () => {
       mockedUpdateStudent.mockRejectedValueOnce(error)
       const onEditError = vi.fn()
       const s = useStudents(() => StudentStatus.ACTIVE, onEditError)
-      s.openEdit(makeStudent({ id: 9, groupIds: [1] }))
+      await s.openEdit(makeStudent({ id: 9, groupIds: [1] }))
       await s.submit({ firstName: 'A', lastName: 'B', phone: '+998901112233', groupIds: [1, 2], groupJoinedAt: '2026-10-15' })
       await flushPromises()
       await s.start.confirm()

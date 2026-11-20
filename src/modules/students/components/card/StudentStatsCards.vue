@@ -17,7 +17,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiStatCard } from '@/shared/components'
-import { Coins, CheckCircle2, TrendingDown, Clock, HandCoins } from '@/shared/icons'
+import { Coins, CheckCircle2, TrendingDown, Clock, HandCoins, Wallet } from '@/shared/icons'
 import { formatSom } from '@/shared/utils/format-money'
 import type { Component } from 'vue'
 import type { StudentSummaryTotals } from '../../interfaces/student-summary.interface'
@@ -65,6 +65,17 @@ const cards = computed<StatTile[]>(() => {
       hint: t('students.view.stats.totalPendingHint'),
       icon: Clock,
       tone: 'warning',
+    })
+  }
+
+  // Overpaid money moved toward a month whose row does not exist yet.
+  if ((x?.creditAmount ?? 0) > 0) {
+    tiles.push({
+      label: t('students.view.stats.credit'),
+      value: formatSom(x?.creditAmount ?? 0),
+      hint: t('students.view.stats.creditHint'),
+      icon: Wallet,
+      tone: 'info',
     })
   }
 

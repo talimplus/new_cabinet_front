@@ -39,14 +39,11 @@ import LeadContactFields from './LeadContactFields.vue'
 import LeadPreferenceFields from './LeadPreferenceFields.vue'
 import LeadPassportFields from './LeadPassportFields.vue'
 import { useLeadForm } from '../composables/use-lead-form'
-import { usePermissions } from '@/shared/composables/use-permissions'
 import type { Lead } from '../interfaces/lead.interface'
 import type { LeadForm } from '../interfaces/lead-form.interface'
 import type { LeadTransferForm } from '../interfaces/lead-transfer-form.interface'
 
 const { t } = useI18n()
-/** Personal price is admin-only by default (`students.personalFee`). */
-const { canSetPersonalFee } = usePermissions()
 
 const props = defineProps<{
   modelValue: boolean
@@ -62,7 +59,7 @@ const emit = defineEmits<{
 }>()
 
 const { form, errors, reset, validate, toPayload, toTransferPayload, setBackendErrors } =
-  useLeadForm(() => props.defaultCenterId, () => canSetPersonalFee.value)
+  useLeadForm(() => props.defaultCenterId)
 
 watch(() => props.modelValue, (open) => { if (open) reset(props.editing) })
 

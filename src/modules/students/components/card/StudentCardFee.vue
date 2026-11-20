@@ -1,16 +1,20 @@
 <template>
-  <div class="flex flex-wrap items-center gap-3">
-    <div class="text-right">
-      <p class="text-xs text-muted-foreground">
-        {{ t('students.view.card.monthlyFee') }} ·
-        {{ t(personal ? 'students.personalFee.personal' : 'students.personalFee.group') }}
-      </p>
-      <p class="font-mono text-lg font-semibold text-foreground">{{ formatSom(amount) }}</p>
+  <div class="flex flex-wrap items-center gap-4">
+    <div v-for="g in rows" :key="g.id" class="flex items-center gap-2">
+      <div class="text-right">
+        <p class="text-xs text-muted-foreground">
+          {{ g.name }} ·
+          {{ t(g.personal ? 'students.personalFee.personal' : 'students.personalFee.group') }}
+        </p>
+        <p class="font-mono text-lg font-semibold text-foreground">{{ formatSom(g.amount) }}</p>
+      </div>
+      <UiIconButton
+        v-if="g.personal && canSetPersonalFee"
+        :icon="ArrowLeftRight"
+        :label="t('students.personalFee.action')"
+        @click="student && dialogRef?.open(student.id, g.id)"
+      />
     </div>
-    <UiButton v-if="personal && canSetPersonalFee" variant="outline" @click="student && dialogRef?.open(student.id)">
-      <UiIcon :icon="ArrowLeftRight" :size="16" />
-      {{ t('students.personalFee.action') }}
-    </UiButton>
     <StudentPersonalFeeDialog ref="dialogRef" @done="emit('changed')" />
   </div>
 </template>
@@ -18,7 +22,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiButton, UiIcon } from '@/shared/components'
+import { UiIconButton } from '@/shared/components'
 import { ArrowLeftRight } from '@/shared/icons'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { formatSom } from '@/shared/utils/format-money'
@@ -33,11 +37,20 @@ const emit = defineEmits<{ changed: [] }>()
 const { canSetPersonalFee } = usePermissions()
 const dialogRef = ref<InstanceType<typeof StudentPersonalFeeDialog> | null>(null)
 
-/** A personal price (> 0) wins; otherwise the student pays the groups' current prices. */
-const personal = computed(() => Number(props.student?.monthlyFee ?? 0) > 0)
-const amount = computed(() =>
-  personal.value
-    ? Number(props.student?.monthlyFee ?? 0)
-    : (props.student?.groups ?? []).reduce((sum, g) => sum + Number(g.monthlyFee ?? 0), 0),
+/**
+ * The monthly price per group: the student's personal price in that group
+ * (> 0) wins, otherwise the group's current price. Each group has its own —
+ * one price is never applied to every group.
+ */
+const rows = computed(() =>
+  (props.student?.groups ?? []).map((g) => {
+    const personal = Number(g.personalFee ?? 0) > 0
+    return {
+      id: g.id,
+      name: g.name,
+      personal,
+      amount: personal ? Number(g.personalFee) : Number(g.monthlyFee ?? 0),
+    }
+  }),
 )
 </script>

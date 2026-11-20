@@ -458,16 +458,32 @@ The status cell shows "Tasdiqlash kutilmoqda" instead of "To'lanmagan"; the
 - `POST /students/{id}/start-date/preview` `{ startDate, groupIds? }` — same
   `rows/totals/paidSalaryMonths` shape as the group preview (+ `startDate`);
   `groupIds` omitted = activation. Perm `students.changeStatus` OR `students.update`.
-- **Personal price → group price (2026-11-20):**
-  `POST /students/{id}/personal-fee/clear/preview` `{ fromMonth? }` → `{ fromMonth,
-  defaultFromMonth, minMonth, personalFee, rows, totals, paidSalaryMonths }`
-  (backdate preview shape; `fromMonth` omitted = month the student was activated).
-  `POST /students/{id}/personal-fee/clear` `{ fromMonth }` → `{ studentId, fromMonth }`:
-  `students.monthlyFee = 0`, `student_base_discounts` price 0 from that month (discount
-  kept, earlier months keep the old price), rows from that month to now rebilled with
-  force (paid too: overpaid → `refundedAmount`). Month: ≤ current, ≥ 24 months back
-  (422 `fromMonth`); no personal price left → 400. Perm `students.personalFee`.
-  UI: card header `StudentCardFee` + `StudentPersonalFeeDialog`.
+- **Personal price is PER GROUP (2026-11-20, migration `…075`, `student_group_fees`):**
+  a student in a 200k and a 500k group is not billed one price for both.
+  `GET /students/{id}` → `groupFees: [{ groupId, groupName, monthlyFee, upcomingMonthlyFee,
+  upcomingFromMonth, groupMonthlyFee }]` (current groups; `monthlyFee` 0 = group price).
+  `POST/PUT /students` body `groupFees?: [{ groupId, monthlyFee }]` — only the changed
+  groups are sent; same rule as the discount, per group (no money this month in THAT
+  group → this month, else next month). `students.monthlyFee` is now only a mirror for
+  the old front (the one fee if every current group has the same, else 0); an old-front
+  `monthlyFee` that differs from it is applied to every current group. Summary
+  (`GET /payments/student/{id}/summary`): `student.groups[].personalFee`,
+  `months[].refundedAmount/creditAmount`, `totals.creditAmount`.
+- **Personal price → group price (2026-11-20), per group:**
+  `POST /students/{id}/personal-fee/clear/preview` `{ groupId, fromMonth? }` → `{ groupId,
+  groupName, fromMonth, defaultFromMonth, minMonth, personalFee, rows, totals,
+  paidSalaryMonths }` (backdate preview shape; `fromMonth` omitted = activation month).
+  `POST /students/{id}/personal-fee/clear` `{ groupId, fromMonth, overpayment?: 'refund'|'carry' }`
+  → `{ studentId, groupId, fromMonth, overpayment, overpaidAmount, refundedAmount,
+  carriedAmount, appliedAmount, waitingAmount }`. That group's price is 0 from the month
+  (earlier months and other groups untouched, discount kept); its rows to now are
+  rebilled with force (paid too). Dearer group price → the difference is debt. Cheaper →
+  `refund` books it to `refundedAmount`; `carry` moves it to `payments.creditAmount` and
+  pays the student's next open months with transfer receipts (same group first); a month
+  whose row does not exist yet gets it from the daily cron (00:10). Month: ≤ current,
+  ≥ 24 months back (422 `fromMonth`); no personal price in that group → 400; group the
+  student never studied in → 422 `groupId`. Perm `students.personalFee`.
+  UI: card header `StudentCardFee` (one price per group) + `StudentPersonalFeeDialog`.
 - UI: `StudentStartDialog` — activation always asks the date (today → no
   preview); the edit form shows "Yangi guruhga qo'shilgan sana" when a group is added.
 

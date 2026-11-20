@@ -196,15 +196,17 @@ describe('useStudentForm', () => {
       expect('birthDate' in payload).toBe(false)
     })
 
-    it('converts a birthDate Date to "YYYY-MM-DD" and coerces monthlyFee to a number', async () => {
+    it('converts a birthDate Date to "YYYY-MM-DD" and sends the per-group price as a number', async () => {
       const f = await ready()
       f.form.birthDate = new Date(2010, 4, 7) // 2010-05-07 local
-      f.form.monthlyFee = '500000'
+      f.form.groupIds = [1]
+      f.form.groupFees = { 1: '500000' }
 
       const payload = f.toPayload()
 
       expect(payload.birthDate).toBe('2010-05-07')
-      expect(payload.monthlyFee).toBe(500000)
+      expect(payload.groupFees).toEqual([{ groupId: 1, monthlyFee: 500000 }])
+      expect('monthlyFee' in payload).toBe(false)
     })
 
     it('keeps optional scalars when set (preferredTime, days, centerId)', async () => {
@@ -362,7 +364,6 @@ describe('useStudentForm', () => {
       expect(f.form.birthDate?.getFullYear()).toBe(2010)
       expect(f.form.birthDate?.getMonth()).toBe(4)
       expect(f.form.birthDate?.getDate()).toBe(7)
-      expect(f.form.monthlyFee).toBe('500000')
       expect(f.form.centerId).toBe(7)
       expect(f.form.subjectIds).toEqual([3])
       expect(f.form.groupIds).toEqual([1, 2])

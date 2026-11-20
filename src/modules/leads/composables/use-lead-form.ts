@@ -17,7 +17,6 @@ export interface LeadFormState {
   phone: string
   secondPhone: string
   birthDate: Date | null
-  monthlyFee: string | number
   heardAboutUs: string
   preferredTime: StudentPreferredTime | null
   preferredDays: WeekDay[]
@@ -34,7 +33,7 @@ export interface LeadFormState {
 function blankState(centerId: number | null): LeadFormState {
   return {
     firstName: '', lastName: '', phone: '', secondPhone: '', birthDate: null,
-    monthlyFee: '', heardAboutUs: '', preferredTime: null, preferredDays: [],
+    heardAboutUs: '', preferredTime: null, preferredDays: [],
     centerId, passportSeries: '', passportNumber: '', jshshir: '',
     discountPercent: '', discountReason: '', comment: '', followUpDate: null,
   }
@@ -45,11 +44,7 @@ function blankState(centerId: number | null): LeadFormState {
  * building. A lead carries no group — the group is chosen once it becomes a
  * student.
  */
-export function useLeadForm(
-  defaultCenterId: () => number | null,
-  /** `students.personalFee` — without it the price field is hidden and never sent. */
-  canSetPersonalFee: () => boolean = () => true,
-) {
+export function useLeadForm(defaultCenterId: () => number | null) {
   const form = reactive<LeadFormState>(blankState(defaultCenterId()))
   const errors = reactive<Record<string, string>>({})
 
@@ -67,7 +62,6 @@ export function useLeadForm(
     form.phone = editing.phone ?? ''
     form.secondPhone = editing.secondPhone ?? ''
     form.birthDate = parseDate(editing.birthDate)
-    form.monthlyFee = editing.monthlyFee ?? ''
     form.heardAboutUs = editing.heardAboutUs ?? ''
     form.preferredTime = editing.preferredTime ?? null
     form.preferredDays = [...(editing.preferredDays ?? [])]
@@ -109,10 +103,9 @@ export function useLeadForm(
     if (form.preferredTime) payload.preferredTime = form.preferredTime
     if (form.preferredDays.length) payload.preferredDays = [...form.preferredDays]
     if (form.centerId != null) payload.centerId = form.centerId
-    // Without the key the field is hidden and nothing is sent — the student
-    // then pays the group price (reception used to type it here by mistake).
-    const fee = num(form.monthlyFee)
-    if (canSetPersonalFee() && fee !== undefined) payload.monthlyFee = fee
+    // A lead has no price field: the price is per group and is set (by the
+    // admin) once the lead becomes a student — reception used to type the
+    // group price here by mistake.
     const percent = num(form.discountPercent)
     if (percent !== undefined) payload.discountPercent = percent
     if (form.discountReason.trim()) payload.discountReason = form.discountReason.trim()

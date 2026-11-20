@@ -8,7 +8,7 @@
   >
     <div class="space-y-4">
       <p class="text-sm text-muted-foreground">
-        {{ t('students.personalFee.hint', { amount: formatSom(f.preview.value?.personalFee ?? 0) }) }}
+        {{ t('students.personalFee.hint', { group: f.preview.value?.groupName ?? '', amount: formatSom(f.preview.value?.personalFee ?? 0) }) }}
       </p>
       <UiSelect
         :model-value="f.state.month"
@@ -19,6 +19,16 @@
         :clearable="false"
         :searchable="false"
         @update:model-value="f.pickMonth(typeof $event === 'string' ? $event : null)"
+      />
+      <UiSelect
+        v-if="f.hasOverpayment.value"
+        :model-value="f.state.overpayment"
+        :options="overpaymentOptions"
+        :label="t('students.personalFee.overpayment.label', { amount: formatSom(f.preview.value?.totals.refund ?? 0) })"
+        :hint="t(f.state.overpayment === OverpaymentMode.CARRY ? 'students.personalFee.overpayment.carryHint' : 'students.personalFee.overpayment.refundHint')"
+        :clearable="false"
+        :searchable="false"
+        @update:model-value="f.state.overpayment = $event as OverpaymentMode"
       />
       <p v-if="f.preview.value?.rows.length" class="rounded-md bg-warning-soft px-3 py-2 text-xs text-warning">
         {{ t('common.backdate.warning') }}
@@ -37,15 +47,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiModal, UiSelect, UiButton } from '@/shared/components'
 import BackdateImpact from '@/shared/components/backdate/BackdateImpact.vue'
 import { formatSom } from '@/shared/utils/format-money'
 import { useStudentPersonalFee } from '../../composables/use-student-personal-fee'
+import { OverpaymentMode, OVERPAYMENT_MODE_LABEL_KEYS } from '../../enums/overpayment-mode.enum'
 
 const { t } = useI18n()
 const emit = defineEmits<{ done: [] }>()
 const f = useStudentPersonalFee(() => emit('done'))
 
-defineExpose({ open: (studentId: number) => f.open(studentId) })
+const overpaymentOptions = computed(() =>
+  Object.values(OverpaymentMode).map((v) => ({ label: t(OVERPAYMENT_MODE_LABEL_KEYS[v]), value: v })),
+)
+
+defineExpose({ open: (studentId: number, groupId: number) => f.open(studentId, groupId) })
 </script>

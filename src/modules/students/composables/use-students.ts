@@ -1,5 +1,5 @@
 import { computed, reactive, ref } from 'vue'
-import { fetchStudents, createStudent, updateStudent, changeStudentStatus } from '../api/students.api'
+import { fetchStudents, fetchStudentById, createStudent, updateStudent, changeStudentStatus } from '../api/students.api'
 import { fetchSubjects } from '@/modules/subjects/api/subjects.api'
 import { optionalRequest, emptyPage } from '@/shared/permissions/optional-request'
 import { useScopeStore } from '@/stores/scope.store'
@@ -124,8 +124,13 @@ export function useStudents(
     editing.value = null
     modalOpen.value = true
   }
-  function openEdit(student: Student): void {
-    editing.value = student
+  /**
+   * The list row has no `groupFees` (per-group personal prices) — read them
+   * from `GET /students/{id}` first so the price fields show what is stored.
+   */
+  async function openEdit(student: Student): Promise<void> {
+    const detail = await optionalRequest(fetchStudentById(student.id), null).catch(() => null)
+    editing.value = detail ? { ...student, groupFees: detail.groupFees ?? [] } : student
     modalOpen.value = true
   }
 

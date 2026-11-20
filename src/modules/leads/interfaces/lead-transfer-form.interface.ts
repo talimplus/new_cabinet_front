@@ -25,7 +25,6 @@ export interface LeadTransferForm {
   passportSeries?: string
   passportNumber?: string
   jshshir?: string
-  monthlyFee?: number
   discountPercent?: number
   discountReason?: string
   status?: LeadStatus

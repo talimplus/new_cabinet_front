@@ -32,8 +32,11 @@ function mountHeader(props: Record<string, unknown> = {}) {
 }
 
 describe('StudentCardHeader', () => {
-  it('renders the full name, phone and formatted monthly fee', () => {
-    const text = mountHeader().text()
+  it('renders the full name, phone and each group\'s monthly fee', () => {
+    // The personal price is per group: it wins in its group only.
+    const text = mountHeader({
+      student: makeStudent({ groups: [{ id: 3, name: 'IELTS', monthlyFee: 350000, personalFee: 500000 }] }),
+    }).text()
     expect(text).toContain('Ali Valiyev')
     expect(text).toContain(`${t('students.view.card.phone')}: +998 90 123 45 67`)
     expect(text).toContain(formatSom(500000))

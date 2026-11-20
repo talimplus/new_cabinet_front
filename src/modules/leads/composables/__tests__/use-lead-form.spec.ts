@@ -62,7 +62,6 @@ describe('useLeadForm', () => {
       form.firstName = ' Ali '
       form.lastName = ' Valiyev '
       form.secondPhone = ' 998907778899 '
-      form.monthlyFee = '500000'
       form.discountPercent = '10'
       form.discountReason = ' Chegirma sababi '
       form.preferredDays = [WeekDay.MONDAY]
@@ -74,7 +73,7 @@ describe('useLeadForm', () => {
       expect(payload.lastName).toBe('Valiyev')
       // Any spelling is stored in the one +998 form.
       expect(payload.secondPhone).toBe('+998907778899')
-      expect(payload.monthlyFee).toBe(500000)
+      expect(payload).not.toHaveProperty('monthlyFee')
       expect(payload.discountPercent).toBe(10)
       expect(payload.discountReason).toBe('Chegirma sababi')
       expect(payload.preferredDays).toEqual([WeekDay.MONDAY])

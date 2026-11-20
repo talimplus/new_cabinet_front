@@ -15,6 +15,8 @@ export interface StudentSummaryGroup {
   id: number
   name: string
   monthlyFee: number
+  /** The student's personal price in this group this month (0 — `monthlyFee` applies). */
+  personalFee?: number
   days?: WeekDay[]
   schedule?: StudentSummaryLesson[]
 }
@@ -59,6 +61,8 @@ export interface StudentSummaryTotals {
   totalReceived: number
   /** What is still collectable FROM THE STUDENT — the page's main figure. */
   payableNow: number
+  /** Overpaid money waiting to move to the next month (its row does not exist yet). */
+  creditAmount?: number
 }
 
 export interface StudentSummaryMonth {
