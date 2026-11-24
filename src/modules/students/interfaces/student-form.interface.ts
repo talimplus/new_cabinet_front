@@ -15,6 +15,15 @@ export interface DiscountPeriodForm {
   reason?: string
 }
 
+/** One permanent discount: percent OR amount, for one group (omitted — all groups). */
+export interface BaseDiscountForm {
+  groupId?: number
+  percent?: number
+  /** so'm per month */
+  amount?: number
+  reason?: string
+}
+
 /** POST /students and PUT /students/:id body. */
 export interface StudentForm {
   firstName: string
@@ -34,10 +43,10 @@ export interface StudentForm {
   monthlyFee?: number
   /** Personal price per group (0 — group price); only the changed groups are sent. */
   groupFees?: GroupFeeForm[]
-  discountPercent?: number
-  /** so'm per month; sent instead of `discountPercent` when the type is "amount" */
-  discountAmount?: number
-  discountReason?: string
+  /** Permanent discounts, the FULL list — a group not in it loses its discount. */
+  baseDiscounts?: BaseDiscountForm[]
+  /** Edit-only: every discount is dropped from this month, its payments (paid too) are rebilled. */
+  clearDiscount?: boolean
   /** First N months free; sent only when it differs from the stored value (0 on create is omitted). */
   freeMonths?: number
   discountPeriods?: DiscountPeriodForm[]

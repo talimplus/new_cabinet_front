@@ -23,7 +23,7 @@
       <StudentGroupFeesField v-if="canSetPersonalFee" v-model="form.groupFees" :groups="selectedGroups" :upcoming="upcomingFees" />
       <UiTextarea v-model="form.comment" :label="t('students.form.comment')" :rows="2" />
       <StudentIdentityFields v-model:passport-series="form.passportSeries" v-model:passport-number="form.passportNumber" v-model:jshshir="form.jshshir" />
-      <StudentDiscountSection v-model:enabled="form.discountEnabled" v-model:free-months="form.freeMonths" :free-window="editing?.freeWindow" :stored-free-months="editing?.freeMonths" v-model:use-periods="form.usePeriods" v-model:type="form.discountType" v-model:value="form.discountValue" v-model:reason="form.discountReason" v-model:periods="form.discountPeriods" :group-options="selectedGroups" />
+      <StudentDiscountSection v-model:enabled="form.discountEnabled" v-model:free-months="form.freeMonths" :free-window="editing?.freeWindow" :stored-free-months="editing?.freeMonths" v-model:use-periods="form.usePeriods" v-model:base-discounts="form.baseDiscounts" :confirm-off="hadDiscount" :error="errors.baseDiscounts" v-model:periods="form.discountPeriods" :group-options="selectedGroups" />
     </div>
 
     <template #footer>
@@ -60,7 +60,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; submit: [payload: StudentForm] }>()
 
-const { form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, upcomingFees, reset, validate, toPayload, setBackendErrors, setGroupIds } =
+const { form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, upcomingFees, hadDiscount, reset, validate, toPayload, setBackendErrors, setGroupIds } =
   useStudentForm(() => props.defaultCenterId, () => canSetPersonalFee.value)
 
 const timeOptions = computed(() =>

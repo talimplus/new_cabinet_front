@@ -34,6 +34,8 @@ export interface StudentAttendanceItem {
   comment: string | null
   /** Who marked it (teacher/staff full name). */
   submittedBy: string | null
+  /** Marked by the admin or someone other than the group's teacher. */
+  markedByOther?: boolean
 }
 
 /** GET /students/{id}/attendance */

@@ -12,6 +12,7 @@ export enum GroupTimelineType {
   FEE_CHANGED = 'fee_changed',
   PAUSE = 'pause',
   LESSON_MOVED = 'lesson_moved',
+  ATTENDANCE_MARKED = 'attendance_marked',
   STUDENT_JOINED = 'student_joined',
   STUDENT_LEFT = 'student_left',
   STUDENT_TRANSFERRED_IN = 'student_transferred_in',
@@ -28,6 +29,7 @@ export enum GroupTimelineCategory {
   SCHEDULE = 'schedule',
   FEE = 'fee',
   PAUSE = 'pause',
+  ATTENDANCE = 'attendance',
   STUDENTS = 'students',
 }
 
@@ -45,6 +47,7 @@ export const GROUP_TIMELINE_CATEGORY_OF: Record<GroupTimelineType, GroupTimeline
   [GroupTimelineType.FEE_SET]: GroupTimelineCategory.FEE,
   [GroupTimelineType.FEE_CHANGED]: GroupTimelineCategory.FEE,
   [GroupTimelineType.PAUSE]: GroupTimelineCategory.PAUSE,
+  [GroupTimelineType.ATTENDANCE_MARKED]: GroupTimelineCategory.ATTENDANCE,
   [GroupTimelineType.STUDENT_JOINED]: GroupTimelineCategory.STUDENTS,
   [GroupTimelineType.STUDENT_LEFT]: GroupTimelineCategory.STUDENTS,
   [GroupTimelineType.STUDENT_TRANSFERRED_IN]: GroupTimelineCategory.STUDENTS,
@@ -57,5 +60,6 @@ export const GROUP_TIMELINE_CATEGORY_LABEL_KEYS: Record<GroupTimelineCategory, s
   [GroupTimelineCategory.SCHEDULE]: 'groups.timeline.filters.schedule',
   [GroupTimelineCategory.FEE]: 'groups.timeline.filters.fee',
   [GroupTimelineCategory.PAUSE]: 'groups.timeline.filters.pause',
+  [GroupTimelineCategory.ATTENDANCE]: 'groups.timeline.filters.attendance',
   [GroupTimelineCategory.STUDENTS]: 'groups.timeline.filters.students',
 }

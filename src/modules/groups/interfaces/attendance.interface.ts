@@ -5,6 +5,10 @@ export interface AttendanceItem {
   studentId: number
   status: AttendanceStatus
   comment?: string
+  /** Who marked it (journal rows only). */
+  submittedByName?: string | null
+  /** Marked by the admin or someone other than the group's teacher. */
+  markedByOther?: boolean
 }
 
 /**

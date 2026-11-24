@@ -1,19 +1,19 @@
 import type { BackdatePreview } from '@/shared/interfaces/backdate-preview.interface'
 import type { OverpaymentMode } from '../enums/overpayment-mode.enum'
 
-/** `POST /students/:id/personal-fee/clear/preview` body — omitted month → `defaultFromMonth`. */
+/** `POST /students/:id/personal-fee/clear/preview` body — omitted date → `defaultFromDate`. */
 export interface PersonalFeePreviewForm {
   /** The group whose personal price is dropped (each group has its own). */
   groupId: number
-  /** `YYYY-MM-01` */
-  fromMonth?: string
+  /** `YYYY-MM-DD` */
+  fromDate?: string
 }
 
 /** `POST /students/:id/personal-fee/clear` body. */
 export interface PersonalFeeClearForm {
   groupId: number
-  /** `YYYY-MM-01` — from this month the group price applies; earlier months keep the old price. */
-  fromMonth: string
+  /** `YYYY-MM-DD` — lessons from this day are billed by the group price; earlier ones keep the old price. */
+  fromDate: string
   /** Money paid above the new amount: given back or moved to the next months (default refund). */
   overpayment?: OverpaymentMode
 }
@@ -22,20 +22,20 @@ export interface PersonalFeeClearForm {
 export interface PersonalFeePreview extends BackdatePreview {
   groupId: number
   groupName: string
-  /** `YYYY-MM-01` the preview was computed for. */
-  fromMonth: string
-  /** `YYYY-MM-01` — the month the student was activated (bounded by `minMonth`). */
-  defaultFromMonth: string
-  /** `YYYY-MM-01` — the earliest month that can be picked (24 months back). */
-  minMonth: string
-  /** The personal price in that group at `fromMonth`. */
+  /** `YYYY-MM-DD` the preview was computed for. */
+  fromDate: string
+  /** `YYYY-MM-DD` — the day the student was activated (bounded by `minDate`). */
+  defaultFromDate: string
+  /** `YYYY-MM-DD` — the earliest day that can be picked (24 months back). */
+  minDate: string
+  /** The personal price in that group at `fromDate`. */
   personalFee: number
 }
 
 export interface PersonalFeeClearResponse {
   studentId: number
   groupId: number
-  fromMonth: string
+  fromDate: string
   overpayment: OverpaymentMode
   /** Paid above the new amounts in total. */
   overpaidAmount: number

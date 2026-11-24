@@ -278,13 +278,13 @@ describe('describeTimelineItem — fee_changed', () => {
   })
 
   it('group fee + fixed-amount discount', () => {
-    const lines = fee({ fromMonth: '2026-10', monthlyFee: null, amount: 50000 })
+    const lines = fee({ fromMonth: '2026-10', monthlyFee: 0, amount: 50000 })
     expect(lines[1]).toBe(t('students.timeline.lines.groupFee'))
     expect(lines[2]).toBe(t('students.timeline.lines.discountValue', { value: formatSom(50000) }))
   })
 
   it('no discount', () => {
-    expect(fee({ fromMonth: '2026-10' })[2]).toBe(t('students.timeline.lines.noDiscount'))
+    expect(fee({ fromMonth: '2026-10' })[1]).toBe(t('students.timeline.lines.noDiscount'))
   })
 })
 

@@ -70,6 +70,7 @@ export const STUDENT_PAGES: Record<string, StudentPageConfig> = {
     filters: { ...NO_FILTERS, returnLikelihood: true },
     columns: [
       ...BASE,
+      { key: 'stoppedAt', label: 'students.table.stoppedAt' },
       { key: 'birthDate', label: 'students.table.birthDate' },
       { key: 'returnLikelihood', label: 'students.table.returnLikelihood' },
       { key: 'comment', label: 'students.table.comment' },

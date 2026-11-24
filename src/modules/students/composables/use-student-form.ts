@@ -13,6 +13,7 @@ import {
   applyDiscount,
   blankDiscount,
   discountFromStudent,
+  hasDuplicateGroup,
   type DiscountBaseline,
   type DiscountState,
 } from '../utils/student-discount'
@@ -83,16 +84,20 @@ export function useStudentForm(
   let baseline: DiscountBaseline = { enabled: false, freeMonths: 0 }
   /** Groups the student was in when the edit opened. */
   const originalGroupIds = ref<number[]>([])
+  /** Of them — added by mistake (no lessons, no money): the edit may drop them. */
+  const removableGroupIds = ref<number[]>([])
 
   /**
    * Edit can only ADD a group: an ongoing group the student is already in is
    * locked. Changing groups goes through the transfer, which splits the month
    * and carries the overpayment over — removing it here would book the money
    * as a cash refund and bill the new group in full (the backend 422s too).
-   * A finished group may still be dropped from the list.
+   * A finished group, or one the student was added to by mistake
+   * (`removableGroupIds`), may still be dropped from the list.
    */
   const lockedGroupIds = computed(() =>
     originalGroupIds.value.filter((id) => {
+      if (removableGroupIds.value.includes(id)) return false
       const option = groups.value.find((g) => g.value === id)
       return option?.status !== GroupStatus.FINISHED
     }),
@@ -119,9 +124,11 @@ export function useStudentForm(
     isEditing = !!editing
     isEditingRef.value = !!editing
     baseline = { enabled: false, freeMonths: 0 }
+    hadDiscount.value = false
     storedFees = {}
     upcomingFees.value = {}
     originalGroupIds.value = [...(editing?.groupIds ?? [])]
+    removableGroupIds.value = [...(editing?.removableGroupIds ?? [])]
     showSubjects.value = !editing || editing.status === StudentStatus.NEW
     if (editing) fillFrom(editing)
     loadOptions()
@@ -161,6 +168,7 @@ export function useStudentForm(
     const discount = discountFromStudent(editing)
     Object.assign(form, discount)
     baseline = { enabled: discount.discountEnabled, freeMonths: discount.freeMonths }
+    hadDiscount.value = baseline.enabled
   }
 
   /**
@@ -187,6 +195,9 @@ export function useStudentForm(
     if (form.secondPhone.trim() && !isValidUzPhone(form.secondPhone)) {
       errors.secondPhone = t('common.phoneInvalid')
     }
+    if (form.discountEnabled && !form.usePeriods && hasDuplicateGroup(form.baseDiscounts)) {
+      errors.baseDiscounts = t('students.form.baseDiscountDuplicate')
+    }
     return Object.keys(errors).length === 0
   }
 
@@ -212,7 +223,8 @@ export function useStudentForm(
     if (form.referrerId != null) payload.referrerId = form.referrerId
     if (form.centerId != null) payload.centerId = form.centerId
     applySubjects(payload)
-    if (form.groupIds.length) payload.groupIds = [...form.groupIds]
+    // On edit an emptied list goes too — a mistaken group of a new student is dropped.
+    if (form.groupIds.length || originalGroupIds.value.length) payload.groupIds = [...form.groupIds]
     // A past join date for the added groups — the list confirms its impact first.
     const joined = toDateString(form.groupJoinedAt)
     if (addedGroupIds.value.length && joined && joined < toDateString(new Date())) {
@@ -256,12 +268,15 @@ export function useStudentForm(
     payload.subjectIds = [...form.subjectIds]
   }
 
+  /** The student had a discount on open — turning the switch off asks for a confirm. */
+  const hadDiscount = ref(false)
+
   function setBackendErrors(error: unknown): void {
     Object.assign(errors, mapBackendErrors(error))
   }
 
   return {
-    form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, upcomingFees,
+    form, errors, subjects, groups, groupOptions, lockedGroupIds, addedGroupIds, referrers, showSubjects, upcomingFees, hadDiscount,
     reset, validate, toPayload, setBackendErrors, setGroupIds,
   }
 }

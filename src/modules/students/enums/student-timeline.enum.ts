@@ -15,6 +15,8 @@ export enum StudentTimelineType {
   TELEGRAM_LINKED = 'telegram_linked',
   TELEGRAM_UNLINKED = 'telegram_unlinked',
   ATTENDANCE = 'attendance',
+  /** Set or changed by the admin / someone other than the group's teacher. */
+  ATTENDANCE_MARKED = 'attendance_marked',
   STATUS_CHANGED = 'status_changed',
   PROFILE_UPDATED = 'profile_updated',
 }

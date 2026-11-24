@@ -125,8 +125,16 @@ export function useAttendance(
   const commentOf = (studentId: number, date: string): string =>
     cellFor(studentId, date)?.comment?.trim() ?? ''
 
+  /** Who marked the cell when it was not the group's teacher; '' otherwise. */
+  function markedByOf(studentId: number, date: string): string {
+    const cell = cellFor(studentId, date)
+    if (!cell?.markedByOther) return ''
+    return t('groups.attendance.markedByOther', { name: cell.submittedByName || '—' })
+  }
+
   /**
-   * today → needs canManageAttendance; past → canManagePastAttendance;
+   * today → needs canManageAttendance; past → canManagePastAttendance
+   * (admin only by default);
    * future / cancelled → never editable.
    */
   function canEditCell(date: string): boolean {
@@ -252,6 +260,7 @@ export function useAttendance(
     enrollmentReason,
     statusOf,
     commentOf,
+    markedByOf,
     canEditCell,
     picker,
     openCell,

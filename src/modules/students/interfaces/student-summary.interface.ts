@@ -2,6 +2,7 @@ import type { Subject } from '@/modules/subjects/interfaces/subject.interface'
 import type { WeekDay } from '@/modules/groups/enums/week-day.enum'
 import type { PaymentStatus } from '@/modules/payments/enums/payment-status.enum'
 import type { PaymentCheck } from '@/shared/interfaces/payment-check.interface'
+import type { BaseDiscount } from './student.interface'
 import type { StudentStatus } from '../enums/student-status.enum'
 import type { StudentPreferredTime } from '../enums/student-preferred-time.enum'
 
@@ -19,6 +20,15 @@ export interface StudentSummaryGroup {
   personalFee?: number
   days?: WeekDay[]
   schedule?: StudentSummaryLesson[]
+}
+
+/** Since when the student is stopped — may be earlier than the day it was recorded. */
+export interface StudentStopInfo {
+  /** `YYYY-MM-DD`, lessons from this day are not billed. */
+  date: string
+  /** `YYYY-MM-DD` the status was set; null for old data. */
+  markedOn: string | null
+  markedBy: string | null
 }
 
 /**
@@ -43,6 +53,10 @@ export interface StudentSummaryProfile {
   /** so'm per month (0 — none); the amount counterpart of discountPercent */
   discountAmount?: number
   discountReason?: string | null
+  /** Permanent discounts per group (null — all groups). */
+  baseDiscounts?: BaseDiscount[]
+  /** Stopped students only. */
+  stopInfo?: StudentStopInfo | null
   centerId: number
   centerName?: string | null
   subject?: Subject | null

@@ -10,6 +10,7 @@
         </div>
         <div class="flex shrink-0 items-center gap-2">
           <span v-if="i.submittedBy" class="text-xs text-muted-foreground">{{ i.submittedBy }}</span>
+          <UiBadge v-if="i.markedByOther" variant="warning">{{ t('students.attendanceHistory.notTeacher') }}</UiBadge>
           <UiBadge :variant="ATTENDANCE_STATUS_VARIANTS[i.status]">{{ t(ATTENDANCE_STATUS_LABEL_KEYS[i.status]) }}</UiBadge>
         </div>
       </li>

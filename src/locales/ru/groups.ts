@@ -72,6 +72,7 @@ export default {
       schedule: 'Расписание',
       fee: 'Цена',
       pause: 'Пауза',
+      attendance: 'Посещаемость',
       students: 'Ученики',
     },
     title: {
@@ -88,6 +89,7 @@ export default {
       feeChanged: 'Месячная цена изменена',
       pause: 'Группа приостановлена',
       lessonMoved: 'Занятие перенесено',
+      attendanceMarked: 'Посещаемость отметил не преподаватель группы ({date})',
       studentJoined: 'добавлен(а) в группу',
       studentLeft: 'покинул(а) группу',
       studentTransferredIn: 'переведён(а) в группу',
@@ -104,6 +106,8 @@ export default {
     },
   },
   attendance: {
+    markedByOther: 'Отметил: {name} (не преподаватель группы)',
+    pastLocked: 'Посещаемость прошлых занятий закрыта — её может изменить только администратор.',
     readonlyClosed: 'Группа не активна (закрыта или ещё не начата) — посещаемость только для просмотра.',
     formerTitle: 'Посещаемость бывших учеников ({count})',
     fromDate: 'Дата начала',

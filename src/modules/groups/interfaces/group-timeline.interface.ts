@@ -1,10 +1,20 @@
 import type { WeekDay } from '../enums/week-day.enum'
+import type { AttendanceStatus } from '../enums/attendance-status.enum'
 import type { GroupTimelineType } from '../enums/group-timeline.enum'
 
 /** One weekday of a schedule snapshot; `startTime` is `HH:mm:ss`. */
 export interface GroupTimelineDay {
   day: WeekDay
   startTime: string
+}
+
+/** One student's mark set or changed in an `attendance_marked` event. */
+export interface GroupTimelineMark {
+  studentId: number
+  studentName: string
+  /** null — marked for the first time. */
+  oldStatus: AttendanceStatus | null
+  newStatus: AttendanceStatus
 }
 
 /**
@@ -28,6 +38,9 @@ export interface GroupTimelineData {
   toDate?: string | null
   reason?: string | null
   createdByName?: string | null
+  // attendance_marked — by someone other than the group's teacher
+  lessonDate?: string
+  items?: GroupTimelineMark[]
   // student_* (`groupId/groupName` = the other group of a transfer)
   studentId?: number
   studentName?: string | null

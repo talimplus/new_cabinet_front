@@ -16,13 +16,13 @@
         @update:model-value="groupId = typeof $event === 'number' ? $event : null"
       />
     </div>
-    <div class="md:col-span-3">
+    <div v-if="!permanent" class="md:col-span-3">
       <UiInput v-model="fromMonth" type="month" :label="t('students.form.fromMonthShort')" />
     </div>
-    <div class="md:col-span-3">
+    <div v-if="!permanent" class="md:col-span-3">
       <UiInput v-model="toMonth" type="month" :label="t('students.form.toMonthShort')" />
     </div>
-    <div class="col-span-2 md:col-span-5">
+    <div class="col-span-2" :class="permanent ? 'md:col-span-11' : 'md:col-span-5'">
       <UiInput v-model="reason" :label="t('students.form.reason')" />
     </div>
     <div class="col-span-2 flex justify-end md:col-span-1">
@@ -42,7 +42,8 @@ import type { SelectOption } from '@/shared/interfaces/select-option.interface'
 const { t } = useI18n()
 const typeOptions = useDiscountTypeOptions()
 
-defineProps<{ groupOptions?: SelectOption[] }>()
+/** `permanent` — no months: the discount runs until it is removed. */
+defineProps<{ groupOptions?: SelectOption[]; permanent?: boolean }>()
 
 const type = defineModel<DiscountType>('type', { default: DiscountType.PERCENT })
 const value = defineModel<string | number>('value', { default: '' })

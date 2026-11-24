@@ -2,6 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import { fetchStudents, fetchStudentById, createStudent, updateStudent, changeStudentStatus } from '../api/students.api'
 import { fetchSubjects } from '@/modules/subjects/api/subjects.api'
 import { optionalRequest, emptyPage } from '@/shared/permissions/optional-request'
+import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
 import { StudentStatus, STUDENT_STATUS_LABEL_KEYS } from '../enums/student-status.enum'
@@ -34,6 +35,8 @@ interface ReturnDialogState {
   open: boolean
   student: Student | null
   status: StudentStatus | null
+  /** 422 `stopDate` — shown under the date. */
+  error: string
 }
 
 /** List/state logic for one student page. `getStatus` is read live so the same
@@ -70,7 +73,7 @@ export function useStudents(
   const modalOpen = ref(false)
   const editing = ref<Student | null>(null)
   const saving = ref(false)
-  const returnDialog = reactive<ReturnDialogState>({ open: false, student: null, status: null })
+  const returnDialog = reactive<ReturnDialogState>({ open: false, student: null, status: null, error: '' })
 
   async function load(): Promise<void> {
     loading.value = true
@@ -125,12 +128,20 @@ export function useStudents(
     modalOpen.value = true
   }
   /**
-   * The list row has no `groupFees` (per-group personal prices) — read them
+   * The list row has no `groupFees` (per-group personal prices) nor `removableGroupIds` — read them
    * from `GET /students/{id}` first so the price fields show what is stored.
    */
   async function openEdit(student: Student): Promise<void> {
     const detail = await optionalRequest(fetchStudentById(student.id), null).catch(() => null)
-    editing.value = detail ? { ...student, groupFees: detail.groupFees ?? [] } : student
+    editing.value = detail
+      ? {
+          ...student,
+          groupFees: detail.groupFees ?? [],
+          removableGroupIds: detail.removableGroupIds ?? [],
+          baseDiscounts: detail.baseDiscounts,
+          freeWindow: detail.freeWindow,
+        }
+      : student
     modalOpen.value = true
   }
 
@@ -188,7 +199,8 @@ export function useStudents(
       notify.success(t('leads.statusChanged'))
       await load()
       return true
-    } catch {
+    } catch (error) {
+      returnDialog.error = mapBackendErrors(error).stopDate ?? ''
       return false
     } finally {
       student.statusLoading = false
@@ -211,6 +223,7 @@ export function useStudents(
       returnDialog.open = true
       returnDialog.student = student
       returnDialog.status = next
+      returnDialog.error = ''
       return
     }
     // The other moves had no dialog — a misclick applied at once.

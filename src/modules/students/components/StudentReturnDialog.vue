@@ -17,6 +17,7 @@
         :min-date="branding.openedOn"
         :label="t('students.dialog.stopDate')"
         :hint="t('students.dialog.stopDateHint')"
+        :error="error"
       />
       <UiTextarea v-model="comment" :label="t('students.dialog.comment')" :rows="3" />
     </div>
@@ -40,7 +41,7 @@ import { ReturnLikelihood, RETURN_LIKELIHOOD_LABEL_KEYS } from '../enums/return-
 const { t } = useI18n()
 
 /** `status` — STOPPED also asks the day the student stopped (may be past). */
-const props = defineProps<{ modelValue: boolean; status?: StudentStatus | null }>()
+const props = defineProps<{ modelValue: boolean; status?: StudentStatus | null; error?: string }>()
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   confirm: [payload: StudentStatusChangeForm]

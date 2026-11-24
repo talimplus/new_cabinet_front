@@ -44,7 +44,7 @@ import { PREFERRED_TIME_LABEL_KEYS } from '../../enums/student-preferred-time.en
 import StudentGroupRow from './StudentGroupRow.vue'
 // A stopped student is returned (header) first — a transfer would leave them stopped and unbilled.
 import { StudentStatus } from '../../enums/student-status.enum'
-import { formatDiscount } from '../../utils/format-discount'
+import { formatDiscount, permanentDiscounts } from '../../utils/format-discount'
 import type {
   StudentSummaryGroup,
   StudentSummaryProfile,
@@ -58,13 +58,16 @@ const emit = defineEmits<{ transfer: [group: StudentSummaryGroup] }>()
 const fields = computed(() => {
   const s = props.student
   const time = s?.preferredTime
-  const discount = formatDiscount(s?.discountPercent, s?.discountAmount)
+  const groupName = (id: number) => s?.groups?.find((g) => g.id === id)?.name ?? `#${id}`
+  const discount = permanentDiscounts(s)
+    .map((d) => [formatDiscount(d.percent, d.amount), d.groupId != null && groupName(d.groupId)].filter(Boolean).join(' · '))
+    .join(', ')
   return [
     { label: t('students.view.info.subject'), value: (s?.subjects?.length ? s.subjects.map((x) => x.name).join(', ') : s?.subject?.name) || '—' },
     { label: t('students.view.info.center'), value: s?.centerName || '—' },
     { label: t('students.view.info.birthDate'), value: formatDate(s?.birthDate) },
     { label: t('students.view.info.preferredTime'), value: time ? t(PREFERRED_TIME_LABEL_KEYS[time]) : '—' },
-    { label: t('students.view.info.discount'), value: discount ?? '—' },
+    { label: t('students.view.info.discount'), value: discount || '—' },
   ]
 })
 </script>

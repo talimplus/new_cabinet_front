@@ -470,18 +470,18 @@ The status cell shows "Tasdiqlash kutilmoqda" instead of "To'lanmagan"; the
   (`GET /payments/student/{id}/summary`): `student.groups[].personalFee`,
   `months[].refundedAmount/creditAmount`, `totals.creditAmount`.
 - **Personal price → group price (2026-11-20), per group:**
-  `POST /students/{id}/personal-fee/clear/preview` `{ groupId, fromMonth? }` → `{ groupId,
-  groupName, fromMonth, defaultFromMonth, minMonth, personalFee, rows, totals,
-  paidSalaryMonths }` (backdate preview shape; `fromMonth` omitted = activation month).
-  `POST /students/{id}/personal-fee/clear` `{ groupId, fromMonth, overpayment?: 'refund'|'carry' }`
-  → `{ studentId, groupId, fromMonth, overpayment, overpaidAmount, refundedAmount,
-  carriedAmount, appliedAmount, waitingAmount }`. That group's price is 0 from the month
-  (earlier months and other groups untouched, discount kept); its rows to now are
+  `POST /students/{id}/personal-fee/clear/preview` `{ groupId, fromDate? }` → `{ groupId,
+  groupName, fromDate, defaultFromDate, minDate, personalFee, rows, totals,
+  paidSalaryMonths }` (backdate preview shape; `fromDate` omitted = activation day).
+  `POST /students/{id}/personal-fee/clear` `{ groupId, fromDate, overpayment?: 'refund'|'carry' }`
+  → `{ studentId, groupId, fromDate, overpayment, overpaidAmount, refundedAmount,
+  carriedAmount, appliedAmount, waitingAmount }`. That group's price is 0 from that DAY
+  (2026-11-24, mid-month allowed: each lesson uses its own day's price; earlier lessons and other groups untouched, discount kept); its rows to now are
   rebilled with force (paid too). Dearer group price → the difference is debt. Cheaper →
   `refund` books it to `refundedAmount`; `carry` moves it to `payments.creditAmount` and
   pays the student's next open months with transfer receipts (same group first); a month
-  whose row does not exist yet gets it from the daily cron (00:10). Month: ≤ current,
-  ≥ 24 months back (422 `fromMonth`); no personal price in that group → 400; group the
+  whose row does not exist yet gets it from the daily cron (00:10). Date: ≤ today,
+  ≥ 24 months back (422 `fromDate`); no personal price in that group → 400; group the
   student never studied in → 422 `groupId`. Perm `students.personalFee`.
   UI: card header `StudentCardFee` (one price per group) + `StudentPersonalFeeDialog`.
 - UI: `StudentStartDialog` — activation always asks the date (today → no
@@ -504,8 +504,8 @@ the student has a group). The window starts at the student's first lesson across
 all groups and lasts N calendar months; lessons inside it are not billed. The form
 hides the whole discount block behind a switch (off by default) with two tabs
 (discounts / free months); `freeMonths` is sent only when it differs from the
-stored value, so 0 never goes on create. Switching the block off on edit clears
-every discount (`discountPercent/Amount: 0`, `discountPeriods: []`, `freeMonths: 0`).
+stored value, so 0 never goes on create. Switching the block off on edit asks for a
+confirm and sends `clearDiscount: true` (below).
 A change touching a month with money → 422 `freeMonths`.
 
 **Leads carry no group (2026-10-10):** the new app's lead form, filter and
@@ -531,6 +531,33 @@ month** if no money was taken for it yet (no `amountPaid`, no pending receipt), 
 from the **next month**; past months are never repriced. The response shape is
 unchanged — `discountPercent/Amount` echo the value the admin last entered, not
 necessarily the one billed this month. Form hint: `students.form.discountChangeHint`.
+
+**Permanent discounts per group, clearing, mistaken groups (2026-11-24, verified live):**
+- `baseDiscounts: { groupId?, percent? | amount?, reason? }[]` on create/update — the
+  FULL list (one per group; `groupId` omitted — all groups; both values / none → 422;
+  duplicate group → 422 `baseDiscounts`). A group missing from it loses its discount by
+  the ordinary rule, counted per group (money this month IN that group → next month).
+  List, `GET /students/{id}` and the summary return `baseDiscounts: { groupId, percent,
+  amount, reason, fromMonth }[]`. All-groups and group discounts add up.
+  `discountPercent/Amount` — the all-groups one only (old front).
+- `PUT /students/{id}` `clearDiscount: true` — every discount ends this month even if it
+  is paid: this month's rows are rebilled with force (the difference is debt), past
+  months untouched, periods cut at this month. A free window that began in an earlier
+  month is left alone.
+- `GET /students/{id}` → `removableGroupIds`: ongoing groups the edit may drop (NEW/IGNORED
+  student, or added ≤ 30 days ago, not transferred; no attendance, money or receipts).
+  Dropping one erases its membership and unpaid rows. An ACTIVE student can't end up
+  without an ongoing group (422 `groupIds`).
+- Stop / leave group: 422 `stopDate` when a lesson from that day on (today too) is marked
+  present / late / **excused**; the message names the earliest allowed day. Summary:
+  `student.stopInfo: { date, markedOn, markedBy } | null` (stopped only).
+- Attendance: a past `lessonDate` needs `attendance.managePast` (admin only by default —
+  removed from every other role by migration `…076`), else 403. `lesson-dates` rows carry
+  `submittedByName`, `markedByOther`; `GET /students/{id}/attendance` items — `markedByOther`.
+  Marks set/changed by anyone but the group's teacher (admin included): student timeline
+  `attendance_marked` `{ lessonDate, oldStatus, status }`, group timeline
+  `attendance_marked` `{ lessonDate, items: [{ studentId, studentName, oldStatus, newStatus }],
+  createdByName }` (both only with `attendance.view`).
 
 ⚠️ `UpdateStudentDto` is **narrower** than create — it has no `secondPhone`,
 `comment`, `heardAboutUs`, `preferredTime`, `preferredDays`, passport fields,

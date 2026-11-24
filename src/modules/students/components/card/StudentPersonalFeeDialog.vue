@@ -10,15 +10,16 @@
       <p class="text-sm text-muted-foreground">
         {{ t('students.personalFee.hint', { group: f.preview.value?.groupName ?? '', amount: formatSom(f.preview.value?.personalFee ?? 0) }) }}
       </p>
-      <UiSelect
-        :model-value="f.state.month"
-        :options="f.monthOptions.value"
-        :label="t('students.personalFee.fromMonth')"
-        :hint="t('students.personalFee.fromMonthHint')"
-        :error="f.error.value"
+      <UiDatepicker
+        :model-value="f.dateModel.value"
+        :enable-time="false"
         :clearable="false"
-        :searchable="false"
-        @update:model-value="f.pickMonth(typeof $event === 'string' ? $event : null)"
+        :min-date="f.minDate.value"
+        :max-date="new Date()"
+        :label="t('students.personalFee.fromDate')"
+        :hint="t('students.personalFee.fromDateHint')"
+        :error="f.error.value"
+        @update:model-value="f.pickDate($event instanceof Date ? $event : null)"
       />
       <UiSelect
         v-if="f.hasOverpayment.value"
@@ -49,7 +50,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { UiModal, UiSelect, UiButton } from '@/shared/components'
+import { UiModal, UiSelect, UiDatepicker, UiButton } from '@/shared/components'
 import BackdateImpact from '@/shared/components/backdate/BackdateImpact.vue'
 import { formatSom } from '@/shared/utils/format-money'
 import { useStudentPersonalFee } from '../../composables/use-student-personal-fee'

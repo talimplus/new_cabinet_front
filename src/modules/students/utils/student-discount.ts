@@ -1,8 +1,13 @@
 import { DiscountType } from '../enums/discount-type.enum'
+import { permanentDiscounts } from './format-discount'
 import type { Student } from '../interfaces/student.interface'
-import type { DiscountPeriodForm, StudentForm } from '../interfaces/student-form.interface'
+import { toDateString } from '@/shared/utils/format-date'
+import type { BaseDiscountForm, DiscountPeriodForm, StudentForm } from '../interfaces/student-form.interface'
 
-/** A discount period row while editing (months are "YYYY-MM", value may be blank). */
+/**
+ * A discount row while editing (months are "YYYY-MM", value may be blank). A
+ * permanent discount is the same row with the months unused.
+ */
 export interface DiscountRow {
   type: DiscountType
   value: string | number
@@ -20,9 +25,8 @@ export interface DiscountState {
   /** First N months free (0 — none). */
   freeMonths: number
   usePeriods: boolean
-  discountType: DiscountType
-  discountValue: string | number
-  discountReason: string
+  /** Permanent discounts, one per group (or one for all groups). */
+  baseDiscounts: DiscountRow[]
   discountPeriods: DiscountRow[]
 }
 
@@ -35,9 +39,7 @@ export function blankDiscount(): DiscountState {
     discountEnabled: false,
     freeMonths: 0,
     usePeriods: false,
-    discountType: DiscountType.PERCENT,
-    discountValue: '',
-    discountReason: '',
+    baseDiscounts: [],
     discountPeriods: [],
   }
 }
@@ -50,34 +52,49 @@ function split(percent: unknown, amount: unknown): { type: DiscountType; value: 
   return { type: DiscountType.PERCENT, value: p > 0 ? p : '' }
 }
 
-/** Editing an existing student: periods win over the single (permanent) discount. */
+/** The stored permanent discounts as rows; old rows (no `baseDiscounts`) fall back to the columns. */
+function baseRows(student: Student): DiscountRow[] {
+  return permanentDiscounts(student)
+    .map((d) => ({ ...emptyPeriod(), ...split(d.percent, d.amount), groupId: d.groupId ?? null, reason: d.reason ?? '' }))
+}
+
+/** The month is over for this period (`toMonth` is exclusive). */
+const isOver = (toMonth?: string | null): boolean => {
+  const now = new Date()
+  const current = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  return !!toMonth && toMonth.slice(0, 7) <= current
+}
+
+/**
+ * Editing an existing student: running periods win over the permanent
+ * discounts. Ended periods stay in the rows (they explain past months) but
+ * don't switch the block on.
+ */
 export function discountFromStudent(student: Student): DiscountState {
   const periods = student.discountPeriods ?? []
+  const usePeriods = periods.some((p) => !isOver(p.toMonth))
   const freeMonths = Number(student.freeMonths ?? 0)
-  if (periods.length) {
-    return {
-      ...blankDiscount(),
-      discountEnabled: true,
-      freeMonths,
-      usePeriods: true,
-      discountPeriods: periods.map((p) => ({
-        ...split(p.percent, p.amount),
-        groupId: p.groupId ?? null,
-        fromMonth: (p.fromMonth ?? '').slice(0, 7),
-        toMonth: (p.toMonth ?? '').slice(0, 7),
-        reason: p.reason ?? '',
-      })),
-    }
-  }
-  const single = split(student.discountPercent, student.discountAmount)
+  const freeRunning = freeMonths > 0 && !isFreeOver(student)
+  const baseDiscounts = baseRows(student)
   return {
     ...blankDiscount(),
-    discountEnabled: single.value !== '' || freeMonths > 0,
+    discountEnabled: usePeriods || baseDiscounts.length > 0 || freeRunning,
     freeMonths,
-    discountType: single.type,
-    discountValue: single.value,
-    discountReason: student.discountReason ?? '',
+    usePeriods,
+    baseDiscounts,
+    discountPeriods: periods.map((p) => ({
+      ...split(p.percent, p.amount),
+      groupId: p.groupId ?? null,
+      fromMonth: (p.fromMonth ?? '').slice(0, 7),
+      toMonth: (p.toMonth ?? '').slice(0, 7),
+      reason: p.reason ?? '',
+    })),
   }
+}
+
+function isFreeOver(student: Student): boolean {
+  const until = student.freeWindow?.untilExclusive
+  return !!until && until <= toDateString(new Date())
 }
 
 function toNumber(value: string | number): number | undefined {
@@ -97,8 +114,10 @@ export interface DiscountBaseline {
  * Writes the discount fields of the POST/PUT body.
  *
  * Switch off: on create nothing is sent; on edit of a student who had a
- * discount everything is cleared. `freeMonths` goes only when it changed, so
+ * discount (the switch asked for a confirm) `clearDiscount` drops every
+ * discount from the current month. `freeMonths` goes only when it changed, so
  * opening the block by mistake and saving never writes a free month.
+ * A row limited to a group the student is not in is dropped.
  */
 export function applyDiscount(
   state: DiscountState,
@@ -106,24 +125,15 @@ export function applyDiscount(
   baseline: DiscountBaseline = { enabled: false, freeMonths: 0 },
 ): void {
   if (!state.discountEnabled) {
-    if (!baseline.enabled) return
-    payload.discountPercent = 0
-    payload.discountAmount = 0
-    payload.discountPeriods = []
-    payload.discountReason = ''
-    if (baseline.freeMonths) payload.freeMonths = 0
+    if (baseline.enabled) payload.clearDiscount = true
     return
   }
   if (state.freeMonths !== baseline.freeMonths) payload.freeMonths = state.freeMonths
   if (state.usePeriods) {
-    const periods: DiscountPeriodForm[] = state.discountPeriods
+    const periods = state.discountPeriods
       .filter((p) => toNumber(p.value) !== undefined && p.fromMonth)
-      .map((p) => {
-        const value = Number(p.value)
-        const row: DiscountPeriodForm = { fromMonth: p.fromMonth }
-        if (p.type === DiscountType.AMOUNT) row.amount = value
-        else row.percent = value
-        if (p.groupId != null) row.groupId = p.groupId
+      .map<DiscountPeriodForm>((p) => {
+        const row: DiscountPeriodForm = { ...valueOf(p), fromMonth: p.fromMonth }
         if (p.toMonth) row.toMonth = p.toMonth
         if (p.reason.trim()) row.reason = p.reason.trim()
         return row
@@ -131,12 +141,24 @@ export function applyDiscount(
     if (periods.length) payload.discountPeriods = periods
     return
   }
-  const value = toNumber(state.discountValue)
-  if (value !== undefined) {
-    // Both are sent so that switching the type on edit clears the other one.
-    const isAmount = state.discountType === DiscountType.AMOUNT
-    payload.discountPercent = isAmount ? 0 : value
-    payload.discountAmount = isAmount ? value : 0
+  const rows = state.baseDiscounts
+    .filter((r) => (toNumber(r.value) ?? 0) > 0)
+    .filter((r) => r.groupId == null || (payload.groupIds ?? []).includes(r.groupId))
+    .map<BaseDiscountForm>((r) => ({ ...valueOf(r), ...(r.reason.trim() ? { reason: r.reason.trim() } : {}) }))
+  // An emptied list on edit is the removal (the ordinary rule: paid month → next month).
+  if (rows.length || baseline.enabled) payload.baseDiscounts = rows
+}
+
+function valueOf(row: DiscountRow): { percent?: number; amount?: number; groupId?: number } {
+  const value = Number(row.value)
+  return {
+    ...(row.type === DiscountType.AMOUNT ? { amount: value } : { percent: value }),
+    ...(row.groupId != null ? { groupId: row.groupId } : {}),
   }
-  if (state.discountReason.trim()) payload.discountReason = state.discountReason.trim()
+}
+
+/** Two permanent discounts for the same group — the backend takes one per group. */
+export function hasDuplicateGroup(rows: DiscountRow[]): boolean {
+  const scopes = rows.filter((r) => (toNumber(r.value) ?? 0) > 0).map((r) => r.groupId)
+  return new Set(scopes).size !== scopes.length
 }

@@ -72,6 +72,7 @@ export default {
       schedule: 'Jadval',
       fee: 'Narx',
       pause: 'Pauza',
+      attendance: 'Davomat',
       students: "O'quvchilar",
     },
     title: {
@@ -88,6 +89,7 @@ export default {
       feeChanged: "Oylik narx o'zgardi",
       pause: "Guruh to'xtatildi",
       lessonMoved: "Dars ko'chirildi",
+      attendanceMarked: "Davomat o'qituvchidan boshqa xodim tomonidan belgilandi ({date})",
       studentJoined: "guruhga qo'shildi",
       studentLeft: 'guruhdan chiqdi',
       studentTransferredIn: "ko'chib keldi",
@@ -104,6 +106,8 @@ export default {
     },
   },
   attendance: {
+    markedByOther: "Belgilagan: {name} (guruh o'qituvchisi emas)",
+    pastLocked: "Oldingi darslar davomati yopilgan — uni faqat admin o'zgartira oladi.",
     readonlyClosed: "Guruh faol emas (yopilgan yoki hali boshlanmagan) — davomat faqat ko'rish uchun.",
     formerTitle: "Sobiq o'quvchilar davomati ({count})",
     fromDate: 'Boshlanish sanasi',

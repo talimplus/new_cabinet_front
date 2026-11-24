@@ -21,6 +21,16 @@ export interface DiscountPeriod {
   createdAt?: string
 }
 
+/** A permanent (monthless) discount of one group; `groupId: null` — all groups. */
+export interface BaseDiscount {
+  groupId: number | null
+  percent: number
+  amount: number
+  reason: string | null
+  /** `YYYY-MM-01` it takes effect; null — since the start. */
+  fromMonth: string | null
+}
+
 /**
  * A student row from GET /students. Note the backend returns `monthlyFee` and
  * `discountPercent` as STRINGS (e.g. "500000", "10") — coerce with Number() when
@@ -45,6 +55,10 @@ export interface Student {
   /** so'm per month, the amount counterpart of `discountPercent` (string numeric) */
   discountAmount?: string | null
   discountReason?: string | null
+  /** Permanent discounts per group (null — all groups), as last entered. */
+  baseDiscounts?: BaseDiscount[]
+  /** `GET /students/{id}` only: ongoing groups added by mistake — the edit may drop them. */
+  removableGroupIds?: number[]
   /** First N months free (0 — none). */
   freeMonths?: number
   /** The free window (`GET /students/{id}` only); null until the student has a group. */

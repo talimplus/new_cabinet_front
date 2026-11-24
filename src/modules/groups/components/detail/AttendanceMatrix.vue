@@ -36,6 +36,7 @@
             :outside="a.isOutsideEnrollment(s.id, date)"
             :note="a.enrollmentReason(s.id, date)"
             :comment="a.commentOf(s.id, date)"
+            :marked-by="a.markedByOf(s.id, date)"
             @click="!readonly && a.openCell(s.id, date)"
           />
         </tr>

@@ -9,6 +9,7 @@
       <p v-if="!current.length" class="p-4 text-center text-sm text-muted-foreground">{{ t('groups.attendance.noStudents') }}</p>
       <!-- Only a STARTED group takes marks (backend 400s otherwise) — no picker to open. -->
       <p v-if="readonly && current.length" class="rounded-md bg-info-soft px-3 py-2 text-xs text-info">{{ t('groups.attendance.readonlyClosed') }}</p>
+      <p v-if="!readonly && current.length && canManageAttendance && !canManagePastAttendance" class="rounded-md bg-info-soft px-3 py-2 text-xs text-info">{{ t('groups.attendance.pastLocked') }}</p>
       <AttendanceMatrix v-if="current.length" :a="a" :students="current" :readonly="readonly" />
       <!-- Former members (transferred, stopped), folded away and read-only. -->
       <UiCollapse v-if="former.length" :title="t('groups.attendance.formerTitle', { count: former.length })">
@@ -42,12 +43,14 @@ import AttendanceHolidaysNote from './AttendanceHolidaysNote.vue'
 import AttendanceMatrix from './AttendanceMatrix.vue'
 import AttendanceStatusPicker from './AttendanceStatusPicker.vue'
 import AttendanceRescheduleDialog from './AttendanceRescheduleDialog.vue'
+import { usePermissions } from '@/shared/composables/use-permissions'
 import { useAttendance } from '../../composables/use-attendance'
 import type { Student } from '@/modules/students/interfaces/student.interface'
 import type { AttendanceRow } from '../../interfaces/attendance.interface'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+const { canManageAttendance, canManagePastAttendance } = usePermissions()
 
 /** `finished` — the group is closed: its students are no longer ACTIVE, so rows come from the journal. */
 /** `readonly` — the group is not running (new or closed): marks are shown, never edited. */

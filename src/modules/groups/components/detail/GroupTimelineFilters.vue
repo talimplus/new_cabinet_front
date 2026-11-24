@@ -25,7 +25,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: Cat | null] }>()
 const { t } = useI18n()
 
 /** Chip order on screen; GROUP (created / started / ended) shows under "all" only. */
-const ORDER: Cat[] = [Cat.TEACHER, Cat.SCHEDULE, Cat.FEE, Cat.PAUSE, Cat.STUDENTS]
+const ORDER: Cat[] = [Cat.TEACHER, Cat.SCHEDULE, Cat.FEE, Cat.PAUSE, Cat.ATTENDANCE, Cat.STUDENTS]
 
 const options = computed<TimelineFilterOption[]>(() => {
   const total = Object.values(props.counts).reduce((sum, n) => sum + (n ?? 0), 0)

@@ -1,5 +1,5 @@
 import {
-  ArrowLeftRight, BadgeDollarSign, CalendarOff, Clock, Coins, DoorOpen, Link2Off, Pause,
+  ArrowLeftRight, BadgeDollarSign, CalendarOff, ClipboardList, Clock, Coins, DoorOpen, Link2Off, Pause,
   Pencil, PhoneCall, ReceiptText, Scissors, Send, UserCheck, UserPlus, Users, UserX,
   type FunctionalComponent,
 } from '@/shared/icons'
@@ -8,7 +8,7 @@ import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import { PAYMENT_METHOD_LABEL_KEYS, PaymentMethod } from '@/shared/enums/payment-method.enum'
 import { RECEIPT_STATUS_LABEL_KEYS, ReceiptStatus } from '@/shared/enums/receipt-status.enum'
-import { AttendanceStatus } from '@/modules/groups/enums/attendance-status.enum'
+import { ATTENDANCE_STATUS_LABEL_KEYS, AttendanceStatus } from '@/modules/groups/enums/attendance-status.enum'
 import { STUDENT_STATUS_LABEL_KEYS, StudentStatus } from '../enums/student-status.enum'
 import { RETURN_LIKELIHOOD_LABEL_KEYS, ReturnLikelihood } from '../enums/return-likelihood.enum'
 import { StudentTimelineType as T, TIMELINE_FIELD_LABEL_KEYS } from '../enums/student-timeline.enum'
@@ -46,10 +46,11 @@ function status(d: D): Shape {
   const from = d.fromStatus as StudentStatus | null | undefined
   const likelihood = d.returnLikelihood &&
     k('lines.likelihood', { value: label(RETURN_LIKELIHOOD_LABEL_KEYS, d.returnLikelihood as ReturnLikelihood) })
-  if (to === StudentStatus.STOPPED) return { icon: Pause, tone: Tone.DANGER, title: k('title.stopped'), lines: [likelihood], note: d.comment }
+  const effective = d.effectiveDate && k('lines.effectiveDate', { date: formatDate(d.effectiveDate) })
+  if (to === StudentStatus.STOPPED) return { icon: Pause, tone: Tone.DANGER, title: k('title.stopped'), lines: [effective, likelihood], note: d.comment }
   if (to === StudentStatus.ACTIVE) {
     const back = from === StudentStatus.STOPPED || from === StudentStatus.FINISHED
-    return { icon: UserCheck, tone: Tone.SUCCESS, title: k(back ? 'title.returned' : 'title.activated'), note: d.comment }
+    return { icon: UserCheck, tone: Tone.SUCCESS, title: k(back ? 'title.returned' : 'title.activated'), lines: [effective], note: d.comment }
   }
   const transition = from
     ? `${label(STUDENT_STATUS_LABEL_KEYS, from)} → ${label(STUDENT_STATUS_LABEL_KEYS, to)}`
@@ -75,6 +76,16 @@ function payment(d: D, actor: string | null): Shape {
       text: label(RECEIPT_STATUS_LABEL_KEYS, s),
       variant: s === ReceiptStatus.REJECTED ? 'danger' : 'warning',
     },
+  }
+}
+
+/** A mark the group's teacher did not make: "lesson date · old → new". */
+function attendanceMarked(d: D): Shape {
+  const name = (s?: string | null) => label(ATTENDANCE_STATUS_LABEL_KEYS, s)
+  return {
+    icon: ClipboardList, tone: Tone.WARNING,
+    title: k('title.attendanceMarked', { date: formatDate(d.lessonDate) }),
+    lines: [d.oldStatus ? `${name(d.oldStatus)} → ${name(d.status)}` : name(d.status)],
   }
 }
 
@@ -120,7 +131,8 @@ const SHAPES: Record<T, (d: D, item: StudentTimelineItem) => Shape> = {
     icon: BadgeDollarSign, tone: Tone.INFO, title: k('title.feeChanged'),
     lines: [
       k('lines.fromMonth', { month: month(d.fromMonth) }),
-      d.monthlyFee ? k('lines.personalFee', { amount: formatSom(d.monthlyFee) }) : k('lines.groupFee'),
+      // null — since prices are per group this event is about the discount only.
+      d.monthlyFee == null ? null : d.monthlyFee ? k('lines.personalFee', { amount: formatSom(d.monthlyFee) }) : k('lines.groupFee'),
       (d.percent || d.amount) ? k('lines.discountValue', { value: discountValue(d) }) : k('lines.noDiscount'),
     ],
     note: d.reason,
@@ -129,6 +141,7 @@ const SHAPES: Record<T, (d: D, item: StudentTimelineItem) => Shape> = {
   [T.TELEGRAM_LINKED]: (d) => ({ icon: Send, tone: Tone.INFO, title: k('title.telegramLinked'), lines: [[d.parentName, d.username && `@${d.username}`].filter(Boolean).join(' · ')] }),
   [T.TELEGRAM_UNLINKED]: (d) => ({ icon: Link2Off, tone: Tone.NEUTRAL, title: k(d.blocked ? 'title.telegramBlocked' : 'title.telegramUnlinked'), lines: [d.parentName] }),
   [T.ATTENDANCE]: attendance,
+  [T.ATTENDANCE_MARKED]: attendanceMarked,
   [T.PROFILE_UPDATED]: (d) => ({
     icon: Pencil, tone: Tone.NEUTRAL, title: k('title.profileUpdated'),
     lines: [d.fields?.length ? k('lines.fields', { fields: d.fields.map((f) => TIMELINE_FIELD_LABEL_KEYS[f] ? t(TIMELINE_FIELD_LABEL_KEYS[f]) : f).join(', ') }) : null],

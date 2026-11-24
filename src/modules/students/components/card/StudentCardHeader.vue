@@ -33,6 +33,7 @@
         {{ t('common.delete') }}
       </UiButton>
     </div>
+    <StudentStopNote v-if="student?.stopInfo" :info="student.stopInfo" />
     <StudentReactivateDialog ref="reactivateRef" @done="emit('changed')" />
   </div>
 </template>
@@ -44,6 +45,7 @@ import { UiBadge, UiButton, UiIcon, UiBackButton } from '@/shared/components'
 import { Pencil, Trash2, RotateCcw } from '@/shared/icons'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import StudentReactivateDialog from './StudentReactivateDialog.vue'
+import StudentStopNote from './StudentStopNote.vue'
 import StudentCardFee from './StudentCardFee.vue'
 import { formatPhone } from '@/shared/utils/format-phone'
 import {

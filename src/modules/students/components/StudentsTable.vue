@@ -10,6 +10,7 @@
     <template #cell-phone="{ row }"><span class="whitespace-nowrap font-mono">{{ formatPhone((row as Student).phone) || '—' }}</span></template>
     <template #cell-groups="{ row }">{{ groupNames(row as Student) }}</template>
     <template #cell-subject="{ row }">{{ subjectNames(row as Student) }}</template>
+    <template #cell-stoppedAt="{ row }">{{ formatDate((row as Student).stoppedAt) }}</template>
     <template #cell-birthDate="{ row }">{{ formatDate((row as Student).birthDate) }}</template>
     <template #cell-monthlyFee="{ row }">
       <span class="font-mono">{{ formatSom(toNumber((row as Student).monthlyFee)) }}</span>

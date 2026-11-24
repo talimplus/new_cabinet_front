@@ -35,6 +35,8 @@ export interface StudentTimelineDetails {
   toStatus?: string
   returnLikelihood?: string | null
   derived?: boolean
+  /** `YYYY-MM-DD` the status is effective from — may be before it was set. */
+  effectiveDate?: string
   // transfer
   fromGroupId?: number
   fromGroupName?: string
@@ -45,6 +47,9 @@ export interface StudentTimelineDetails {
   refundedAmount?: number
   remainingDebt?: number
   deletedAttendance?: number
+  // attendance_marked (`status` — the new mark)
+  lessonDate?: string
+  oldStatus?: string | null
   // misc
   fromLead?: boolean
   fields?: string[]
