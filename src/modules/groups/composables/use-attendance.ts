@@ -1,5 +1,5 @@
 import { ref, reactive, computed, type Ref } from 'vue'
-import { fetchLessonDates, submitAttendance, rescheduleAttendance } from '../api/attendance.api'
+import { fetchLessonDates, submitAttendance, clearAttendance, rescheduleAttendance } from '../api/attendance.api'
 import { useNotificationStore } from '@/stores/notification.store'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { toDateString, formatDate } from '@/shared/utils/format-date'
@@ -151,7 +151,10 @@ export function useAttendance(
     date: '',
     status: AttendanceStatus.PRESENT,
     comment: '',
+    /** The cell already has a mark — it can be reset. */
+    marked: false,
     saving: false,
+    clearing: false,
   })
 
   function openCell(studentId: number, date: string): void {
@@ -161,6 +164,7 @@ export function useAttendance(
     picker.date = date
     picker.status = existing?.status ?? AttendanceStatus.PRESENT
     picker.comment = existing?.comment ?? ''
+    picker.marked = !!existing
     picker.open = true
   }
 
@@ -191,6 +195,25 @@ export function useAttendance(
       await load(true)
     } finally {
       picker.saving = false
+    }
+  }
+
+  /** A mark set by mistake → back to unmarked (same date rules as marking). */
+  async function clearCell(): Promise<void> {
+    const { date, studentId } = picker
+    picker.clearing = true
+    try {
+      await clearAttendance(groupId, { lessonDate: date, studentId })
+      notify.success(t('groups.attendance.clearedDone'))
+      picker.open = false
+      const byDate = data.value?.attendanceByDate
+      if (byDate) {
+        const rows = rowsFor(date).filter((r) => r.studentId !== studentId)
+        byDate[date] = { exists: rows.length > 0, rows }
+      }
+      await load(true)
+    } finally {
+      picker.clearing = false
     }
   }
 
@@ -265,6 +288,7 @@ export function useAttendance(
     picker,
     openCell,
     saveCell,
+    clearCell,
     reschedule,
     canRescheduleDate,
     openReschedule,

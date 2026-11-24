@@ -106,6 +106,9 @@ export default {
     },
   },
   attendance: {
+    clearMark: 'Belgini olib tashlash',
+    clearedDone: 'Belgi olib tashlandi',
+    cleared: 'belgilanmagan',
     markedByOther: "Belgilagan: {name} (guruh o'qituvchisi emas)",
     pastLocked: "Oldingi darslar davomati yopilgan — uni faqat admin o'zgartira oladi.",
     readonlyClosed: "Guruh faol emas (yopilgan yoki hali boshlanmagan) — davomat faqat ko'rish uchun.",

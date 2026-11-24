@@ -22,7 +22,10 @@
       v-model:status="a.picker.status"
       v-model:comment="a.picker.comment"
       :saving="a.picker.saving"
+      :marked="a.picker.marked"
+      :clearing="a.picker.clearing"
       @save="a.saveCell"
+      @clear="a.clearCell"
     />
     <AttendanceRescheduleDialog
       v-model="a.reschedule.open"

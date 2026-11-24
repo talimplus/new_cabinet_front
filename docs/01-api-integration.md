@@ -558,6 +558,9 @@ necessarily the one billed this month. Form hint: `students.form.discountChangeH
   `attendance_marked` `{ lessonDate, oldStatus, status }`, group timeline
   `attendance_marked` `{ lessonDate, items: [{ studentId, studentName, oldStatus, newStatus }],
   createdByName }` (both only with `attendance.view`).
+- `POST /groups/{id}/attendance/clear` `{ lessonDate, studentId }` → `{ cleared }`: removes one
+  mark (unmarked again). Same rules as submit (today / past with `managePast`); a former
+  student → 400. In the history `newStatus` / `status` is `cleared`.
 
 ⚠️ `UpdateStudentDto` is **narrower** than create — it has no `secondPhone`,
 `comment`, `heardAboutUs`, `preferredTime`, `preferredDays`, passport fields,

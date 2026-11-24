@@ -8,7 +8,7 @@ import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import { PAYMENT_METHOD_LABEL_KEYS, PaymentMethod } from '@/shared/enums/payment-method.enum'
 import { RECEIPT_STATUS_LABEL_KEYS, ReceiptStatus } from '@/shared/enums/receipt-status.enum'
-import { ATTENDANCE_STATUS_LABEL_KEYS, AttendanceStatus } from '@/modules/groups/enums/attendance-status.enum'
+import { attendanceMarkKey, AttendanceStatus } from '@/modules/groups/enums/attendance-status.enum'
 import { STUDENT_STATUS_LABEL_KEYS, StudentStatus } from '../enums/student-status.enum'
 import { RETURN_LIKELIHOOD_LABEL_KEYS, ReturnLikelihood } from '../enums/return-likelihood.enum'
 import { StudentTimelineType as T, TIMELINE_FIELD_LABEL_KEYS } from '../enums/student-timeline.enum'
@@ -81,7 +81,7 @@ function payment(d: D, actor: string | null): Shape {
 
 /** A mark the group's teacher did not make: "lesson date · old → new". */
 function attendanceMarked(d: D): Shape {
-  const name = (s?: string | null) => label(ATTENDANCE_STATUS_LABEL_KEYS, s)
+  const name = (s?: string | null) => (s ? t(attendanceMarkKey(s)) : '')
   return {
     icon: ClipboardList, tone: Tone.WARNING,
     title: k('title.attendanceMarked', { date: formatDate(d.lessonDate) }),

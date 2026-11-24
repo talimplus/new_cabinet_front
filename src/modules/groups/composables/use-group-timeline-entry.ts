@@ -7,7 +7,7 @@ import { formatSom } from '@/shared/utils/format-money'
 import { formatDate } from '@/shared/utils/format-date'
 import { TimelineTone as Tone } from '@/shared/enums/timeline-tone.enum'
 import { WEEK_DAY_SHORT_KEYS, WeekDay } from '../enums/week-day.enum'
-import { ATTENDANCE_STATUS_LABEL_KEYS, type AttendanceStatus } from '../enums/attendance-status.enum'
+import { attendanceMarkKey, type AttendanceStatus } from '../enums/attendance-status.enum'
 import { GroupTimelineType as T } from '../enums/group-timeline.enum'
 import type { GroupTimelineData as D, GroupTimelineDay, GroupTimelineEvent } from '../interfaces/group-timeline.interface'
 import type { TimelineEntryView, TimelineLink } from '@/shared/interfaces/timeline-entry.interface'
@@ -33,7 +33,7 @@ interface Shape {
 const k = (key: string, params?: Record<string, unknown>) => t(`groups.timeline.${key}`, params ?? {})
 const teacher = (name?: string | null) => name || k('noTeacher')
 /** "Kelmadi → " — empty for a first mark. */
-const markLabel = (old: AttendanceStatus | null) => (old ? `${t(ATTENDANCE_STATUS_LABEL_KEYS[old])} → ` : '')
+const markLabel = (old: AttendanceStatus | null) => (old ? `${t(attendanceMarkKey(old))} → ` : '')
 const ORDER = Object.values(WeekDay)
 
 /** `Du 14:00, Ch 14:00` — weekdays in calendar order. */
@@ -99,7 +99,7 @@ function shapes(e: GroupTimelineEvent, access: GroupTimelineLinkAccess): Shape |
       return {
         icon: ClipboardList, tone: Tone.WARNING,
         title: k('title.attendanceMarked', { date: formatDate(d.lessonDate) }),
-        lines: (d.items ?? []).map((m) => `${m.studentName}: ${markLabel(m.oldStatus)}${t(ATTENDANCE_STATUS_LABEL_KEYS[m.newStatus])}`),
+        lines: (d.items ?? []).map((m) => `${m.studentName}: ${markLabel(m.oldStatus)}${t(attendanceMarkKey(m.newStatus))}`),
       }
     case T.STUDENT_JOINED:
       return { icon: UserPlus, tone: Tone.SUCCESS, title: k('title.studentJoined'), subject: student() }

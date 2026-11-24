@@ -27,13 +27,17 @@
     </div>
 
     <template #footer>
+      <UiButton v-if="marked" variant="outline" class="me-auto" :loading="clearing" :disabled="saving" @click="emit('clear')">
+        <UiIcon :icon="RotateCcw" :size="16" />{{ t('groups.attendance.clearMark') }}
+      </UiButton>
       <UiButton variant="ghost" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</UiButton>
-      <UiButton :loading="saving" @click="emit('save')">{{ t('common.save') }}</UiButton>
+      <UiButton :loading="saving" :disabled="clearing" @click="emit('save')">{{ t('common.save') }}</UiButton>
     </template>
   </UiModal>
 </template>
 
 <script setup lang="ts">
+import { RotateCcw } from '@/shared/icons'
 import { cn } from '@/shared/utils/cn'
 import { useI18n } from 'vue-i18n'
 import { UiModal, UiTextarea, UiButton, UiIcon } from '@/shared/components'
@@ -51,12 +55,16 @@ defineProps<{
   status: AttendanceStatus
   comment: string
   saving?: boolean
+  /** The cell has a mark — offer the reset to unmarked. */
+  marked?: boolean
+  clearing?: boolean
 }>()
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   'update:status': [value: AttendanceStatus]
   'update:comment': [value: string]
   save: []
+  clear: []
 }>()
 
 const statuses = Object.values(AttendanceStatus)

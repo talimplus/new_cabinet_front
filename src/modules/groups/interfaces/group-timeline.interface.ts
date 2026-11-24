@@ -1,5 +1,5 @@
 import type { WeekDay } from '../enums/week-day.enum'
-import type { AttendanceStatus } from '../enums/attendance-status.enum'
+import type { AttendanceStatus, ATTENDANCE_CLEARED } from '../enums/attendance-status.enum'
 import type { GroupTimelineType } from '../enums/group-timeline.enum'
 
 /** One weekday of a schedule snapshot; `startTime` is `HH:mm:ss`. */
@@ -14,7 +14,8 @@ export interface GroupTimelineMark {
   studentName: string
   /** null — marked for the first time. */
   oldStatus: AttendanceStatus | null
-  newStatus: AttendanceStatus
+  /** A status, or `cleared` — the mark was removed. */
+  newStatus: AttendanceStatus | typeof ATTENDANCE_CLEARED
 }
 
 /**

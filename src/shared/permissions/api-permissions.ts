@@ -140,6 +140,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   { method: GET, path: '/groups/:groupId/attendance/lesson-dates', permissions: [Permission.ATTENDANCE_VIEW] },
   { method: GET, path: '/groups/:groupId/attendance', permissions: [Permission.ATTENDANCE_VIEW] },
   { method: POST, path: '/groups/:groupId/attendance/submit', permissions: [Permission.ATTENDANCE_MANAGE] },
+  { method: POST, path: '/groups/:groupId/attendance/clear', permissions: [Permission.ATTENDANCE_MANAGE] },
   { method: POST, path: '/groups/:groupId/attendance/reschedule', permissions: [Permission.ATTENDANCE_MANAGE] },
   { method: PUT, path: '/groups/:groupId/plan/syllabus', permissions: [Permission.GROUP_PLAN_ATTACH] },
   { method: PUT, path: '/groups/:groupId/plan/lessons/:lessonNumber/topics', permissions: [Permission.GROUP_PLAN_MANAGE] },

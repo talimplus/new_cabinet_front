@@ -82,6 +82,13 @@ export interface SubmitAttendancePayload {
   items: AttendanceItem[]
 }
 
+/** POST /groups/{groupId}/attendance/clear body. */
+export interface ClearAttendancePayload {
+  /** `YYYY-MM-DD` — today, or any past lesson with `attendance.managePast`. */
+  lessonDate: string
+  studentId: number
+}
+
 /** POST /groups/{groupId}/attendance/reschedule body. */
 export interface RescheduleAttendancePayload {
   fromDate?: string

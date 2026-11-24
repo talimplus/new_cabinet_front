@@ -4,6 +4,7 @@ import type {
   LessonDatesParams,
   SubmitAttendancePayload,
   RescheduleAttendancePayload,
+  ClearAttendancePayload,
 } from '../interfaces/attendance.interface'
 
 /** GET /groups/{groupId}/attendance/lesson-dates — the matrix data for a window. */
@@ -24,6 +25,11 @@ export async function submitAttendance(
   payload: SubmitAttendancePayload,
 ): Promise<void> {
   await http.post(`/groups/${groupId}/attendance/submit`, payload)
+}
+
+/** POST /groups/{groupId}/attendance/clear — drop one mark, the cell is unmarked again. */
+export async function clearAttendance(groupId: number, payload: ClearAttendancePayload): Promise<void> {
+  await http.post(`/groups/${groupId}/attendance/clear`, payload)
 }
 
 /** POST /groups/{groupId}/attendance/reschedule — move a lesson to another date. */

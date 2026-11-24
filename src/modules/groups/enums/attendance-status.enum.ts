@@ -16,6 +16,16 @@ export const ATTENDANCE_STATUS_LABEL_KEYS: Record<AttendanceStatus, string> = {
   [AttendanceStatus.EXCUSED]: 'groups.attendance.status.excused',
 }
 
+/** History only: the mark was removed (the cell is unmarked again). */
+export const ATTENDANCE_CLEARED = 'cleared'
+
+/** i18n key of a status in the history, the removed mark included. */
+export function attendanceMarkKey(status: string): string {
+  return status === ATTENDANCE_CLEARED
+    ? 'groups.attendance.cleared'
+    : ATTENDANCE_STATUS_LABEL_KEYS[status as AttendanceStatus]
+}
+
 /** Badge/token variant per status (present→success, absent→danger, late→warning, excused→info). */
 export const ATTENDANCE_STATUS_VARIANTS: Record<
   AttendanceStatus,
