@@ -27,8 +27,11 @@
     </div>
 
     <template #footer>
-      <UiButton v-if="marked" variant="outline" class="me-auto" :loading="clearing" :disabled="saving" @click="emit('clear')">
-        <UiIcon :icon="RotateCcw" :size="16" />{{ t('groups.attendance.clearMark') }}
+      <UiButton
+        v-if="marked" variant="outline" class="me-auto" :loading="clearing" :disabled="saving"
+        :title="t('groups.attendance.clearMark')" :aria-label="t('groups.attendance.clearMark')" @click="emit('clear')"
+      >
+        <UiIcon v-if="!clearing" :icon="RotateCcw" :size="16" />
       </UiButton>
       <UiButton variant="ghost" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</UiButton>
       <UiButton :loading="saving" :disabled="clearing" @click="emit('save')">{{ t('common.save') }}</UiButton>
