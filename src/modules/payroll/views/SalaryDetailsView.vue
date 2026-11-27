@@ -24,10 +24,14 @@
       <SalaryCommissionStep :details="d.details.value" />
       <SalaryTransfersStep :details="d.details.value" />
       <SalaryExtrasStep :details="d.details.value" />
-      <SalaryAdvancesStep :details="d.details.value" />
+      <SalaryAdvancesStep :details="d.details.value" :can-pay="canPaySalary" @carry="askCarry" />
       <SalaryPaymentsStep :details="d.details.value" />
       <SalaryReceipt :details="d.details.value" />
     </template>
+    <UiConfirmDialog
+      :model-value="carry.state.open" :title="t('payroll.carry.title')" :message="carry.message.value"
+      :loading="carry.state.loading" @update:model-value="carry.state.open = $event" @confirm="carry.confirm"
+    />
   </div>
 </template>
 
@@ -44,6 +48,9 @@ import SalaryExtrasStep from '../components/details/SalaryExtrasStep.vue'
 import SalaryAdvancesStep from '../components/details/SalaryAdvancesStep.vue'
 import SalaryPaymentsStep from '../components/details/SalaryPaymentsStep.vue'
 import SalaryReceipt from '../components/details/SalaryReceipt.vue'
+import { UiConfirmDialog } from '@/shared/components'
+import { usePermissions } from '@/shared/composables/use-permissions'
+import { useAdvanceCarry } from '../composables/use-advance-carry'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -53,6 +60,10 @@ const userId = computed(() => Number(route.params.userId))
 const month = computed(() => String(route.params.month))
 const d = useSalaryDetails(() => userId.value, () => month.value)
 onMounted(d.load)
+const { canPaySalary } = usePermissions()
+const carry = useAdvanceCarry(d.load)
+const askCarry = () =>
+  carry.ask({ userId: userId.value, forMonth: month.value, over: d.details.value?.totals.over ?? 0 })
 
 const monthLabel = computed(() => `${monthName(month.value)} ${month.value.slice(0, 4)}`)
 const heading = computed(() => {

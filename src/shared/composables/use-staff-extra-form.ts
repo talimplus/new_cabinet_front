@@ -110,6 +110,14 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
         else created = await createStaffAdvance({ ...base, userId, comment: form.text.trim() || undefined })
       }
       notify.success(created ? advanceSplitText(created) : successText(editId, amount))
+      if (created && (created.monthOver ?? 0) > 0) {
+        notify.warning(
+          t('payroll.extras.advanceOver', {
+            month: t(`common.months.${created.sourceForMonth.slice(5, 7)}`),
+            amount: formatSom(created.monthOver ?? 0),
+          }),
+        )
+      }
       form.open = false
       await onSaved()
     } catch (e) {
@@ -131,21 +139,12 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
 }
 
 /**
- * "800 000 so'm avans berildi. Oktabr oyligidan 527 346 so'm ushlanadi,
- * qolgan 272 654 so'm Noyabr oyligidan ushlanadi."
+ * "800 000 so'm avans berildi — Oktabr oyligi hisobiga." The advance stays in
+ * its month; if it now exceeds that salary the caller also warns.
  */
 export function advanceSplitText(r: StaffAdvanceResult): string {
-  const parts = (r.allocations ?? []).map((a, i) =>
-    t(i === 0 ? 'payroll.extras.splitFirst' : 'payroll.extras.splitNext', {
-      month: t(`common.months.${a.month.slice(5, 7)}`),
-      amount: formatSom(a.amount),
-    }),
-  )
-  const pending = r.remainingAmount ?? 0
-  if (pending > 0) parts.push(t('payroll.extras.splitPending', { amount: formatSom(pending) }))
-  const text = parts.join(', ')
-  return t('payroll.extras.advanceSplit', {
+  return t('payroll.extras.advanceGiven', {
     amount: formatSom(r.amount),
-    parts: text.charAt(0).toUpperCase() + text.slice(1),
+    month: t(`common.months.${r.sourceForMonth.slice(5, 7)}`),
   })
 }

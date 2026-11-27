@@ -13,7 +13,7 @@
 
     <StaffOverviewStats :summary="s.data.value.summary" />
 
-    <StaffGroupsCard v-if="s.data.value.user.role === UserRole.TEACHER" :groups="s.data.value.groups ?? []" />
+    <StaffTeacherBlock v-if="s.data.value.user.role === UserRole.TEACHER" :user-id="s.data.value.user.id" :month="s.month.value" :groups="s.data.value.groups ?? []" />
 
     <StaffSalaryCard
       v-if="s.salary.value" :salary="s.salary.value" :outstanding="s.data.value.summary.deductionOutstanding"
@@ -54,7 +54,7 @@ import { useStaffOverview } from '../composables/use-staff-overview'
 import { useStaffPayExtras } from '../composables/use-staff-pay-extras'
 import StaffOverviewHeader from './StaffOverviewHeader.vue'
 import StaffOverviewStats from './StaffOverviewStats.vue'
-import StaffGroupsCard from './StaffGroupsCard.vue'
+import StaffTeacherBlock from './StaffTeacherBlock.vue'
 import StaffSalaryCard from './StaffSalaryCard.vue'
 import StaffOverviewTabBody from './StaffOverviewTabBody.vue'
 import StaffOverviewDialogs from './StaffOverviewDialogs.vue'

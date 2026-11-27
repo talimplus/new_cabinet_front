@@ -26,6 +26,8 @@
         required
         @update:model-value="f.setField({ forMonth: String($event) })"
       />
+      <!-- How much this person will roughly earn that month — sizing the advance. -->
+      <SalaryForecastCard v-if="!f.isBonus.value" :user-id="f.form.target.userId" :month="f.form.forMonth" />
       <UiTextarea
         :model-value="f.form.text"
         :label="t(f.isBonus.value ? 'payroll.extras.reason' : 'payroll.extras.comment')"
@@ -51,6 +53,7 @@ import UiMoneyInput from '../UiMoneyInput.vue'
 import UiInput from '../UiInput.vue'
 import UiTextarea from '../UiTextarea.vue'
 import UiButton from '../UiButton.vue'
+import SalaryForecastCard from './SalaryForecastCard.vue'
 import { cn } from '@/shared/utils/cn'
 import { useStaffExtraForm } from '@/shared/composables/use-staff-extra-form'
 import type { StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'

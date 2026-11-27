@@ -48,4 +48,8 @@ export interface StaffSalary {
   transfersOut?: SalaryTransfer[]
   /** Teachers: shares moved INTO this salary from earlier months. */
   transfersIn?: SalaryTransfer[]
+  /** Teachers: the share of payments still waiting for confirmation / not paid, and the total if all is paid. */
+  forecast?: { pendingShare: number; unpaidShare: number; estimate: number } | null
+  /** Advances for this month (+ fines, cash given) exceed the salary by this much. */
+  overAmount?: number
 }

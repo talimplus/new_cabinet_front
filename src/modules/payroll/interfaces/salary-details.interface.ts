@@ -1,5 +1,6 @@
 import type { SalaryTransfer } from './salary-transfer.interface'
 import type { PayrollStatus } from '../enums/payroll-status.enum'
+import type { SalaryForecast } from '@/shared/interfaces/salary-forecast.interface'
 
 /** One group in "where the commission came from". */
 export interface SalaryCommissionGroup {
@@ -64,10 +65,14 @@ export interface SalaryTotals {
   fines: number
   paid: number
   remaining: number
+  /** Advances (+ fines, cash) exceed the salary by this much. */
+  over: number
 }
 
 /** `GET /staff-salaries/details?userId=&forMonth=` — one salary, step by step. */
 export interface SalaryDetails {
+  /** Paid / waiting / unpaid student payments by group and the expected salary. */
+  forecast: SalaryForecast
   id: number
   userId: number
   forMonth: string

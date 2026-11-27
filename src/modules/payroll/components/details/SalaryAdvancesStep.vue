@@ -1,53 +1,41 @@
 <template>
   <SalaryStep :n="4" :title="t('payroll.details.steps.advances')">
     <p v-if="!details.advances.length" class="text-sm text-muted-foreground">{{ t('payroll.details.advances.none') }}</p>
-    <template v-else>
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[36rem] text-sm">
-          <thead class="text-left text-xs text-muted-foreground">
-            <tr>
-              <th v-for="h in HEADERS" :key="h" :class="cn('py-1.5 pr-3 font-medium', h !== 'comment' && h !== 'date' && h !== 'month' && 'text-right')">
-                {{ t(`payroll.details.advances.${h}`) }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="a in details.advances" :key="a.id" class="border-t border-border align-top">
-              <td class="py-2 pr-3 font-mono">{{ formatDate(a.createdAt) }}</td>
-              <td class="py-2 pr-3 text-right font-mono">{{ formatSom(a.amount) }}</td>
-              <td class="py-2 pr-3">{{ a.forMonth ? monthName(a.forMonth) : '—' }}</td>
-              <td class="py-2 pr-3">{{ a.reason }}</td>
-              <td class="py-2 pr-3 text-right"><PayrollMoney :value="a.thisMonth" tone="minus" /></td>
-              <td class="py-2 text-right font-mono">{{ formatSom(advanceLeftAfter(a, details.forMonth)) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Where the rest of each advance went — the owner's main question. -->
-      <ul class="mt-3 space-y-1 text-xs text-muted-foreground">
-        <template v-for="a in details.advances" :key="`s${a.id}`">
-          <li v-for="(line, i) in advanceStory(a, details.forMonth)" :key="i">
-            {{ formatSom(a.amount) }} ({{ formatDate(a.createdAt) }}): {{ line }}
-          </li>
-        </template>
-      </ul>
-    </template>
+    <ul v-else class="divide-y divide-border text-sm">
+      <li v-for="a in details.advances" :key="a.id" class="flex flex-wrap justify-between gap-2 py-2">
+        <div class="min-w-0">
+          <div class="font-mono">{{ formatDate(a.createdAt) }}</div>
+          <div class="text-xs text-muted-foreground">{{ [a.reason, a.createdBy].filter(Boolean).join(' · ') }}</div>
+        </div>
+        <PayrollMoney :value="a.amount" />
+      </li>
+      <li class="flex justify-between gap-2 py-2 font-semibold">
+        <span>{{ t('payroll.details.advances.total') }}</span>
+        <PayrollMoney :value="total" />
+      </li>
+    </ul>
+    <!-- Never moved on its own: warn and let the owner decide. -->
+    <div v-if="details.totals.over > 0" class="mt-3 space-y-2 rounded-md bg-warning-soft p-3 text-sm text-warning">
+      <p>{{ t('payroll.details.advances.over', { amount: formatSom(details.totals.over) }) }}</p>
+      <UiButton v-if="canPay" size="sm" variant="outline" @click="emit('carry')">{{ t('payroll.carry.action') }}</UiButton>
+    </div>
   </SalaryStep>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { cn } from '@/shared/utils/cn'
+import { UiButton } from '@/shared/components'
 import { formatDate } from '@/shared/utils/format-date'
 import { formatSom } from '@/shared/utils/format-money'
 import SalaryStep from './SalaryStep.vue'
 import PayrollMoney from '../PayrollMoney.vue'
-import { monthName } from '../../utils/payroll-salary'
-import { advanceLeftAfter, advanceStory } from '../../utils/salary-details-text'
 import type { SalaryDetails } from '../../interfaces/salary-details.interface'
 
 const { t } = useI18n()
-defineProps<{ details: SalaryDetails }>()
 
-const HEADERS = ['date', 'amount', 'month', 'comment', 'thisMonth', 'left']
+/** The advances given FOR this month, as given — no "withheld" arithmetic. */
+const props = defineProps<{ details: SalaryDetails; canPay?: boolean }>()
+const emit = defineEmits<{ carry: [] }>()
+const total = computed(() => props.details.advances.reduce((s, a) => s + a.amount, 0))
 </script>

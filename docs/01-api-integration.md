@@ -1085,10 +1085,16 @@ the total and fine / advance (−) separately in the deduction cell
 (`utils/payroll-salary.ts → getFine/getAdvance`).
 
 **Owner-readable payroll (2026-11-28, backend migration `…077`):**
-- Advances/fines are re-allocated from scratch per person (`rebuildUserTx`):
-  months are filled oldest → newest, an advance never lands before the month the
-  admin chose, a salary paid out in cash keeps its withholdings. So an October
-  advance sits in October as long as it fits, the rest goes to November.
+- **An advance stays in the month it was given for** (in full, even above the
+  salary) — never moved on its own. Rows carry `overAmount` (advance + fines +
+  cash above the salary); the owner moves the excess with `POST /staff/advances/carry
+  { userId, forMonth:'YYYY-MM' }` → `{ moved, toMonth }` (`payroll.pay`). Fines still
+  fill months oldest → newest.
+- `GET /staff-salaries/forecast?userId=&forMonth=YYYY-MM` → `SalaryForecast` (shared
+  interface): per group due / paid / pending / unpaid, `shares`, `estimate`,
+  `advanceGiven`, `overAmount`. Rows (teachers) carry `forecast{pendingShare,
+  unpaidShare, estimate}`; details carry the full `forecast`. Shown by
+  `shared/components/staff-extras/SalaryForecastCard` (advance dialog, staff page).
 - List rows (teachers) also carry `earningCommissionGross` (full share before
   transfers), `transfersOut[]` / `transfersIn[]` — `SalaryTransfer
   { id, amount, fromMonth, toMonth|null, student{id,name}|null, group{id,name}|null,
@@ -1099,9 +1105,9 @@ the total and fine / advance (−) separately in the deduction cell
   reason,forMonth,createdAt,createdBy,thisMonth,allocations[{month,amount}],
   notWithheld}], payments[], advanceDebt, totals{calculated,advance,fines,paid,
   remaining} }`.
-- `POST /staff/advances` answer now includes `allocations[{month,amount}]` — the
-  dialog's success toast says where it is withheld.
-- UI: columns calculated / advance / deductions / given / remaining; status is
+- `POST /staff/advances` answer includes `allocations[{month,amount}]` and
+  `monthOver` — the dialog warns when the month's advances exceed the salary.
+- UI: columns calculated / expected / this month's advance / fine / cash given / remaining; status is
   derived from money (`getDisplayStatus`: unpaid, partial, paid, closed by advance);
   row click and 👁 → `/payroll/:userId/:month` (`SalaryDetailsView`).
 

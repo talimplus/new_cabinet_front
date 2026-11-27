@@ -3,6 +3,8 @@ import type {
   StaffAdvanceForm,
   StaffAdvancePatch,
   StaffAdvanceResult,
+  StaffAdvanceCarryForm,
+  StaffAdvanceCarryResult,
   StaffBonusForm,
   StaffBonusPatch,
 } from '@/shared/interfaces/staff-extras.interface'
@@ -35,4 +37,13 @@ export async function updateStaffAdvance(id: number, patch: StaffAdvancePatch): 
 /** PATCH /staff/bonuses/{id} — 400 when lowering / moving a bonus already paid out with the salary. */
 export async function updateStaffBonus(id: number, patch: StaffBonusPatch): Promise<void> {
   await http.patch(`/staff/bonuses/${id}`, patch)
+}
+
+/**
+ * POST /staff/advances/carry — the admin's "move to next month": the part of a
+ * month's advance above its salary goes to the next month (400 when nothing exceeds).
+ */
+export async function carryStaffAdvance(form: StaffAdvanceCarryForm): Promise<StaffAdvanceCarryResult> {
+  const { data } = await http.post<StaffAdvanceCarryResult>('/staff/advances/carry', form)
+  return data
 }

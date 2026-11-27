@@ -105,16 +105,26 @@ describe('PayrollTable', () => {
   })
 
   describe('advance and deduction columns', () => {
-    it('shows the advance with a minus sign in its own column', () => {
+    it("shows the month's advance as given and the fine with a minus", () => {
       const wrapper = mountTable([makeSalary({ deductionAmount: 300_000, advanceAmount: 200_000, fineAmount: 100_000 })])
       const cells = wrapper.get('tbody tr').findAll('td')
-      expect(cells[3]!.text()).toBe(`−${formatSom(200_000)}`)
-      expect(cells[4]!.text()).toBe(`−${formatSom(100_000)}`)
+      expect(cells[4]!.text()).toBe(formatSom(200_000))
+      expect(cells[5]!.text()).toBe(`−${formatSom(100_000)}`)
     })
 
-    it('shows a dash when nothing is withheld', () => {
+    it('shows a dash when no advance was given', () => {
       const wrapper = mountTable([makeSalary({ deductionAmount: 0 })])
-      expect(wrapper.get('tbody tr').findAll('td')[3]!.text()).toBe('—')
+      expect(wrapper.get('tbody tr').findAll('td')[4]!.text()).toBe('—')
+    })
+
+    it('warns when the advance exceeds the salary and offers to move it', async () => {
+      const row = makeSalary({ advanceAmount: 1_000_000, deductionAmount: 1_000_000, baseSalary: 727_346, overAmount: 272_654, remaining: 0 })
+      const wrapper = mountTable([row])
+      const cell = wrapper.get('tbody tr').findAll('td')[4]!
+      expect(cell.text()).toContain(t('payroll.over', { amount: formatSom(272_654) }))
+      await cell.get('button').trigger('click')
+      expect(wrapper.emitted('carry')?.[0]).toEqual([row])
+      expect(wrapper.emitted('details')).toBeUndefined()
     })
 
     it('puts the advance debt under the name, not in a money column', () => {

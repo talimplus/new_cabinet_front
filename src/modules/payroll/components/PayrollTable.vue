@@ -10,8 +10,9 @@
     <template #cell-worker="{ row }"><PayrollWorkerCell :staff="row as StaffSalary" /></template>
     <template #cell-role="{ row }">{{ getRoleLabel((row as StaffSalary).user) }}</template>
     <template #cell-calculated="{ row }"><PayrollCalculatedCell :staff="row as StaffSalary" /></template>
+    <template #cell-expected="{ row }"><PayrollExpectedCell :staff="row as StaffSalary" /></template>
     <template #cell-advance="{ row }">
-      <PayrollMoney :value="getAdvance(row as StaffSalary)" tone="minus" />
+      <PayrollAdvanceCell :staff="row as StaffSalary" :can-pay="canPay" @carry="emit('carry', $event)" />
     </template>
     <template #cell-fines="{ row }">
       <PayrollMoney :value="getFine(row as StaffSalary)" tone="minus" />
@@ -44,7 +45,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge } from '@/shared/components'
-import { getAdvance, getDisplayStatus, getFine, getRemaining, getRoleLabel } from '../utils/payroll-salary'
+import { getDisplayStatus, getFine, getRemaining, getRoleLabel } from '../utils/payroll-salary'
 import {
   PAYROLL_DISPLAY_LABEL_KEYS,
   PAYROLL_DISPLAY_TINTS,
@@ -54,6 +55,8 @@ import { buildPayrollColumns } from '../config/payroll-columns'
 import PayrollMoney from './PayrollMoney.vue'
 import PayrollWorkerCell from './PayrollWorkerCell.vue'
 import PayrollCalculatedCell from './PayrollCalculatedCell.vue'
+import PayrollExpectedCell from './PayrollExpectedCell.vue'
+import PayrollAdvanceCell from './PayrollAdvanceCell.vue'
 import PayrollRowActions from './PayrollRowActions.vue'
 import type { StaffSalary } from '../interfaces/staff-salary.interface'
 
@@ -66,6 +69,7 @@ const emit = defineEmits<{
   'open-staff': [staff: StaffSalary]
   advance: [staff: StaffSalary]
   bonus: [staff: StaffSalary]
+  carry: [staff: StaffSalary]
 }>()
 
 /** The row's tint follows the status the owner reads. */

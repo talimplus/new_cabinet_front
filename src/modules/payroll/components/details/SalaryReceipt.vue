@@ -9,6 +9,10 @@
         <dt class="font-semibold text-foreground">{{ t('payroll.details.summary.remaining') }}</dt>
         <dd><PayrollMoney :value="details.totals.remaining" tone="strong" /></dd>
       </div>
+      <div v-if="details.totals.over > 0" class="flex items-baseline justify-between gap-4 text-sm text-danger">
+        <dt>{{ t('payroll.details.summary.over') }}</dt>
+        <dd class="font-mono">{{ formatSom(details.totals.over) }}</dd>
+      </div>
       <div v-if="details.advanceDebt > 0" class="flex items-baseline justify-between gap-4 text-xs text-warning">
         <dt>{{ t('payroll.details.summary.debt') }}</dt>
         <dd class="font-mono">{{ formatSom(details.advanceDebt) }}</dd>

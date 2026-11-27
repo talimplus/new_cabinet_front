@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
-import { UiSelect } from '@/shared/components'
+import { useI18n } from 'vue-i18n'
+import { UiSelect, UiConfirmDialog } from '@/shared/components'
 import { usePermissions } from '@/shared/composables/use-permissions'
 import { usePayroll } from '../composables/use-payroll'
 import PayrollMonthTabs from '../components/PayrollMonthTabs.vue'
@@ -12,10 +13,14 @@ import type { StaffSalary } from '../interfaces/staff-salary.interface'
 import StaffOverviewModal from '@/modules/staff/components/StaffOverviewModal.vue'
 import PayrollMonthBanner from '../components/PayrollMonthBanner.vue'
 import PayrollTotals from '../components/PayrollTotals.vue'
+import { useAdvanceCarry } from '../composables/use-advance-carry'
 
 const { canPaySalary, canDeductSalary, canViewStaffPerformance } = usePermissions()
+const { t } = useI18n()
 const p = usePayroll()
 onMounted(p.init)
+const carry = useAdvanceCarry(p.load)
+const askCarry = (row: StaffSalary) => carry.ask({ userId: row.userId, forMonth: row.forMonth, over: row.overAmount ?? 0 })
 const extraRef = ref<InstanceType<typeof StaffExtraDialog> | null>(null)
 /** A bonus defaults to the row's month; an advance to the current one. */
 const openExtra = (kind: StaffExtraKind, row: StaffSalary) =>
@@ -53,6 +58,7 @@ const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined
       :can-view-staff="canViewStaffPerformance"
       @pay="p.openPay"
       @details="p.openDetails"
+      @carry="askCarry"
       @open-staff="p.openStaff"
       @advance="openExtra(StaffExtraKind.ADVANCE, $event)"
       @bonus="openExtra(StaffExtraKind.BONUS, $event)"
@@ -61,6 +67,10 @@ const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined
     <PayrollTotals :rows="p.rows.value" />
 
     <StaffExtraDialog ref="extraRef" @saved="p.load" />
+    <UiConfirmDialog
+      :model-value="carry.state.open" :title="t('payroll.carry.title')" :message="carry.message.value"
+      :loading="carry.state.loading" @update:model-value="carry.state.open = $event" @confirm="carry.confirm"
+    />
 
     <PayStaffModal
       :model-value="p.pay.open"

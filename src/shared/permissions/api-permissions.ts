@@ -212,6 +212,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   // ---- payroll / staff ----
   { method: GET, path: '/staff-salaries', permissions: [Permission.PAYROLL_VIEW], acceptsCenterId: true },
   { method: PUT, path: '/staff-salaries/pay/:id', permissions: [Permission.PAYROLL_PAY] },
+  { method: GET, path: '/staff-salaries/forecast', permissions: [Permission.PAYROLL_VIEW, Permission.STAFF_PERFORMANCE_VIEW, Permission.PAYROLL_PAY] },
   { method: GET, path: '/staff-salaries/details', permissions: [Permission.PAYROLL_VIEW] },
   { method: GET, path: '/staff-salaries/:id/details', permissions: [Permission.PAYROLL_VIEW] },
   { method: POST, path: '/staff/deductions', permissions: [Permission.PAYROLL_DEDUCT] },
@@ -219,6 +220,7 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   // Advances / bonuses — listed before the `/staff/:userId/...` rules so a
   // param segment can never swallow the literal `advances` / `bonuses`.
   { method: POST, path: '/staff/advances', permissions: [Permission.PAYROLL_PAY] },
+  { method: POST, path: '/staff/advances/carry', permissions: [Permission.PAYROLL_PAY] },
   { method: DELETE, path: '/staff/advances/:id', permissions: [Permission.PAYROLL_PAY] },
   { method: PATCH, path: '/staff/advances/:id', permissions: [Permission.PAYROLL_PAY] },
   { method: POST, path: '/staff/bonuses', permissions: [Permission.PAYROLL_PAY] },

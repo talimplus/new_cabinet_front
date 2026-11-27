@@ -62,4 +62,22 @@ export interface StaffAdvanceResult {
   remainingAmount: number
   /** Salary month ("YYYY-MM-01") → amount, oldest first. */
   allocations?: { month: string; amount: number }[]
+  /** "YYYY-MM-01" — the month it is for. */
+  sourceForMonth: string
+  /** Advances for that month now exceed its salary by this much (0 = fine). */
+  monthOver?: number
+}
+
+/** Body for `POST /staff/advances/carry` — move the excess of a month's advance to the next month. */
+export interface StaffAdvanceCarryForm {
+  userId: number
+  /** "YYYY-MM" — the month whose advance exceeds the salary. */
+  forMonth: string
+}
+
+/** Answer of `POST /staff/advances/carry`. */
+export interface StaffAdvanceCarryResult {
+  moved: number
+  /** "YYYY-MM-01". */
+  toMonth: string
 }
