@@ -53,3 +53,13 @@ export interface StaffExtraTarget {
   /** Set = correct this existing record instead of creating a new one. */
   edit?: StaffExtraEdit
 }
+
+/** What `POST /staff/advances` answers — where the advance will be withheld. */
+export interface StaffAdvanceResult {
+  id: number
+  amount: number
+  /** Not withheld from any salary yet (comes off the next ones). */
+  remainingAmount: number
+  /** Salary month ("YYYY-MM-01") → amount, oldest first. */
+  allocations?: { month: string; amount: number }[]
+}

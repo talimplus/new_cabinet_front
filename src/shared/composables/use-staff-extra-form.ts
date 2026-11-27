@@ -4,7 +4,7 @@ import { useNotificationStore } from '@/stores/notification.store'
 import { mapBackendErrors } from '@/shared/utils/backend-errors'
 import { formatSom } from '@/shared/utils/format-money'
 import { StaffExtraKind, STAFF_EXTRA_TITLE_KEYS, STAFF_EXTRA_EDIT_TITLE_KEYS } from '@/shared/enums/staff-extra-kind.enum'
-import type { StaffExtraTarget } from '@/shared/interfaces/staff-extras.interface'
+import type { StaffAdvanceResult, StaffExtraTarget } from '@/shared/interfaces/staff-extras.interface'
 import { t } from '@/locales'
 
 export interface StaffExtraFormState {
@@ -98,6 +98,7 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
     const userId = form.target.userId
     const editId = form.target.edit?.id
     form.saving = true
+    let created: StaffAdvanceResult | null = null
     try {
       if (isBonus.value) {
         const reason = form.text.trim()
@@ -106,9 +107,9 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
       } else {
         // On edit an empty comment is sent as '' so a wrong one can be cleared.
         if (editId) await updateStaffAdvance(editId, { ...base, comment: form.text.trim() })
-        else await createStaffAdvance({ ...base, userId, comment: form.text.trim() || undefined })
+        else created = await createStaffAdvance({ ...base, userId, comment: form.text.trim() || undefined })
       }
-      notify.success(successText(editId, amount))
+      notify.success(created ? advanceSplitText(created) : successText(editId, amount))
       form.open = false
       await onSaved()
     } catch (e) {
@@ -127,4 +128,24 @@ export function useStaffExtraForm(onSaved: () => Promise<void> | void) {
   }
 
   return { form, isBonus, editing, title, monthHint, open, setField, close, submit }
+}
+
+/**
+ * "800 000 so'm avans berildi. Oktabr oyligidan 527 346 so'm ushlanadi,
+ * qolgan 272 654 so'm Noyabr oyligidan ushlanadi."
+ */
+export function advanceSplitText(r: StaffAdvanceResult): string {
+  const parts = (r.allocations ?? []).map((a, i) =>
+    t(i === 0 ? 'payroll.extras.splitFirst' : 'payroll.extras.splitNext', {
+      month: t(`common.months.${a.month.slice(5, 7)}`),
+      amount: formatSom(a.amount),
+    }),
+  )
+  const pending = r.remainingAmount ?? 0
+  if (pending > 0) parts.push(t('payroll.extras.splitPending', { amount: formatSom(pending) }))
+  const text = parts.join(', ')
+  return t('payroll.extras.advanceSplit', {
+    amount: formatSom(r.amount),
+    parts: text.charAt(0).toUpperCase() + text.slice(1),
+  })
 }

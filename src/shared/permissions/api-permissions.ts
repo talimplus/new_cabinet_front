@@ -212,6 +212,8 @@ export const API_PERMISSIONS: ApiPermissionRule[] = [
   // ---- payroll / staff ----
   { method: GET, path: '/staff-salaries', permissions: [Permission.PAYROLL_VIEW], acceptsCenterId: true },
   { method: PUT, path: '/staff-salaries/pay/:id', permissions: [Permission.PAYROLL_PAY] },
+  { method: GET, path: '/staff-salaries/details', permissions: [Permission.PAYROLL_VIEW] },
+  { method: GET, path: '/staff-salaries/:id/details', permissions: [Permission.PAYROLL_VIEW] },
   { method: POST, path: '/staff/deductions', permissions: [Permission.PAYROLL_DEDUCT] },
   { method: DELETE, path: '/staff/deductions/:id', permissions: [Permission.PAYROLL_DEDUCT] },
   // Advances / bonuses — listed before the `/staff/:userId/...` rules so a

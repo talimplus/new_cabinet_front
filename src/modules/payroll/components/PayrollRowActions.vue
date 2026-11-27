@@ -1,43 +1,40 @@
 <template>
   <div class="flex items-center justify-end gap-2">
-    <!-- Vaqtincha: xodimlar qator bosilishiga o'rgangach Eye olib tashlanadi. -->
-    <UiIconButton
-      v-if="canViewStaff"
-      :icon="Eye"
-      :label="t('staff.viewAction')"
-      @click="emit('open-staff', staff)"
-    />
+    <UiIconButton :icon="Eye" :label="t('payroll.actions.details')" @click="emit('details', staff)" />
+    <UiIconButton v-if="canViewStaff" :icon="User" :label="t('payroll.actions.staff')" @click="emit('open-staff', staff)" />
     <template v-if="canPay">
       <UiIconButton :icon="HandCoins" tone="primary" :label="t('payroll.actions.advance')" @click="emit('advance', staff)" />
       <UiIconButton :icon="Gift" tone="success" :label="t('payroll.actions.bonus')" @click="emit('bonus', staff)" />
     </template>
-    <UiButton v-if="canPay && staff.status !== PayrollStatus.PAID" size="sm" @click="emit('pay', staff)">
+    <UiButton v-if="canPay && owed" size="sm" @click="emit('pay', staff)">
       {{ t('payroll.pay') }}
     </UiButton>
-    <span v-else-if="staff.status === PayrollStatus.PAID" class="text-xs text-muted-foreground">
-      {{ t('payroll.paid') }}
-    </span>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { UiButton, UiIconButton } from '@/shared/components'
-import { Eye, HandCoins, Gift } from '@/shared/icons'
-import { PayrollStatus } from '../enums/payroll-status.enum'
+import { Eye, HandCoins, Gift, User } from '@/shared/icons'
+import { getRemaining } from '../utils/payroll-salary'
 import type { StaffSalary } from '../interfaces/staff-salary.interface'
 
 const { t } = useI18n()
 
 /**
- * The staff page opens from the eye button and from the row click (PayrollTable).
- * Advance / bonus are offered even on a paid row — they land on a later salary.
+ * Eye (and the row click) opens the salary breakdown; the person icon opens
+ * the staff page. "Pay" is offered while something is still to be handed over.
+ * Advance / bonus are offered even on a settled row — they land on a later salary.
  */
-defineProps<{ staff: StaffSalary; canPay?: boolean; canViewStaff?: boolean }>()
+const props = defineProps<{ staff: StaffSalary; canPay?: boolean; canViewStaff?: boolean }>()
 const emit = defineEmits<{
   pay: [staff: StaffSalary]
+  details: [staff: StaffSalary]
   'open-staff': [staff: StaffSalary]
   advance: [staff: StaffSalary]
   bonus: [staff: StaffSalary]
 }>()
+
+const owed = computed(() => getRemaining(props.staff) > 0)
 </script>

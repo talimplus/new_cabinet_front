@@ -3,43 +3,26 @@
     :columns="columns"
     :rows="(rows as unknown as Record<string, unknown>[])"
     :loading="loading"
-    :row-class="statusTint"
+    :row-class="tint"
     :empty-text="t('payroll.emptyState')"
-    :row-click="canViewStaff ? (row) => emit('open-staff', row as unknown as StaffSalary) : undefined"
+    :row-click="(row) => emit('details', row as unknown as StaffSalary)"
   >
-    <template #cell-worker="{ row }">
-      <span class="font-medium">{{ fullName(row as StaffSalary) }}</span>
-    </template>
+    <template #cell-worker="{ row }"><PayrollWorkerCell :staff="row as StaffSalary" /></template>
     <template #cell-role="{ row }">{{ getRoleLabel((row as StaffSalary).user) }}</template>
-    <template #cell-baseSalary="{ row }">
-      <span class="font-mono">{{ formatSom(getBaseSalary(row as StaffSalary)) }}</span>
+    <template #cell-calculated="{ row }"><PayrollCalculatedCell :staff="row as StaffSalary" /></template>
+    <template #cell-advance="{ row }">
+      <PayrollMoney :value="getAdvance(row as StaffSalary)" tone="minus" />
     </template>
-    <template #cell-commission="{ row }">
-      <span v-if="(row as StaffSalary).earningCommissionAmount != null" class="font-mono">
-        {{ formatSom((row as StaffSalary).earningCommissionAmount) }}
-      </span>
-      <span v-else class="text-muted-foreground">—</span>
+    <template #cell-fines="{ row }">
+      <PayrollMoney :value="getFine(row as StaffSalary)" tone="minus" />
     </template>
-    <template #cell-total="{ row }">
-      <span class="font-mono font-semibold">{{ formatSom(getTotalSalary(row as StaffSalary)) }}</span>
-      <div v-if="((row as StaffSalary).bonusAmount ?? 0) > 0" class="font-mono text-xs text-success">
-        {{ t('payroll.table.bonus') }} +{{ formatSom((row as StaffSalary).bonusAmount) }}
-      </div>
-    </template>
-    <template #cell-deduction="{ row }">
-      <PayrollDeductionCell :staff="row as StaffSalary" />
-    </template>
-    <template #cell-paid="{ row }">
-      <span class="font-mono">{{ formatSom((row as StaffSalary).paidAmount) }}</span>
-    </template>
+    <template #cell-paid="{ row }"><PayrollMoney :value="(row as StaffSalary).paidAmount" /></template>
     <template #cell-remaining="{ row }">
-      <span :class="cn('font-mono', getRemaining(row as StaffSalary) > 0 && 'font-semibold text-danger')">
-        {{ formatSom(getRemaining(row as StaffSalary)) }}
-      </span>
+      <PayrollMoney :value="getRemaining(row as StaffSalary)" tone="strong" />
     </template>
     <template #cell-status="{ row }">
-      <UiBadge :variant="PAYROLL_STATUS_VARIANTS[(row as StaffSalary).status]">
-        {{ t(PAYROLL_STATUS_LABEL_KEYS[(row as StaffSalary).status]) }}
+      <UiBadge :variant="PAYROLL_DISPLAY_VARIANTS[getDisplayStatus(row as StaffSalary)]">
+        {{ t(PAYROLL_DISPLAY_LABEL_KEYS[getDisplayStatus(row as StaffSalary)]) }}
       </UiBadge>
     </template>
     <template #actions="{ row }">
@@ -48,6 +31,7 @@
         :can-pay="canPay"
         :can-view-staff="canViewStaff"
         @pay="emit('pay', $event)"
+        @details="emit('details', $event)"
         @open-staff="emit('open-staff', $event)"
         @advance="emit('advance', $event)"
         @bonus="emit('bonus', $event)"
@@ -58,43 +42,34 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { UiTable, UiBadge } from '@/shared/components'
-import { cn } from '@/shared/utils/cn'
-import { formatSom } from '@/shared/utils/format-money'
-import { getTotalSalary, getBaseSalary, getRemaining, getRoleLabel } from '../utils/payroll-salary'
+import { getAdvance, getDisplayStatus, getFine, getRemaining, getRoleLabel } from '../utils/payroll-salary'
 import {
-  PayrollStatus,
-  PAYROLL_STATUS_LABEL_KEYS,
-  PAYROLL_STATUS_VARIANTS,
-} from '../enums/payroll-status.enum'
+  PAYROLL_DISPLAY_LABEL_KEYS,
+  PAYROLL_DISPLAY_TINTS,
+  PAYROLL_DISPLAY_VARIANTS,
+} from '../enums/payroll-display-status.enum'
 import { buildPayrollColumns } from '../config/payroll-columns'
-import PayrollDeductionCell from './PayrollDeductionCell.vue'
+import PayrollMoney from './PayrollMoney.vue'
+import PayrollWorkerCell from './PayrollWorkerCell.vue'
+import PayrollCalculatedCell from './PayrollCalculatedCell.vue'
 import PayrollRowActions from './PayrollRowActions.vue'
 import type { StaffSalary } from '../interfaces/staff-salary.interface'
-import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const props = defineProps<{
-  rows: StaffSalary[]
-  loading?: boolean
-  showCommission?: boolean
-  canPay?: boolean
-  canViewStaff?: boolean
-}>()
+defineProps<{ rows: StaffSalary[]; loading?: boolean; canPay?: boolean; canViewStaff?: boolean }>()
 const emit = defineEmits<{
-  pay: [staff: StaffSalary]; 'open-staff': [staff: StaffSalary]; advance: [staff: StaffSalary]; bonus: [staff: StaffSalary]
+  pay: [staff: StaffSalary]
+  details: [staff: StaffSalary]
+  'open-staff': [staff: StaffSalary]
+  advance: [staff: StaffSalary]
+  bonus: [staff: StaffSalary]
 }>()
 
-const fullName = (s: StaffSalary) => `${s.user.firstName} ${s.user.lastName}`
+/** The row's tint follows the status the owner reads. */
+const tint = (row: Record<string, unknown>) => PAYROLL_DISPLAY_TINTS[getDisplayStatus(row as unknown as StaffSalary)]
 
-/** Paid / partly paid / unpaid are read at a glance from the row's tint. */
-const TINTS: Record<PayrollStatus, string> = {
-  [PayrollStatus.UNPAID]: 'bg-danger-soft/40',
-  [PayrollStatus.PARTIAL]: 'bg-warning-soft/40',
-  [PayrollStatus.PAID]: 'bg-success-soft/30',
-}
-const statusTint = (row: Record<string, unknown>) => TINTS[(row as unknown as StaffSalary).status]
-
-const columns = computed(() => buildPayrollColumns(!!props.showCommission))
+const columns = computed(() => buildPayrollColumns())
 </script>

@@ -1,6 +1,7 @@
 import type { PayrollStatus } from '../enums/payroll-status.enum'
 import type { StaffUser } from './staff-user.interface'
 import type { PaymentHistoryItem } from './payment-history-item.interface'
+import type { SalaryTransfer } from './salary-transfer.interface'
 
 /**
  * A staff member's salary record for a given month (`GET /staff-salaries`).
@@ -41,4 +42,10 @@ export interface StaffSalary {
   earningCommissionAmount?: number
   earningCarryOverCommission?: number
   earningTotalEarning?: number
+  /** Teachers: the full share of what students paid for this month (before transfers). */
+  earningCommissionGross?: number
+  /** Teachers: shares moved FROM this month to a later salary (late payments). */
+  transfersOut?: SalaryTransfer[]
+  /** Teachers: shares moved INTO this salary from earlier months. */
+  transfersIn?: SalaryTransfer[]
 }

@@ -1043,11 +1043,13 @@ reception/manager payments create a **pending** receipt for an admin to confirm.
 
 `forMonth` defaults to the current month.
 
-### 5.10 Payroll — staff salaries (2)
+### 5.10 Payroll — staff salaries (4)
 | Method | Path | Params / Body |
 |---|---|---|
 | GET | `/staff-salaries` | `forMonth?(YYYY-MM), centerId?` → **bare array** |
 | PUT | `/staff-salaries/pay/{id}` | `{ amount*, comment?, deduction? }` |
+| GET | `/staff-salaries/details` | `userId*, forMonth*(YYYY-MM)` → `SalaryDetails` (404 if no row) · `payroll.view` |
+| GET | `/staff-salaries/{id}/details` | — → `SalaryDetails` · `payroll.view` |
 
 The list **ensures** rows exist for the requested month (never empty when staff
 exist). **Future months are rejected.**
@@ -1080,7 +1082,28 @@ StaffSalary *(old-project verified)*:
 `netSalary` = base + bonus − deductionAmount; `remaining` = netSalary − paidAmount;
 `deductionOutstanding` now counts **fines only**. The table shows bonus (+) under
 the total and fine / advance (−) separately in the deduction cell
-(`PayrollDeductionCell`, `utils/payroll-salary.ts → getFine/getAdvance`).
+(`utils/payroll-salary.ts → getFine/getAdvance`).
+
+**Owner-readable payroll (2026-11-28, backend migration `…077`):**
+- Advances/fines are re-allocated from scratch per person (`rebuildUserTx`):
+  months are filled oldest → newest, an advance never lands before the month the
+  admin chose, a salary paid out in cash keeps its withholdings. So an October
+  advance sits in October as long as it fits, the rest goes to November.
+- List rows (teachers) also carry `earningCommissionGross` (full share before
+  transfers), `transfersOut[]` / `transfersIn[]` — `SalaryTransfer
+  { id, amount, fromMonth, toMonth|null, student{id,name}|null, group{id,name}|null,
+  paidAt, confirmedAt }` (a late payment's share moved to another salary).
+- `SalaryDetails`: `{ id, userId, forMonth, status, user{…,roleName}, monthOpen,
+  closed, fixedSalary, commission{percent, groups[{groupId,groupName,paid,share}],
+  total}|null, transfers{out,in}, bonuses[], fines[], advances[{id,type,amount,
+  reason,forMonth,createdAt,createdBy,thisMonth,allocations[{month,amount}],
+  notWithheld}], payments[], advanceDebt, totals{calculated,advance,fines,paid,
+  remaining} }`.
+- `POST /staff/advances` answer now includes `allocations[{month,amount}]` — the
+  dialog's success toast says where it is withheld.
+- UI: columns calculated / advance / deductions / given / remaining; status is
+  derived from money (`getDisplayStatus`: unpaid, partial, paid, closed by advance);
+  row click and 👁 → `/payroll/:userId/:month` (`SalaryDetailsView`).
 
 ### 5.11 Staff performance (5)
 | Method | Path | Params / Body |

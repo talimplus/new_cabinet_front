@@ -184,6 +184,12 @@ const appChildren: RouteRecordRaw[] = [
     meta: { titleKey: 'layout.menu.payroll', permission: [Permission.PAYROLL_VIEW] },
   },
   {
+    path: 'payroll/:userId(\\d+)/:month(\\d+-\\d+)',
+    name: 'payroll-details',
+    component: () => import('@/modules/payroll/views/SalaryDetailsView.vue'),
+    meta: { titleKey: 'payroll.details.title', permission: [Permission.PAYROLL_VIEW] },
+  },
+  {
     path: 'candidates',
     name: 'candidates',
     component: () => import('@/modules/candidates/views/CandidatesView.vue'),

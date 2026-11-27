@@ -10,6 +10,8 @@ import StaffExtraDialog from '@/shared/components/staff-extras/StaffExtraDialog.
 import { StaffExtraKind } from '@/shared/enums/staff-extra-kind.enum'
 import type { StaffSalary } from '../interfaces/staff-salary.interface'
 import StaffOverviewModal from '@/modules/staff/components/StaffOverviewModal.vue'
+import PayrollMonthBanner from '../components/PayrollMonthBanner.vue'
+import PayrollTotals from '../components/PayrollTotals.vue'
 
 const { canPaySalary, canDeductSalary, canViewStaffPerformance } = usePermissions()
 const p = usePayroll()
@@ -42,17 +44,21 @@ const toYear = (v: unknown) => (typeof v === 'number' ? p.setYear(v) : undefined
       @update:model-value="p.setMonth"
     />
 
+    <PayrollMonthBanner :for-month="p.forMonth.value" />
+
     <PayrollTable
       :rows="p.rows.value"
       :loading="p.loading.value"
-      :show-commission="p.showCommission.value"
       :can-pay="canPaySalary"
       :can-view-staff="canViewStaffPerformance"
       @pay="p.openPay"
+      @details="p.openDetails"
       @open-staff="p.openStaff"
       @advance="openExtra(StaffExtraKind.ADVANCE, $event)"
       @bonus="openExtra(StaffExtraKind.BONUS, $event)"
     />
+
+    <PayrollTotals :rows="p.rows.value" />
 
     <StaffExtraDialog ref="extraRef" @saved="p.load" />
 

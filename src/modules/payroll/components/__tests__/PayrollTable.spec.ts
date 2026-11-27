@@ -4,7 +4,7 @@ import PayrollTable from '../PayrollTable.vue'
 import { PayrollStatus } from '../../enums/payroll-status.enum'
 import type { StaffSalary } from '../../interfaces/staff-salary.interface'
 import { t } from '@/locales'
-import { formatSom } from '@/shared/utils/format-money'
+import { formatMoney, formatSom } from '@/shared/utils/format-money'
 
 function makeSalary(overrides: Partial<StaffSalary> = {}): StaffSalary {
   return {
@@ -27,18 +27,30 @@ function makeSalary(overrides: Partial<StaffSalary> = {}): StaffSalary {
 
 function mountTable(
   rows: StaffSalary[],
-  showCommission = false,
   extra: Partial<{ canPay: boolean; canViewStaff: boolean }> = {},
 ) {
   return mount(PayrollTable, {
-    props: { rows, showCommission, canPay: true, canViewStaff: false, ...extra },
+    props: { rows, canPay: true, canViewStaff: false, ...extra },
   })
 }
 
 describe('PayrollTable', () => {
-  it('shows the commission column only when showCommission is set', () => {
-    expect(mountTable([makeSalary()], false).text()).not.toContain('Ustama')
-    expect(mountTable([makeSalary()], true).text()).toContain('Ustama')
+  it('explains a teacher salary under "calculated": base + commission − transfer', () => {
+    const wrapper = mountTable([
+      makeSalary({
+        baseSalary: 727_346,
+        earningTotalEarning: 727_346,
+        earningBaseSalarySnapshot: 0,
+        earningCommissionGross: 862_346,
+        transfersOut: [
+          { id: 1, amount: 135_000, fromMonth: '2026-10-01', toMonth: '2026-11-01', student: null, group: null, paidAt: null, confirmedAt: null },
+        ],
+      }),
+    ])
+    const cell = wrapper.get('tbody tr').findAll('td')[2]!.text()
+    expect(cell).toContain(formatSom(727_346))
+    expect(cell).toContain(t('payroll.note.commission', { amount: formatMoney(862_346) }))
+    expect(cell).toContain(t('payroll.note.out', { amount: formatMoney(135_000), month: t('common.months.11').toLowerCase() }))
   })
 
   it('applies the danger class to a positive remaining amount', () => {
@@ -49,14 +61,14 @@ describe('PayrollTable', () => {
     expect(settled.html()).not.toContain('text-danger')
   })
 
-  it('renders a pay button for unpaid rows and a paid label when fully paid', () => {
+  it('renders a pay button while something is owed and none when settled', () => {
     const unpaid = mountTable([makeSalary({ status: PayrollStatus.UNPAID })])
     expect(unpaid.findComponent({ name: 'UiButton' }).exists()).toBe(true)
     expect(unpaid.text()).toContain(t('payroll.pay'))
 
-    const paid = mountTable([makeSalary({ status: PayrollStatus.PAID })])
+    const paid = mountTable([makeSalary({ status: PayrollStatus.PAID, paidAmount: 2_000_000, remaining: 0 })])
     expect(paid.findComponent({ name: 'UiButton' }).exists()).toBe(false)
-    expect(paid.text()).toContain(t('payroll.paid'))
+    expect(paid.text()).toContain(t('payroll.display.paid'))
   })
 
   it('emits pay with the row when the pay button is clicked', async () => {
@@ -84,42 +96,41 @@ describe('PayrollTable', () => {
     })
   })
 
-  describe('base-salary column', () => {
-    it('uses the teacher base-salary snapshot when present, not the raw baseSalary', () => {
-      const wrapper = mountTable([makeSalary({ baseSalary: 1_000_000, earningBaseSalarySnapshot: 1_500_000 })])
+  describe('calculated column', () => {
+    it('is the salary plus the bonus', () => {
+      const wrapper = mountTable([makeSalary({ baseSalary: 1_000_000, bonusAmount: 200_000 })])
       const cell = wrapper.get('tbody tr').findAll('td')[2]!.text()
-      expect(cell).toContain(formatSom(1_500_000))
+      expect(cell).toContain(formatSom(1_200_000))
     })
   })
 
-  describe('deduction column (PayrollDeductionCell)', () => {
-    it('shows the withheld amount in text-danger when positive', () => {
-      const wrapper = mountTable([makeSalary({ deductionAmount: 200_000 })])
-      const cell = wrapper.get('tbody tr').findAll('td')[4]!
-      expect(cell.text()).toContain(`−${formatSom(200_000)}`)
-      expect(cell.html()).toContain('text-danger')
+  describe('advance and deduction columns', () => {
+    it('shows the advance with a minus sign in its own column', () => {
+      const wrapper = mountTable([makeSalary({ deductionAmount: 300_000, advanceAmount: 200_000, fineAmount: 100_000 })])
+      const cells = wrapper.get('tbody tr').findAll('td')
+      expect(cells[3]!.text()).toBe(`−${formatSom(200_000)}`)
+      expect(cells[4]!.text()).toBe(`−${formatSom(100_000)}`)
     })
 
-    it('shows a dash when there is no deduction', () => {
+    it('shows a dash when nothing is withheld', () => {
       const wrapper = mountTable([makeSalary({ deductionAmount: 0 })])
-      const cell = wrapper.get('tbody tr').findAll('td')[4]!
-      expect(cell.text()).toBe('—')
+      expect(wrapper.get('tbody tr').findAll('td')[3]!.text()).toBe('—')
     })
 
-    it('shows the outstanding line only when deductionOutstanding is positive', () => {
-      const withOutstanding = mountTable([
-        makeSalary({ deductionAmount: 100_000, deductionOutstanding: 50_000 }),
-      ])
-      expect(withOutstanding.get('tbody tr').findAll('td')[4]!.text()).toContain(
-        t('payroll.table.outstanding', { amount: formatSom(50_000) }),
-      )
+    it('puts the advance debt under the name, not in a money column', () => {
+      const withDebt = mountTable([makeSalary({ advanceOutstanding: 2_500 })])
+      const first = withDebt.get('tbody tr').findAll('td')[0]!.text()
+      expect(first).toContain(t('payroll.advanceDebt', { amount: formatSom(2_500) }))
 
-      const withoutOutstanding = mountTable([
-        makeSalary({ deductionAmount: 100_000, deductionOutstanding: 0 }),
+      const without = mountTable([makeSalary({ advanceOutstanding: 0 })])
+      expect(without.get('tbody tr').text()).not.toContain(t('payroll.advanceDebt', { amount: formatSom(2_500) }))
+    })
+
+    it('labels a salary covered only by an advance as "closed by advance"', () => {
+      const wrapper = mountTable([
+        makeSalary({ baseSalary: 500_000, deductionAmount: 500_000, advanceAmount: 500_000, remaining: 0, status: PayrollStatus.PAID }),
       ])
-      expect(withoutOutstanding.get('tbody tr').findAll('td')[4]!.text()).not.toContain(
-        t('payroll.table.outstanding', { amount: formatSom(50_000) }),
-      )
+      expect(wrapper.text()).toContain(t('payroll.display.advance'))
     })
   })
 
@@ -140,30 +151,23 @@ describe('PayrollTable', () => {
   })
 
   describe('row actions (PayrollRowActions)', () => {
-    it('opens the staff page on a row click only with canViewStaff', async () => {
+    it('opens the salary breakdown on a row click', async () => {
       const row = makeSalary({ id: 5 })
-      const hidden = mountTable([row], false, { canViewStaff: false })
-      await hidden.get('tbody tr').trigger('click')
-      expect(hidden.emitted('open-staff')).toBeUndefined()
-
-      const shown = mountTable([row], false, { canViewStaff: true })
-      await shown.get('tbody tr').trigger('click')
-      expect(shown.emitted('open-staff')?.[0]).toEqual([row])
+      const wrapper = mountTable([row])
+      await wrapper.get('tbody tr').trigger('click')
+      expect(wrapper.emitted('details')?.[0]).toEqual([row])
+      expect(wrapper.emitted('open-staff')).toBeUndefined()
     })
 
-    it('shows the pay button only with canPay and a non-PAID status', () => {
-      const noPermission = mountTable([makeSalary({ status: PayrollStatus.UNPAID })], false, {
-        canPay: false,
-      })
+    it('shows the pay button only with canPay and something still owed', () => {
+      const noPermission = mountTable([makeSalary({ status: PayrollStatus.UNPAID })], { canPay: false })
       expect(noPermission.get('tbody').text()).not.toContain(t('payroll.pay'))
-      expect(noPermission.get('tbody').text()).not.toContain(t('payroll.paid'))
 
-      const canPayRow = mountTable([makeSalary({ status: PayrollStatus.UNPAID })], false, { canPay: true })
+      const canPayRow = mountTable([makeSalary({ status: PayrollStatus.UNPAID })], { canPay: true })
       expect(canPayRow.get('tbody').text()).toContain(t('payroll.pay'))
 
-      const paidRow = mountTable([makeSalary({ status: PayrollStatus.PAID })], false, { canPay: true })
-      expect(paidRow.get('tbody').text()).not.toContain(t('payroll.pay'))
-      expect(paidRow.get('tbody').text()).toContain(t('payroll.paid'))
+      const settled = mountTable([makeSalary({ status: PayrollStatus.PAID, paidAmount: 2_000_000, remaining: 0 })], { canPay: true })
+      expect(settled.get('tbody').text()).not.toContain(t('payroll.pay'))
     })
   })
 })

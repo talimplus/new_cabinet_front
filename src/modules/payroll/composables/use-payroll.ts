@@ -1,4 +1,5 @@
 import { computed, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { fetchStaffSalaries, payStaffSalary } from '../api/payroll.api'
 import { useScopeStore } from '@/stores/scope.store'
 import { useNotificationStore } from '@/stores/notification.store'
@@ -39,6 +40,7 @@ interface StaffModalState {
 export function usePayroll() {
   const scope = useScopeStore()
   const notify = useNotificationStore()
+  const router = useRouter()
 
   const now = new Date()
   const rows = ref<StaffSalary[]>([])
@@ -128,6 +130,11 @@ export function usePayroll() {
     })
   }
 
+  /** The step-by-step breakdown of one salary (`/payroll/:userId/:month`). */
+  function openDetails(staff: StaffSalary): void {
+    void router.push({ name: 'payroll-details', params: { userId: staff.userId, month: forMonth.value } })
+  }
+
   function openStaff(staff: StaffSalary): void {
     staffModal.userId = staff.userId
     staffModal.open = true
@@ -168,7 +175,7 @@ export function usePayroll() {
   return {
     scope, rows, loading, filters, forMonth, showCommission, pay, staffModal,
     yearOptions, monthOptions, deductionReady,
-    init, load, setYear, setMonth, openPay, openStaff, confirmPay,
+    init, load, setYear, setMonth, openPay, openDetails, openStaff, confirmPay,
     getTotalSalary, getRemaining,
   }
 }
